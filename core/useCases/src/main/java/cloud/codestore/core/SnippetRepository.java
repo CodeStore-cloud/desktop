@@ -5,6 +5,14 @@ package cloud.codestore.core;
  */
 public interface SnippetRepository {
     /**
+     * Checks whether this repository contains the code snippet with the given id.
+     *
+     * @param snippetId the id of a code snippet.
+     * @return whether this repository contains the code snippet.
+     */
+    boolean contains(String snippetId);
+
+    /**
      * Reads the code snippet with the given id.
      *
      * @param snippetId the id of a code snippet.
