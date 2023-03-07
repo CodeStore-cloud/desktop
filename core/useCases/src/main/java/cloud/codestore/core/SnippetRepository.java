@@ -19,4 +19,12 @@ public interface SnippetRepository {
      * @return the code snippet with the given id.
      */
     Snippet get(String snippetId);
+
+    /**
+     * Puts the given code snippet into this repository.
+     * If the code snippet already exists, it will be overridden.
+     *
+     * @param snippet a code snippet.
+     */
+    void put(Snippet snippet);
 }
