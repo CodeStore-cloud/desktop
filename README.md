@@ -1,0 +1,2 @@
+# desktop
+{CodeStore} desktop application
