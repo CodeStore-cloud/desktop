@@ -1,2 +1,1 @@
-# desktop
-{CodeStore} desktop application
+# {CodeStore} 2.0 
