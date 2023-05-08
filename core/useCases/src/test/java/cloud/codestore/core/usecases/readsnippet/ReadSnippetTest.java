@@ -31,7 +31,7 @@ class ReadSnippetTest {
     @DisplayName("reads a code snippet from the repository")
     void returnSnippet() throws Exception {
         var expectedSnippet = testSnippet();
-        var snippetId = expectedSnippet.id();
+        var snippetId = expectedSnippet.getId();
         when(repository.contains(snippetId)).thenReturn(true);
         when(repository.get(snippetId)).thenReturn(expectedSnippet);
 

@@ -1,6 +1,7 @@
 package cloud.codestore.core;
 
 import java.time.OffsetDateTime;
+import java.util.Objects;
 
 /**
  * A builder for dynamically creating {@link Snippet code snippets}.
@@ -50,6 +51,14 @@ public class SnippetBuilder {
     }
 
     public Snippet build() {
-        return new Snippet(id, language, title, description, code, created, modified);
+        return new Snippet(
+                id,
+                Objects.requireNonNullElse(title, ""),
+                Objects.requireNonNullElse(description, ""),
+                Objects.requireNonNullElse(code, ""),
+                Objects.requireNonNullElseGet(language, Language::getDefault),
+                Objects.requireNonNullElseGet(created, OffsetDateTime::now),
+                modified
+        );
     }
 }

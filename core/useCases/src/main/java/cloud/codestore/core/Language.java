@@ -66,4 +66,12 @@ public enum Language {
     public String toString() {
         return name;
     }
+
+    /**
+     * @return the default programming language which is applied to any code snippet that doesn't
+     * explicitly specify a programming language.
+     */
+    public static Language getDefault() {
+        return TEXT;
+    }
 }

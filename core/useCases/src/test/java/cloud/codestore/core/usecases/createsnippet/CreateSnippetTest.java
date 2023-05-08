@@ -40,13 +40,13 @@ class CreateSnippetTest {
 
         verify(repository).put(snippetArgument.capture());
         Snippet snippet = snippetArgument.getValue();
-        assertThat(snippet.id()).isNotNull();
-        assertThat(snippet.language()).isEqualTo(dto.language());
-        assertThat(snippet.title()).isEqualTo(dto.title());
-        assertThat(snippet.code()).isEqualTo(dto.code());
-        assertThat(snippet.description()).isEqualTo(dto.description());
-        assertThat(snippet.created()).isEqualTo(now);
-        assertThat(snippet.modified()).isNull();
+        assertThat(snippet.getId()).isNotNull();
+        assertThat(snippet.getLanguage()).isEqualTo(dto.language());
+        assertThat(snippet.getTitle()).isEqualTo(dto.title());
+        assertThat(snippet.getCode()).isEqualTo(dto.code());
+        assertThat(snippet.getDescription()).isEqualTo(dto.description());
+        assertThat(snippet.getCreated()).isEqualTo(now);
+        assertThat(snippet.getModified()).isNull();
     }
 
     private NewSnippetDto createDto() {
