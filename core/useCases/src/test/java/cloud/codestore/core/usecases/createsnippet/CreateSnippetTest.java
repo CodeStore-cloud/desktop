@@ -3,6 +3,8 @@ package cloud.codestore.core.usecases.createsnippet;
 import cloud.codestore.core.Language;
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.SnippetRepository;
+import cloud.codestore.core.validation.InvalidSnippetException;
+import cloud.codestore.core.validation.SnippetValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,22 +24,25 @@ import static org.mockito.Mockito.verify;
 class CreateSnippetTest {
     @Mock
     private SnippetRepository repository;
+    @Mock
+    private SnippetValidator validator;
     private CreateSnippet useCase;
 
     @BeforeEach
     void setUp() {
-        useCase = new CreateSnippet(repository);
+        useCase = new CreateSnippet(repository, validator);
     }
 
     @Test
     @DisplayName("puts the new code snippet into the repository")
-    void createSnippet() {
+    void createSnippet() throws InvalidSnippetException {
         var now = OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         var snippetArgument = ArgumentCaptor.forClass(Snippet.class);
 
         var dto = createDto();
         useCase.create(dto);
 
+        verify(validator).validate(snippetArgument.capture());
         verify(repository).put(snippetArgument.capture());
         Snippet snippet = snippetArgument.getValue();
         assertThat(snippet.getId()).isNotNull();
