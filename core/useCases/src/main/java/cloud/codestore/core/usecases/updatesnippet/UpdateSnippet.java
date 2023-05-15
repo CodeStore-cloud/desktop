@@ -4,13 +4,14 @@ import cloud.codestore.core.Snippet;
 import cloud.codestore.core.SnippetBuilder;
 import cloud.codestore.core.SnippetNotExistsException;
 import cloud.codestore.core.SnippetRepository;
+import cloud.codestore.core.validation.InvalidSnippetException;
 import cloud.codestore.core.validation.SnippetValidator;
 
 import javax.annotation.Nonnull;
 import java.time.OffsetDateTime;
 
 /**
- * Use case: update an existing code snippet.
+ * Use case: update a code snippet.
  */
 public class UpdateSnippet {
     private final SnippetRepository repository;
@@ -21,7 +22,15 @@ public class UpdateSnippet {
         this.validator = validator;
     }
 
-    public void update(@Nonnull UpdatedSnippetDto dto) throws SnippetNotExistsException {
+    /**
+     * Updates the code snippet represented by the given dto.
+     *
+     * @param dto a dto representing the snippet to update.
+     *
+     * @throws SnippetNotExistsException if the code snippet does not exist.
+     * @throws InvalidSnippetException if the code snippet is invalid.
+     */
+    public void update(@Nonnull UpdatedSnippetDto dto) throws SnippetNotExistsException, InvalidSnippetException {
         if (!repository.contains(dto.id())) {
             throw new SnippetNotExistsException();
         }
@@ -36,6 +45,7 @@ public class UpdateSnippet {
                                                      .description(dto.description())
                                                      .build();
 
+        validator.validate(updatedSnippet);
         repository.put(updatedSnippet);
     }
 }

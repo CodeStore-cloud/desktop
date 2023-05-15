@@ -46,7 +46,7 @@ class UpdateSnippetTest {
 
     @DisplayName("puts the updated code snippet into the repository")
     @Test
-    void passSnippetToRepository() throws SnippetNotExistsException {
+    void passSnippetToRepository() throws Exception {
         OffsetDateTime now = OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         ArgumentCaptor<Snippet> snippetArgument = ArgumentCaptor.forClass(Snippet.class);
 
@@ -57,6 +57,7 @@ class UpdateSnippetTest {
         UpdatedSnippetDto dto = updatedSnippet();
         useCase.update(dto);
 
+        verify(validator).validate(snippetArgument.capture());
         verify(repository).put(snippetArgument.capture());
         Snippet snippet = snippetArgument.getValue();
         assertThat(snippet.getId()).isEqualTo(SNIPPET_ID);
