@@ -23,13 +23,13 @@ class SnippetValidatorTest {
         Snippet validSnippet = new SnippetBuilder().title(ofLength(1)).build();
         InvalidSnippetAssert.assertThat(validate(validSnippet)).hasNoValidationMessage("title");
 
-        Snippet invalidSnippet = new SnippetBuilder().build();
+        Snippet invalidSnippet = new SnippetBuilder().title("").build();
         InvalidSnippetAssert.assertThat(validate(invalidSnippet))
                             .hasValidationMessage("title", "The code snippet must have a title.");
     }
 
     @Test
-    @DisplayName("the title is too long")
+    @DisplayName("the title is longer than 100 characters")
     void titleTooLong() {
         Snippet validSnippet = new SnippetBuilder().title(ofLength(100)).build();
         InvalidSnippetAssert.assertThat(validate(validSnippet)).hasNoValidationMessage("title");
@@ -40,7 +40,7 @@ class SnippetValidatorTest {
     }
 
     @Test
-    @DisplayName("if the description is too long")
+    @DisplayName("the description is longer than 10,000 characters")
     void descriptionTooLong() {
         Snippet validSnippet = new SnippetBuilder().description(ofLength(10000)).build();
         InvalidSnippetAssert.assertThat(validate(validSnippet)).hasNoValidationMessage("description");
@@ -48,6 +48,28 @@ class SnippetValidatorTest {
         Snippet invalidSnippet = new SnippetBuilder().description(ofLength(10001)).build();
         InvalidSnippetAssert.assertThat(validate(invalidSnippet))
                             .hasValidationMessage("description", "The description must not be longer than 10,000 characters.");
+    }
+
+    @DisplayName("the code is empty")
+    @Test
+    void codeEmpty() {
+        Snippet validSnippet = new SnippetBuilder().code(ofLength(1)).build();
+        InvalidSnippetAssert.assertThat(validate(validSnippet)).hasNoValidationMessage("code");
+
+        Snippet invalidSnippet = new SnippetBuilder().code("").build();
+        InvalidSnippetAssert.assertThat(validate(invalidSnippet))
+                            .hasValidationMessage("code", "The code snippet must contain code.");
+    }
+
+    @DisplayName("the code is longer than 10,000 characters")
+    @Test
+    void codeTooLong() {
+        Snippet validSnippet = new SnippetBuilder().code(ofLength(10000)).build();
+        InvalidSnippetAssert.assertThat(validate(validSnippet)).hasNoValidationMessage("code");
+
+        Snippet invalidSnippet = new SnippetBuilder().code(ofLength(10001)).build();
+        InvalidSnippetAssert.assertThat(validate(invalidSnippet))
+                            .hasValidationMessage("code", "The code must not be longer than 10,000 characters.");
     }
 
     private InvalidSnippetException validate(Snippet snippet) {
