@@ -27,4 +27,10 @@ public interface SnippetRepository {
      * @param snippet a code snippet.
      */
     void put(Snippet snippet);
+
+    /**
+     * Deletes the code snippet with the given id from this repository.
+     * @param snippetId the id of a code snippet.
+     */
+    void delete(String snippetId);
 }
