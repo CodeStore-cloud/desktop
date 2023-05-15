@@ -1,10 +1,13 @@
 package cloud.codestore.core.usecases.updatesnippet;
 
+import cloud.codestore.core.Snippet;
+import cloud.codestore.core.SnippetBuilder;
 import cloud.codestore.core.SnippetNotExistsException;
 import cloud.codestore.core.SnippetRepository;
 import cloud.codestore.core.validation.SnippetValidator;
 
 import javax.annotation.Nonnull;
+import java.time.OffsetDateTime;
 
 /**
  * Use case: update an existing code snippet.
@@ -23,6 +26,16 @@ public class UpdateSnippet {
             throw new SnippetNotExistsException();
         }
 
+        Snippet currentSnippet = repository.get(dto.id());
+        Snippet updatedSnippet = new SnippetBuilder().id(currentSnippet.getId())
+                                                     .created(currentSnippet.getCreated())
+                                                     .modified(OffsetDateTime.now())
+                                                     .language(dto.language())
+                                                     .title(dto.title())
+                                                     .code(dto.code())
+                                                     .description(dto.description())
+                                                     .build();
 
+        repository.put(updatedSnippet);
     }
 }
