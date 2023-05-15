@@ -41,15 +41,13 @@ class ReadSnippetTest {
 
     @Test
     @DisplayName("throws a SnippetNotExistsException if the code snippet does not exist")
-    void snippetNotExist()
-    {
+    void snippetNotExist() {
         String snippetId = UUID.randomUUID().toString();
         when(repository.contains(snippetId)).thenReturn(false);
         assertThatThrownBy(() -> useCase.read(snippetId)).isInstanceOf(SnippetNotExistsException.class);
     }
 
-    private Snippet testSnippet()
-    {
+    private Snippet testSnippet() {
         return new SnippetBuilder()
                 .id(UUID.randomUUID().toString())
                 .language(Language.TEXT)

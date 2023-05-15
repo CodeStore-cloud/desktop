@@ -10,7 +10,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 /**
- * Use case: create a new snippet.
+ * Use case: create a new code snippet.
  */
 public class CreateSnippet {
     private final SnippetRepository repository;
