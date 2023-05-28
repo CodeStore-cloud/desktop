@@ -9,9 +9,9 @@ import java.util.Map;
  */
 public class InvalidSnippetException extends CoreException
 {
-    private final Map<String, String> validationMessages;
+    private final Map<SnippetProperty, String> validationMessages;
     
-    InvalidSnippetException(Map<String, String> validationMessages)
+    InvalidSnippetException(Map<SnippetProperty, String> validationMessages)
     {
         super("error.invalidSnippet");
         this.validationMessages = validationMessages;
@@ -23,7 +23,7 @@ public class InvalidSnippetException extends CoreException
      * @return a map containing an error message for each invalid snippet property.
      * The keys of the map are the names of the properties, the values are the corresponding error message.
      */
-    public Map<String, String> getValidationMessages()
+    public Map<SnippetProperty, String> getValidationMessages()
     {
         return validationMessages;
     }
