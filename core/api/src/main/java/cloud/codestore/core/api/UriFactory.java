@@ -1,12 +1,23 @@
 package cloud.codestore.core.api;
 
+import org.springframework.boot.web.servlet.context.ServletWebServerInitializedEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Component;
+
 import javax.annotation.Nonnull;
 
 /**
  * A factory which constructs the URIs to the resources.
  */
-public class UriFactory {
+@Component
+public class UriFactory implements ApplicationListener<ServletWebServerInitializedEvent> {
     private static String ROOT_URI;
+
+    @Override
+    public void onApplicationEvent(ServletWebServerInitializedEvent event) {
+        int port = event.getWebServer().getPort();
+        init(port);
+    }
 
     /**
      * Initializes the {@link UriFactory} with the port of the local {CodeStore} Core server.

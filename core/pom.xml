@@ -14,8 +14,22 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>application</module>
         <module>api</module>
         <module>useCases</module>
     </modules>
+
+    <properties>
+        <spring.boot.version>3.1.0</spring.boot.version>
+    </properties>
+
+    <dependencies>
+        <!-- Log4j2 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-log4j2</artifactId>
+            <version>${spring.boot.version}</version>
+        </dependency>
+    </dependencies>
 
 </project>
