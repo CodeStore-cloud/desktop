@@ -1,7 +1,7 @@
 package cloud.codestore.core.api.root;
 
+import cloud.codestore.core.api.DummyWebServerInitializedEvent;
 import cloud.codestore.core.api.TestConfig;
-import cloud.codestore.core.api.UriFactoryInitializer;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(RootController.class)
 @Import({TestConfig.class, RootController.class})
-@ExtendWith(UriFactoryInitializer.class)
+@ExtendWith(DummyWebServerInitializedEvent.class)
 @DisplayName("GET /")
 class RootControllerTest {
 

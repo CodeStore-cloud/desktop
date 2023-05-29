@@ -16,15 +16,6 @@ public class UriFactory implements ApplicationListener<ServletWebServerInitializ
     @Override
     public void onApplicationEvent(ServletWebServerInitializedEvent event) {
         int port = event.getWebServer().getPort();
-        init(port);
-    }
-
-    /**
-     * Initializes the {@link UriFactory} with the port of the local {CodeStore} Core server.
-     *
-     * @param port the port of the server.
-     */
-    public static void init(int port) {
         ROOT_URI = "http://localhost:" + port;
     }
 
