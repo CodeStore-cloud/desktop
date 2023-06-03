@@ -1,5 +1,7 @@
 package cloud.codestore.core;
 
+import java.util.List;
+
 /**
  * A repository for storing and reading code snippets.
  */
@@ -19,6 +21,12 @@ public interface SnippetRepository {
      * @return the code snippet with the given id.
      */
     Snippet get(String snippetId);
+
+    /**
+     * Reads all code snippets.
+     * @return all code snippets.
+     */
+    List<Snippet> get();
 
     /**
      * Puts the given code snippet into this repository.

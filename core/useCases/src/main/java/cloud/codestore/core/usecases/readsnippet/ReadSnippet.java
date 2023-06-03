@@ -23,6 +23,7 @@ public class ReadSnippet {
      * @return the code snippet.
      * @throws SnippetNotExistsException if the code snippet does not exist.
      */
+    @Nonnull
     public Snippet read(@Nonnull String snippetId) throws SnippetNotExistsException {
         if (!repository.contains(snippetId)) {
             throw new SnippetNotExistsException();
