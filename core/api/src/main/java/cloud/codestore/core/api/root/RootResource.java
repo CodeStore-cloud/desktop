@@ -24,4 +24,14 @@ class RootResource extends ResourceObject {
     String getApiVersion() {
         return API_VERSION;
     }
+
+    @JsonGetter("apiVersionHeader")
+    String getApiVersionHeader() {
+        return "X-API-Version";
+    }
+
+    @JsonGetter("documentation")
+    String getDocumentationUrl() {
+        return "https://codestore.cloud/api-documentation";
+    }
 }

@@ -46,8 +46,10 @@ class RootControllerTest {
                     "type": "core",
                     "id": "1",
                     "attributes": {
-                      "apiVersion": "1.0",
-                      "name": "{CodeStore} Core"
+                      "apiVersion" : "1.0",
+                      "apiVersionHeader" : "X-API-Version",
+                      "documentation" : "https://codestore.cloud/api-documentation",
+                      "name" : "{CodeStore} Core"
                     },
                     "links": {
                       "self": "http://localhost:8080"
