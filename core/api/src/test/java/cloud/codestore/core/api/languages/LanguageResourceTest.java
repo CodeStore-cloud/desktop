@@ -7,18 +7,21 @@ import cloud.codestore.core.usecases.listlanguages.ListLanguages;
 import cloud.codestore.core.usecases.readlanguage.ReadLanguage;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.List;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
-import static org.hamcrest.core.Every.everyItem;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -26,8 +29,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(LanguageController.class)
 @Import({TestConfig.class, LanguageController.class})
 @ExtendWith(DummyWebServerInitializedEvent.class)
-@DisplayName("GET /languages")
-class LanguageCollectionResourceTest {
+@DisplayName("GET /languages/{languageId}")
+class LanguageResourceTest {
     @Autowired
     private MockMvc mockMvc;
     @MockBean
@@ -35,21 +38,22 @@ class LanguageCollectionResourceTest {
     @MockBean
     private ReadLanguage readLanguageUseCase;
 
-    @Test
-    @DisplayName("returns all available programming languages")
-    void returnLanguageCollection() throws Exception {
-        when(listLanguagesUseCase.list()).thenReturn(languageList());
-        mockMvc.perform(get("/languages"))
+    @ParameterizedTest
+    @MethodSource("languageStream")
+    @DisplayName("returns a single programming languages")
+    void returnLanguage(Language language) throws Exception {
+        when(readLanguageUseCase.read(anyInt())).thenReturn(language);
+        mockMvc.perform(get("/languages/" + language.getId()))
                .andExpect(status().isOk())
                .andExpect(content().contentType(JsonApiDocument.MEDIA_TYPE))
-               .andExpect(jsonPath("$.data").isArray())
-               .andExpect(jsonPath("$.data.length()", is(3)))
-               .andExpect(jsonPath("$.data[*].type", everyItem(is("language"))))
-               .andExpect(jsonPath("$.data[*].attributes.name").exists())
-               .andExpect(jsonPath("$.data[*].links.self").exists());
+               .andExpect(jsonPath("$.data.type", is("language")))
+               .andExpect(jsonPath("$.data.id", is(String.valueOf(language.getId()))))
+               .andExpect(jsonPath("$.data.attributes.name", is(language.getName())))
+               .andExpect(jsonPath("$.data.links.self").exists());
     }
 
-    private List<Language> languageList() {
-        return List.of(Language.JAVA, Language.HTML, Language.PYTHON);
+    private static Stream<Arguments> languageStream() {
+        return Arrays.stream(Language.values())
+                     .map(Arguments::of);
     }
 }

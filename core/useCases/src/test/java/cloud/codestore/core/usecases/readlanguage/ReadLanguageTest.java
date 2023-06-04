@@ -24,7 +24,7 @@ class ReadLanguageTest {
     }
 
     @ParameterizedTest
-    @MethodSource("paramStream")
+    @MethodSource("languageStream")
     @DisplayName("returns a programming language by its id")
     void returnLanguage(int languageId, Language expectedLanguage) throws LanguageNotExistsException {
         var language = useCase.read(languageId);
@@ -38,7 +38,7 @@ class ReadLanguageTest {
         assertThatThrownBy(() -> useCase.read(Language.values().length)).isInstanceOf(LanguageNotExistsException.class);
     }
 
-    private static Stream<Arguments> paramStream() {
+    private static Stream<Arguments> languageStream() {
         return Arrays.stream(Language.values())
                      .map(language -> Arguments.of(language.getId(), language));
     }

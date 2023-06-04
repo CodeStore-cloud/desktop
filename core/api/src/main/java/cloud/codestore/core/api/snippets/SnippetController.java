@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Nonnull;
+
 @RestController
 @RequestMapping(path = SnippetCollectionResource.PATH, produces = JsonApiDocument.MEDIA_TYPE)
 public class SnippetController {
@@ -18,8 +20,8 @@ public class SnippetController {
 
     @Autowired
     public SnippetController(
-            ListSnippets listSnippetsUseCase,
-            ReadSnippet readSnippetUseCase
+            @Nonnull ListSnippets listSnippetsUseCase,
+            @Nonnull ReadSnippet readSnippetUseCase
     ) {
         this.listSnippetsUseCase = listSnippetsUseCase;
         this.readSnippetUseCase = readSnippetUseCase;
