@@ -6,7 +6,7 @@ package cloud.codestore.core;
 public enum Language {
     TEXT(0, "Text"),
     C(1, "C"),
-    OBJECTIVE_C(2, "Objective C"),
+    OBJECTIVE_C(2, "Objective-C"),
     CPP(3, "C++"),
     CSHARP(4, "C#"),
     COBOL(5, "COBOL"),

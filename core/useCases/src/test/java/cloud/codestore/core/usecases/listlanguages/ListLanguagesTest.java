@@ -5,8 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("The list-languages use case")
@@ -19,10 +17,46 @@ class ListLanguagesTest {
     }
 
     @Test
-    @DisplayName("returns all available programming languages")
+    @DisplayName("returns all available programming languages sorted by name")
     void returnAvailableLanguages() {
         var languages = useCase.list();
-        var expectedResult = List.of(Language.values());
-        assertThat(languages).isEqualTo(expectedResult);
+        assertThat(languages).containsExactly(sortedList());
+    }
+
+    private Language[] sortedList() {
+        return new Language[]{
+                Language.BATCH,
+                Language.C,
+                Language.OBJECTIVE_C,
+                Language.CSHARP,
+                Language.CPP,
+                Language.COBOL,
+                Language.CLISP,
+                Language.CSS,
+                Language.DOCKERFILE,
+                Language.FORTRAN,
+                Language.GO,
+                Language.GROOVY,
+                Language.HTML,
+                Language.JAVA,
+                Language.JAVASCRIPT,
+                Language.KOTLIN,
+                Language.LATEX,
+                Language.LUA,
+                Language.MATHEMATICA,
+                Language.MATLAB,
+                Language.PERL,
+                Language.PHP,
+                Language.PYTHON,
+                Language.RUBY,
+                Language.SCALA,
+                Language.SQL,
+                Language.SWIFT,
+                Language.TEXT,
+                Language.TYPESCRIPT,
+                Language.SHELL,
+                Language.XML,
+                Language.YAML
+        };
     }
 }
