@@ -2,6 +2,8 @@ package cloud.codestore.core.api.snippets;
 
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.api.UriFactory;
+import cloud.codestore.core.api.languages.LanguageResource;
+import cloud.codestore.jsonapi.relationship.Relationship;
 import cloud.codestore.jsonapi.resource.ResourceObject;
 import com.fasterxml.jackson.annotation.JsonGetter;
 
@@ -16,6 +18,7 @@ public class SnippetResource extends ResourceObject {
     private String code;
     private OffsetDateTime created;
     private OffsetDateTime modified;
+    private Relationship<LanguageResource> language;
 
     SnippetResource(@Nonnull Snippet snippet) {
         super(RESOURCE_TYPE, snippet.getId());
@@ -26,6 +29,7 @@ public class SnippetResource extends ResourceObject {
         this.code = snippet.getCode();
         this.created = snippet.getCreated();
         this.modified = snippet.getModified();
+        this.language = new Relationship<>(LanguageResource.getLink(snippet.getLanguage()));
     }
 
     @JsonGetter("title")
@@ -51,6 +55,11 @@ public class SnippetResource extends ResourceObject {
     @JsonGetter("modified")
     public OffsetDateTime getModified() {
         return modified;
+    }
+
+    @JsonGetter("language")
+    public Relationship<LanguageResource> getLanguage() {
+        return language;
     }
 
     /**
