@@ -13,11 +13,17 @@
     <artifactId>api</artifactId>
 
     <dependencies>
-        <!-- Core -->
+        <!-- Use Cases -->
         <dependency>
             <groupId>cloud.codestore</groupId>
-            <artifactId>core</artifactId>
+            <artifactId>useCases</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-databind</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- JSON:API -->
