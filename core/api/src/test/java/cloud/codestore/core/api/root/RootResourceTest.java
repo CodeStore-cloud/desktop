@@ -48,6 +48,18 @@ class RootResourceTest {
                              "apiVersionHeader" : "X-API-Version",
                              "documentation" : "https://codestore.cloud/api-documentation"
                            },
+                           "relationships": {
+                             "languages": {
+                               "links": {
+                                 "related": "http://localhost:8080/languages"
+                               }
+                             },
+                             "snippets": {
+                               "links": {
+                                 "related": "http://localhost:8080/snippets"
+                               }
+                             }
+                           },
                            "links": {
                              "self": "http://localhost:8080"
                            }

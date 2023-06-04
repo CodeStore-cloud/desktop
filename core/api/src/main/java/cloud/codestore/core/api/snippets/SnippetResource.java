@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import javax.annotation.Nonnull;
 import java.time.OffsetDateTime;
 
-class SnippetResource extends ResourceObject {
+public class SnippetResource extends ResourceObject {
     private static final String RESOURCE_TYPE = "snippet";
 
     private String title;
