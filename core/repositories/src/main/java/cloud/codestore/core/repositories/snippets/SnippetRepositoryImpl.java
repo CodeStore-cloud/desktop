@@ -1,9 +1,10 @@
-package cloud.codestore.core.repositories;
+package cloud.codestore.core.repositories.snippets;
 
 import cloud.codestore.core.Language;
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.SnippetBuilder;
 import cloud.codestore.core.SnippetRepository;
+import cloud.codestore.core.repositories.Repository;
 
 import java.time.OffsetDateTime;
 import java.util.*;
