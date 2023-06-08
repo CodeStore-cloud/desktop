@@ -11,11 +11,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static java.time.temporal.ChronoUnit.SECONDS;
+import static java.time.temporal.ChronoUnit.WEEKS;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -47,7 +47,6 @@ class UpdateSnippetTest {
     @DisplayName("puts the updated code snippet into the repository")
     @Test
     void passSnippetToRepository() throws Exception {
-        OffsetDateTime now = OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         ArgumentCaptor<Snippet> snippetArgument = ArgumentCaptor.forClass(Snippet.class);
 
         Snippet currentSnippet = currentSnippet();
@@ -66,12 +65,12 @@ class UpdateSnippetTest {
         assertThat(snippet.getCode()).isEqualTo(dto.code());
         assertThat(snippet.getDescription()).isEqualTo(dto.description());
         assertThat(snippet.getCreated()).isEqualTo(currentSnippet.getCreated());
-        assertThat(snippet.getModified()).isEqualTo(now);
+        assertThat(snippet.getModified()).isCloseTo(OffsetDateTime.now(), within(3, SECONDS));
     }
 
     private Snippet currentSnippet() {
-        OffsetDateTime now = OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS);
-        OffsetDateTime fiveWeeksAgo = now.minus(5, ChronoUnit.WEEKS);
+        OffsetDateTime now = OffsetDateTime.now().truncatedTo(SECONDS);
+        OffsetDateTime fiveWeeksAgo = now.minus(5, WEEKS);
         return new SnippetBuilder()
                 .id(SNIPPET_ID)
                 .language(Language.JAVASCRIPT)
