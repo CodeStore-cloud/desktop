@@ -17,8 +17,7 @@ public class SnippetCollectionResource extends ResourceCollectionDocument<Snippe
     /**
      * @return the URI to the snippet collection resource.
      */
-    public static String getLink()
-    {
+    public static String getLink() {
         return UriFactory.createUri(PATH);
     }
 

@@ -10,8 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/", produces = JsonApiDocument.MEDIA_TYPE)
 public class RootController {
     @GetMapping
-    public JsonApiDocument getRootResource()
-    {
+    public JsonApiDocument getRootResource() {
         return new RootResource()
                 .asDocument()
                 .setJsonapiObject(new JsonApiObject(new JsonApiMetaInformation()));

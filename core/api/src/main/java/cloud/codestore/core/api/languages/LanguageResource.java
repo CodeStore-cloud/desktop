@@ -19,18 +19,15 @@ public class LanguageResource extends ResourceObject {
     }
 
     @JsonGetter("name")
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
     /**
      * @param language a programming language
-     *
      * @return the URI to the language resource with the given id.
      */
-    public static String getLink(@Nonnull Language language)
-    {
+    public static String getLink(@Nonnull Language language) {
         return LanguageCollectionResource.getLink() + "/" + language.getId();
     }
 }

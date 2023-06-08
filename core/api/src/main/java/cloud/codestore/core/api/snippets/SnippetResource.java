@@ -64,11 +64,9 @@ public class SnippetResource extends ResourceObject {
 
     /**
      * @param snippetId the id of a snippet.
-     *
      * @return the URI to the corresponding snippet resource.
      */
-    private static String getLink(@Nonnull String snippetId)
-    {
+    private static String getLink(@Nonnull String snippetId) {
         return UriFactory.createUri(SnippetCollectionResource.PATH + "/" + snippetId);
     }
 }
