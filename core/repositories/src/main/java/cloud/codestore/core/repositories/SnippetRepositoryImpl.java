@@ -8,6 +8,7 @@ import cloud.codestore.core.SnippetRepository;
 import java.time.OffsetDateTime;
 import java.util.*;
 
+@Repository
 public class SnippetRepositoryImpl implements SnippetRepository {
     private final Map<String, Snippet> snippets = new HashMap<>();
 

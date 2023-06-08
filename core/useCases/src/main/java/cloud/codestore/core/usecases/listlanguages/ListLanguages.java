@@ -1,6 +1,7 @@
 package cloud.codestore.core.usecases.listlanguages;
 
 import cloud.codestore.core.Language;
+import cloud.codestore.core.UseCase;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
@@ -9,6 +10,7 @@ import java.util.List;
 /**
  * Use case: get all available programming languages.
  */
+@UseCase
 public class ListLanguages {
     /**
      * @return a list of all available programming languages.

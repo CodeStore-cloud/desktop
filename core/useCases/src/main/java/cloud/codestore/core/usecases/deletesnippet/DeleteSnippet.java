@@ -2,12 +2,14 @@ package cloud.codestore.core.usecases.deletesnippet;
 
 import cloud.codestore.core.SnippetNotExistsException;
 import cloud.codestore.core.SnippetRepository;
+import cloud.codestore.core.UseCase;
 
 import javax.annotation.Nonnull;
 
 /**
  * Use case: delete a code snippet.
  */
+@UseCase
 public class DeleteSnippet {
     private final SnippetRepository repository;
 

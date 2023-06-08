@@ -8,6 +8,9 @@ import java.util.Map;
 
 import static cloud.codestore.core.validation.SnippetProperty.*;
 
+/**
+ * Validates the input constraints of a code snippet.
+ */
 public class SnippetValidator {
     private static final int MAX_TITLE_LENGTH = 100;
     private static final int MAX_DESCRIPTION_LENGTH = 10000;

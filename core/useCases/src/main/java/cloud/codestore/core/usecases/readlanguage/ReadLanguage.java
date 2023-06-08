@@ -1,14 +1,15 @@
 package cloud.codestore.core.usecases.readlanguage;
 
 import cloud.codestore.core.Language;
+import cloud.codestore.core.UseCase;
 
 import javax.annotation.Nonnull;
 
 /**
  * Use case: read a programming language by its id.
  */
+@UseCase
 public class ReadLanguage {
-
     /**
      * Reads the programming language with the given id.
      *

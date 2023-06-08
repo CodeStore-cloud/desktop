@@ -1,9 +1,6 @@
 package cloud.codestore.core.usecases.updatesnippet;
 
-import cloud.codestore.core.Snippet;
-import cloud.codestore.core.SnippetBuilder;
-import cloud.codestore.core.SnippetNotExistsException;
-import cloud.codestore.core.SnippetRepository;
+import cloud.codestore.core.*;
 import cloud.codestore.core.validation.InvalidSnippetException;
 import cloud.codestore.core.validation.SnippetValidator;
 
@@ -13,6 +10,7 @@ import java.time.OffsetDateTime;
 /**
  * Use case: update a code snippet.
  */
+@UseCase
 public class UpdateSnippet {
     private final SnippetRepository repository;
     private final SnippetValidator validator;
