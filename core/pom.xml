@@ -17,6 +17,7 @@
         <module>application</module>
         <module>api</module>
         <module>useCases</module>
+        <module>repositories</module>
     </modules>
 
     <properties>
