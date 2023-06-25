@@ -4,6 +4,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,13 +16,10 @@ import java.nio.file.Paths;
 
 @Configuration
 public class RepositoryConfiguration {
-    private final Directory dataDirectory;
+    private static final Logger LOGGER = LoggerFactory.getLogger(RepositoryConfiguration.class);
 
-    public RepositoryConfiguration() {
-        String userHome = System.getProperty("user.home");
-        Path dataPath = Paths.get(userHome, "CodeStore").toAbsolutePath();
-        dataDirectory = new Directory(dataPath);
-    }
+    @Value("${codestore.data:}")
+    private String dataPath;
 
     @Bean("snippetMapper")
     public ObjectMapper objectMapper() {
@@ -28,8 +29,23 @@ public class RepositoryConfiguration {
                                  .configure(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE, false);
     }
 
+    @Bean("data")
+    public Directory dataDirectory() {
+        Directory dataDirectory;
+        if (dataPath.isEmpty()) {
+            String userHome = System.getProperty("user.home");
+            Path dataPath = Paths.get(userHome, "CodeStore").toAbsolutePath();
+            dataDirectory = new Directory(dataPath);
+        } else {
+            dataDirectory = new Directory(Path.of(dataPath).toAbsolutePath());
+        }
+
+        LOGGER.info("Data directory: {}", dataDirectory);
+        return dataDirectory;
+    }
+
     @Bean("snippets")
-    public Directory snippetsDirectory() {
+    public Directory snippetsDirectory(@Qualifier("data") Directory dataDirectory) {
         return dataDirectory.getSubDirectory("snippets");
     }
 }
