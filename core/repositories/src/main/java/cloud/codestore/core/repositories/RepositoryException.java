@@ -7,11 +7,11 @@ import java.util.ResourceBundle;
  * Abstract exception that indicates an error when accessing a repository.
  */
 public class RepositoryException extends RuntimeException {
-    RepositoryException(String messageKey, Object... messageArguments) {
+    public RepositoryException(String messageKey, Object... messageArguments) {
         super(createMessage(messageKey, messageArguments));
     }
 
-    RepositoryException(Throwable cause, String message, Object... messageArguments) {
+    public RepositoryException(Throwable cause, String message, Object... messageArguments) {
         super(createMessage(message, messageArguments), cause);
     }
 

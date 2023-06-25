@@ -14,174 +14,142 @@ import java.util.stream.Stream;
 /**
  * Encapsulates the access to a directory.
  */
-public class Directory
-{
+public class Directory {
     private final Path path;
-    
+
     /**
      * Creates a new directory with the given path.
      *
      * @param path the path of ths directory.
-     *
      * @throws IllegalArgumentException if the path exists and is not a directory.
      */
-    public Directory(@Nonnull Path path)
-    {
-        if(Files.exists(path) && !Files.isDirectory(path))
+    public Directory(@Nonnull Path path) {
+        if (Files.exists(path) && !Files.isDirectory(path))
             throw new IllegalArgumentException(path.toAbsolutePath() + " is not a directory.");
-        
+
         this.path = path;
     }
-    
+
     /**
      * @return the {@link Path} of this directory.
      */
-    public Path path()
-    {
+    public Path path() {
         return path;
     }
-    
+
     /**
      * @return whether this directory exists on the file system.
      */
-    public boolean exists()
-    {
+    public boolean exists() {
         return Files.exists(path);
     }
-    
+
     /**
      * @return the name of this directory.
      */
-    public String getName()
-    {
+    public String getName() {
         return path.getFileName().toString();
     }
-    
+
     @Override
-    public String toString()
-    {
+    public String toString() {
         return path.toString();
     }
-    
+
     /**
      * Deletes this directory recursively.
      * If it does not exist, nothing happens.
      *
      * @throws RepositoryException if the directory exists but could not be deleted.
      */
-    public void delete() throws RepositoryException
-    {
-        if(Files.exists(path))
-        {
-            try
-            {
+    public void delete() throws RepositoryException {
+        if (Files.exists(path)) {
+            try {
                 Files.walk(path)
                      .sorted(Comparator.reverseOrder())
                      .map(Path::toFile)
                      .forEach(java.io.File::delete);
-            }
-            catch(IOException exception)
-            {
+            } catch (IOException exception) {
                 throw new RepositoryException(exception, "directory.couldNotDelete", path);
             }
         }
     }
-    
+
     /**
      * Checks whether this directory is empty.
      * If it does not exist, this method returns {@code true}.
      *
      * @return whether this directory is empty or does not exist.
-     *
      * @throws RepositoryException if the directory could not be accessed.
      */
-    public boolean isEmpty() throws RepositoryException
-    {
-        try(Stream<Path> entries = Files.list(path))
-        {
+    public boolean isEmpty() throws RepositoryException {
+        try (Stream<Path> entries = Files.list(path)) {
             return entries.findFirst().isEmpty();
-        }
-        catch(NoSuchFileException exception)
-        {
+        } catch (NoSuchFileException exception) {
             return true;
-        }
-        catch(IOException exception)
-        {
+        } catch (IOException exception) {
             throw new RepositoryException(exception, "directory.couldNotAccess", path);
         }
     }
-    
+
     /**
      * Returns a file inside this directory.
      *
      * @param fileName the name of the file.
-     *
      * @return a {@link File} object representing a file inside this directory.
      */
-    public File getFile(@Nonnull String fileName)
-    {
+    public File getFile(@Nonnull String fileName) {
         return new File(path.resolve(fileName));
     }
-    
+
     /**
      * Returns al files inside this directory.
      *
      * @return a list of {@link File}s representing the files (not subdirectories) inside this directory.
      */
-    public List<File> getFiles() throws RepositoryException
-    {
-        try
-        {
+    public List<File> getFiles() throws RepositoryException {
+        try {
             return Files.list(path)
                         .filter(Files::isRegularFile)
                         .map(File::new)
                         .collect(Collectors.toList());
-        }
-        catch(NoSuchFileException exception)
-        {
+        } catch (NoSuchFileException exception) {
             throw new RepositoryException(exception, "directory.notExists", path);
-        }
-        catch(IOException exception)
-        {
+        } catch (IOException exception) {
             throw new RepositoryException(exception, "directory.couldNotAccess", path);
         }
     }
-    
+
     /**
      * @return the parent directory of this directory.
      */
-    public Directory getParentDirectory()
-    {
+    public Directory getParentDirectory() {
         return new Directory(path.getParent());
     }
-    
+
     /**
      * Returns a subdirectory.
      *
      * @param directoryName the name of the subdirectory.
-     *
      * @return a {@link Directory} object representing a subdirectory.
      */
-    public Directory getSubDirectory(@Nonnull String directoryName)
-    {
+    public Directory getSubDirectory(@Nonnull String directoryName) {
         return new Directory(path.resolve(directoryName));
     }
-    
+
     @Override
-    public boolean equals(Object o)
-    {
-        if(this == o)
+    public boolean equals(Object o) {
+        if (this == o)
             return true;
-        if(o == null || getClass() != o.getClass())
+        if (o == null || getClass() != o.getClass())
             return false;
-        
+
         Directory directory = (Directory) o;
         return Objects.equals(path, directory.path);
     }
-    
+
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return path == null ? 0 : path.hashCode();
     }
 }

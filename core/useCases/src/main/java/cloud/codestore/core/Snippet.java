@@ -3,6 +3,7 @@ package cloud.codestore.core;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
@@ -32,8 +33,10 @@ public class Snippet {
         this.description = description;
         this.code = code;
         this.language = language;
-        this.created = created.truncatedTo(ChronoUnit.SECONDS);
-        this.modified = modified == null ? null : modified.truncatedTo(ChronoUnit.SECONDS);
+        this.created = created.truncatedTo(ChronoUnit.SECONDS)
+                              .withOffsetSameInstant(ZoneOffset.UTC);
+        this.modified = modified == null ? null : modified.truncatedTo(ChronoUnit.SECONDS)
+                                                          .withOffsetSameInstant(ZoneOffset.UTC);
     }
 
     @Nonnull

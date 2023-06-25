@@ -4,16 +4,15 @@ import cloud.codestore.core.Language;
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.SnippetBuilder;
 import cloud.codestore.core.SnippetRepository;
-import cloud.codestore.core.repositories.Repository;
 
 import java.time.OffsetDateTime;
 import java.util.*;
 
-@Repository
-public class SnippetRepositoryImpl implements SnippetRepository {
+//@Repository
+public class DummySnippetRepository implements SnippetRepository {
     private final Map<String, Snippet> snippets = new HashMap<>();
 
-    public SnippetRepositoryImpl() {
+    public DummySnippetRepository() {
         var snippet1 = new SnippetBuilder().id(UUID.randomUUID().toString())
                                            .language(Language.JAVA)
                                            .title("A simple Hello World example")

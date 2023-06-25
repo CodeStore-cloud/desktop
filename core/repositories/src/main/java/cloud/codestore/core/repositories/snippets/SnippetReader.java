@@ -1,0 +1,64 @@
+package cloud.codestore.core.repositories.snippets;
+
+import cloud.codestore.core.Language;
+import cloud.codestore.core.Snippet;
+import cloud.codestore.core.SnippetBuilder;
+import cloud.codestore.core.repositories.File;
+import cloud.codestore.core.repositories.RepositoryException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import javax.annotation.Nullable;
+import java.time.OffsetDateTime;
+import java.util.Optional;
+
+class SnippetReader {
+    private final ObjectMapper objectMapper;
+
+    SnippetReader(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
+    Snippet read(File file) {
+        var dto = readDto(file);
+        return new SnippetBuilder().id(getSnippetId(file))
+                                   .title(dto.title())
+                                   .description(dto.description())
+                                   .code(dto.code())
+                                   .language(getLanguageById(dto.language()))
+                                   .created(parseDateTime(dto.created()))
+                                   .modified(parseDateTime(dto.modified()))
+                                   .build();
+    }
+
+    private PersistentSnippetDto readDto(File file) {
+        try {
+            String fileContent = file.readOrElse("{}");
+            return objectMapper.readValue(fileContent, PersistentSnippetDto.class);
+        } catch (JsonProcessingException exception) {
+            throw new RepositoryException(exception, "file.invalidFormat", file.path());
+        }
+    }
+
+    @Nullable
+    private Language getLanguageById(int languageId) {
+        for (Language language : Language.values()) {
+            if (language.getId() == languageId)
+                return language;
+        }
+
+        return null;
+    }
+
+    @Nullable
+    private OffsetDateTime parseDateTime(@Nullable String timestamp) {
+        return Optional.ofNullable(timestamp)
+                       .map(OffsetDateTime::parse)
+                       .orElse(null);
+    }
+
+    private String getSnippetId(File file) {
+        String fileName = file.getName();
+        return fileName.substring(0, fileName.length() - LocalSnippetRepository.JSON_FILE_EXTENSION.length());
+    }
+}

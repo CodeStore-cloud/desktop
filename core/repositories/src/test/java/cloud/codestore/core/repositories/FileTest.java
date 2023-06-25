@@ -63,8 +63,17 @@ class FileTest {
         }
 
         @Test
+        @DisplayName("returns a fallback-content if the file is empty")
+        void readFallbackContentWhenEmpty() throws IOException {
+            Files.writeString(testFile, "");
+            String fallbackContent = "Fallback-Content";
+            String content = new File(testFile).readOrElse(fallbackContent);
+            assertThat(content).isEqualTo(fallbackContent);
+        }
+
+        @Test
         @DisplayName("returns a fallback-content in case of an error")
-        void readFallbackContent() {
+        void readFallbackContentWhenError() {
             String fallbackContent = "Fallback-Content";
             String content = notExistingFile().readOrElse(fallbackContent);
             assertThat(content).isEqualTo(fallbackContent);
