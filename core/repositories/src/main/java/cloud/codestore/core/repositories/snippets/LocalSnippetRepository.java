@@ -5,6 +5,7 @@ import cloud.codestore.core.SnippetRepository;
 import cloud.codestore.core.repositories.Directory;
 import cloud.codestore.core.repositories.File;
 import cloud.codestore.core.repositories.Repository;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ class LocalSnippetRepository implements SnippetRepository {
     private final SnippetWriter snippetWriter;
 
     LocalSnippetRepository(
-            Directory snippetsDirectory,
+            @Qualifier("snippets") Directory snippetsDirectory,
             SnippetReader snippetReader,
             SnippetWriter snippetWriter
     ) {

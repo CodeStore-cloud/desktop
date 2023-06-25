@@ -5,13 +5,16 @@ import cloud.codestore.core.repositories.File;
 import cloud.codestore.core.repositories.RepositoryException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
+@Component
 class SnippetWriter {
     private final ObjectMapper objectMapper;
 
-    SnippetWriter(ObjectMapper objectMapper) {
+    SnippetWriter(@Qualifier("snippetMapper") ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 

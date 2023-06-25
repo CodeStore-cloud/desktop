@@ -7,15 +7,18 @@ import cloud.codestore.core.repositories.File;
 import cloud.codestore.core.repositories.RepositoryException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
+@Component
 class SnippetReader {
     private final ObjectMapper objectMapper;
 
-    SnippetReader(ObjectMapper objectMapper) {
+    SnippetReader(@Qualifier("snippetMapper") ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 

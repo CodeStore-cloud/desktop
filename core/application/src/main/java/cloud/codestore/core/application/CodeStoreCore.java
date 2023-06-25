@@ -12,7 +12,7 @@ import org.springframework.context.annotation.FilterType;
 /**
  * The main class of the {CodeStore} Core.
  */
-@SpringBootApplication()
+@SpringBootApplication
 @ComponentScan(
         basePackages = "cloud.codestore.core",
         includeFilters = @ComponentScan.Filter(
