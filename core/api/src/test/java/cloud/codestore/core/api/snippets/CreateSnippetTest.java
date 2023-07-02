@@ -3,17 +3,8 @@ package cloud.codestore.core.api.snippets;
 import cloud.codestore.core.Language;
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.SnippetBuilder;
-import cloud.codestore.core.api.DefaultLocale;
-import cloud.codestore.core.api.DummyWebServerInitializedEvent;
-import cloud.codestore.core.api.ErrorHandler;
-import cloud.codestore.core.api.TestConfig;
-import cloud.codestore.core.usecases.createsnippet.CreateSnippet;
 import cloud.codestore.core.usecases.createsnippet.NewSnippetDto;
-import cloud.codestore.core.usecases.deletesnippet.DeleteSnippet;
-import cloud.codestore.core.usecases.listsnippets.ListSnippets;
 import cloud.codestore.core.usecases.readlanguage.LanguageNotExistsException;
-import cloud.codestore.core.usecases.readlanguage.ReadLanguage;
-import cloud.codestore.core.usecases.readsnippet.ReadSnippet;
 import cloud.codestore.core.validation.InvalidSnippetException;
 import cloud.codestore.core.validation.SnippetProperty;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
@@ -22,54 +13,23 @@ import cloud.codestore.jsonapi.relationship.ToOneRelationship;
 import cloud.codestore.jsonapi.resource.ResourceIdentifierObject;
 import cloud.codestore.jsonapi.resource.ResourceObject;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.Map;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(DefaultLocale.class)
-@WebMvcTest(SnippetController.class)
-@Import({TestConfig.class, SnippetController.class, ErrorHandler.class})
-@ExtendWith(DummyWebServerInitializedEvent.class)
 @DisplayName("POST /snippets")
-class CreateSnippetTest {
-    private static final String SNIPPET_ID = UUID.randomUUID().toString();
-
-    @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
-    private MockMvc mockMvc;
-    @MockBean
-    private ListSnippets listSnippetsUseCase;
-    @MockBean
-    private ReadSnippet readSnippetUseCase;
-    @MockBean
-    private CreateSnippet createSnippetUseCase;
-    @MockBean
-    private DeleteSnippet deleteSnippetUseCase;
-    @MockBean
-    private ReadLanguage readLanguageUseCase;
-
+class CreateSnippetTest extends SnippetControllerTest {
     private Snippet testSnippet;
 
     @BeforeEach
@@ -164,18 +124,15 @@ class CreateSnippetTest {
     }
 
     private ResultActions sendRequest() throws Exception {
-        return mockMvc.perform(post("/snippets").content(body()).contentType(JsonApiDocument.MEDIA_TYPE));
-    }
-
-    private String body() throws JsonProcessingException {
-        var resource = new ClientSnippet(
+        ClientSnippet resource = new ClientSnippet(
                 testSnippet.getLanguage(),
                 testSnippet.getTitle(),
                 testSnippet.getDescription(),
                 testSnippet.getCode()
         );
 
-        return objectMapper.writeValueAsString(resource.asDocument());
+        String requestBody = objectMapper.writeValueAsString(resource.asDocument());
+        return POST("/snippets", requestBody);
     }
 
     private static class ClientSnippet extends ResourceObject {

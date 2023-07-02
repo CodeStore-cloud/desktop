@@ -4,51 +4,17 @@ import cloud.codestore.core.Language;
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.SnippetBuilder;
 import cloud.codestore.core.SnippetNotExistsException;
-import cloud.codestore.core.api.DefaultLocale;
-import cloud.codestore.core.api.DummyWebServerInitializedEvent;
-import cloud.codestore.core.api.ErrorHandler;
-import cloud.codestore.core.api.TestConfig;
-import cloud.codestore.core.usecases.createsnippet.CreateSnippet;
-import cloud.codestore.core.usecases.deletesnippet.DeleteSnippet;
-import cloud.codestore.core.usecases.listsnippets.ListSnippets;
-import cloud.codestore.core.usecases.readsnippet.ReadSnippet;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.UUID;
 
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(DefaultLocale.class)
-@WebMvcTest(SnippetController.class)
-@Import({TestConfig.class, SnippetController.class, ErrorHandler.class})
-@ExtendWith(DummyWebServerInitializedEvent.class)
 @DisplayName("DELETE /snippets/{snippetId}")
-class DeleteSnippetTest {
-    private static final String SNIPPET_ID = UUID.randomUUID().toString();
-
-    @Autowired
-    private MockMvc mockMvc;
-    @MockBean
-    private ListSnippets listSnippetsUseCase;
-    @MockBean
-    private ReadSnippet readSnippetUseCase;
-    @MockBean
-    private CreateSnippet createSnippetUseCase;
-    @MockBean
-    private DeleteSnippet deleteSnippetUseCase;
-
+class DeleteSnippetTest extends SnippetControllerTest {
     @BeforeEach
     void setUp() throws SnippetNotExistsException {
         when(readSnippetUseCase.read(SNIPPET_ID)).thenReturn(testSnippet());
@@ -57,8 +23,7 @@ class DeleteSnippetTest {
     @Test
     @DisplayName("deletes the corresponding snippet")
     void deleteSnippet() throws Exception {
-        mockMvc.perform(delete("/snippets/" + SNIPPET_ID))
-               .andExpect(status().isOk());
+        DELETE(SNIPPET_URL).andExpect(status().isOk());
 
         verify(deleteSnippetUseCase).delete(SNIPPET_ID);
     }
@@ -66,25 +31,23 @@ class DeleteSnippetTest {
     @Test
     @DisplayName("returns the deleted snippet")
     void returnDeletedSnippet() throws Exception {
-        mockMvc.perform(delete("/snippets/" + SNIPPET_ID))
-               .andExpect(status().isOk())
-               .andExpect(content().contentType(JsonApiDocument.MEDIA_TYPE))
-               .andExpect(jsonPath("$.data.type", is("snippet")))
-               .andExpect(jsonPath("$.data.id", is(SNIPPET_ID)));
+        DELETE(SNIPPET_URL).andExpect(status().isOk())
+                           .andExpect(content().contentType(JsonApiDocument.MEDIA_TYPE))
+                           .andExpect(jsonPath("$.data.type", is("snippet")))
+                           .andExpect(jsonPath("$.data.id", is(SNIPPET_ID)));
     }
 
     @Test
     @DisplayName("returns 404 if the snippet does not exist")
     void snippetNotExist() throws Exception {
         doThrow(SnippetNotExistsException.class).when(deleteSnippetUseCase).delete(SNIPPET_ID);
-        mockMvc.perform(delete("/snippets/" + SNIPPET_ID))
-               .andExpect(status().isNotFound())
-               .andExpect(content().contentType(JsonApiDocument.MEDIA_TYPE))
-               .andExpect(jsonPath("$.errors").isArray())
-               .andExpect(jsonPath("$.errors.length()", is(1)))
-               .andExpect(jsonPath("$.errors[0].code", is("NOT_FOUND")))
-               .andExpect(jsonPath("$.errors[0].title", is("Not Found")))
-               .andExpect(jsonPath("$.errors[0].detail", is("The code snippet does not exist.")));
+        DELETE(SNIPPET_URL).andExpect(status().isNotFound())
+                           .andExpect(content().contentType(JsonApiDocument.MEDIA_TYPE))
+                           .andExpect(jsonPath("$.errors").isArray())
+                           .andExpect(jsonPath("$.errors.length()", is(1)))
+                           .andExpect(jsonPath("$.errors[0].code", is("NOT_FOUND")))
+                           .andExpect(jsonPath("$.errors[0].title", is("Not Found")))
+                           .andExpect(jsonPath("$.errors[0].detail", is("The code snippet does not exist.")));
     }
 
     private Snippet testSnippet() {

@@ -26,11 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Nonnull;
 
 @RestController
-@RequestMapping(
-        path = SnippetCollectionResource.PATH,
-        consumes = JsonApiDocument.MEDIA_TYPE,
-        produces = JsonApiDocument.MEDIA_TYPE
-)
+@RequestMapping(path = SnippetCollectionResource.PATH, produces = JsonApiDocument.MEDIA_TYPE)
 public class SnippetController {
     private ListSnippets listSnippetsUseCase;
     private ReadSnippet readSnippetUseCase;
