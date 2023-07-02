@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import javax.annotation.Nonnull;
 
 public class LanguageResource extends ResourceObject {
-    private static final String RESOURCE_TYPE = "language";
+    public static final String RESOURCE_TYPE = "language";
 
     private String name;
 

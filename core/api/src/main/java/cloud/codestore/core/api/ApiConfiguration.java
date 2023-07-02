@@ -1,5 +1,6 @@
 package cloud.codestore.core.api;
 
+import cloud.codestore.core.api.snippets.SnippetResource;
 import cloud.codestore.jsonapi.JsonApiObjectMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -14,6 +15,7 @@ public class ApiConfiguration {
     @Primary
     public ObjectMapper objectMapper() {
         var objectMapper = new JsonApiObjectMapper();
+        objectMapper.registerResourceType(SnippetResource.RESOURCE_TYPE, SnippetResource.class);
         enableOffsetDateTimeSupport(objectMapper);
         return objectMapper;
     }

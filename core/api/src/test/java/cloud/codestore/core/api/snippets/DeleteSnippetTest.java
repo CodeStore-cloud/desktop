@@ -8,6 +8,7 @@ import cloud.codestore.core.api.DefaultLocale;
 import cloud.codestore.core.api.DummyWebServerInitializedEvent;
 import cloud.codestore.core.api.ErrorHandler;
 import cloud.codestore.core.api.TestConfig;
+import cloud.codestore.core.usecases.createsnippet.CreateSnippet;
 import cloud.codestore.core.usecases.deletesnippet.DeleteSnippet;
 import cloud.codestore.core.usecases.listsnippets.ListSnippets;
 import cloud.codestore.core.usecases.readsnippet.ReadSnippet;
@@ -43,6 +44,8 @@ class DeleteSnippetTest {
     private ListSnippets listSnippetsUseCase;
     @MockBean
     private ReadSnippet readSnippetUseCase;
+    @MockBean
+    private CreateSnippet createSnippetUseCase;
     @MockBean
     private DeleteSnippet deleteSnippetUseCase;
 
