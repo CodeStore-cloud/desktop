@@ -11,6 +11,8 @@ import cloud.codestore.core.usecases.listsnippets.ListSnippets;
 import cloud.codestore.core.usecases.readlanguage.LanguageNotExistsException;
 import cloud.codestore.core.usecases.readlanguage.ReadLanguage;
 import cloud.codestore.core.usecases.readsnippet.ReadSnippet;
+import cloud.codestore.core.usecases.updatesnippet.UpdateSnippet;
+import cloud.codestore.core.usecases.updatesnippet.UpdatedSnippetDto;
 import cloud.codestore.core.validation.InvalidSnippetException;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
 import cloud.codestore.jsonapi.document.SingleResourceDocument;
@@ -31,6 +33,7 @@ public class SnippetController {
     private ListSnippets listSnippetsUseCase;
     private ReadSnippet readSnippetUseCase;
     private CreateSnippet createSnippetUseCase;
+    private UpdateSnippet updateSnippetUseCase;
     private DeleteSnippet deleteSnippetUseCase;
     private ReadLanguage readLanguageUseCase;
 
@@ -39,12 +42,13 @@ public class SnippetController {
             @Nonnull ListSnippets listSnippetsUseCase,
             @Nonnull ReadSnippet readSnippetUseCase,
             @Nonnull CreateSnippet createSnippetUseCase,
-            @Nonnull DeleteSnippet deleteSnippetUseCase,
+            UpdateSnippet updateSnippetUseCase, @Nonnull DeleteSnippet deleteSnippetUseCase,
             @Nonnull ReadLanguage readLanguageUseCase
     ) {
         this.listSnippetsUseCase = listSnippetsUseCase;
         this.readSnippetUseCase = readSnippetUseCase;
         this.createSnippetUseCase = createSnippetUseCase;
+        this.updateSnippetUseCase = updateSnippetUseCase;
         this.deleteSnippetUseCase = deleteSnippetUseCase;
         this.readLanguageUseCase = readLanguageUseCase;
     }
@@ -80,6 +84,25 @@ public class SnippetController {
         SnippetResource snippetResource = new SnippetResource(createdSnippet);
         response.setHeader(HttpHeaders.LOCATION, snippetResource.getSelfLink());
         return snippetResource.asDocument();
+    }
+
+    @PatchMapping("/{snippetId}")
+    public JsonApiDocument updateSnippet(
+            @PathVariable("snippetId") String snippetId,
+            @RequestBody SingleResourceDocument<SnippetResource> document
+    ) throws SnippetNotExistsException, LanguageNotExistsException, InvalidSnippetException {
+        SnippetResource resource = document.getData();
+        UpdatedSnippetDto dto = new UpdatedSnippetDto(
+                snippetId,
+                getLanguage(resource.getLanguage()),
+                resource.getTitle(),
+                resource.getCode(),
+                resource.getDescription()
+        );
+
+        updateSnippetUseCase.update(dto);
+
+        return getSnippet(snippetId);
     }
 
     @DeleteMapping("/{snippetId}")

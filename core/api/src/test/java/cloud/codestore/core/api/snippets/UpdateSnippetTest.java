@@ -3,8 +3,9 @@ package cloud.codestore.core.api.snippets;
 import cloud.codestore.core.Language;
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.SnippetBuilder;
-import cloud.codestore.core.usecases.createsnippet.NewSnippetDto;
+import cloud.codestore.core.SnippetNotExistsException;
 import cloud.codestore.core.usecases.readlanguage.LanguageNotExistsException;
+import cloud.codestore.core.usecases.updatesnippet.UpdatedSnippetDto;
 import cloud.codestore.core.validation.InvalidSnippetException;
 import cloud.codestore.core.validation.SnippetProperty;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
@@ -20,6 +21,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.time.OffsetDateTime;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,32 +29,35 @@ import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@DisplayName("POST /snippets")
-class CreateSnippetTest extends SnippetControllerTest {
+@DisplayName("PATCH /snippets/{snippetId}")
+class UpdateSnippetTest extends SnippetControllerTest {
     private Snippet testSnippet;
 
     @BeforeEach
-    void setUp() throws InvalidSnippetException, LanguageNotExistsException {
+    void setUp() throws LanguageNotExistsException, SnippetNotExistsException {
         testSnippet = new SnippetBuilder().id(SNIPPET_ID)
                                           .language(Language.PYTHON)
                                           .title("A simple code snippet")
                                           .description("A short description")
                                           .code("print('Hello, World!')")
+                                          .created(OffsetDateTime.now().minusHours(2))
+                                          .modified(OffsetDateTime.now())
                                           .build();
 
-        when(createSnippetUseCase.create(any(NewSnippetDto.class))).thenReturn(testSnippet);
+        when(readSnippetUseCase.read(SNIPPET_ID)).thenReturn(testSnippet);
         when(readLanguageUseCase.read(testSnippet.getLanguage().getId())).thenReturn(testSnippet.getLanguage());
     }
 
     @Test
-    @DisplayName("creates a code snippet")
-    void createSnippet() throws Exception {
-        sendRequest().andExpect(status().isCreated());
+    @DisplayName("updates the code snippet")
+    void updateSnippet() throws Exception {
+        sendRequest().andExpect(status().isOk());
 
-        ArgumentCaptor<NewSnippetDto> argument = ArgumentCaptor.forClass(NewSnippetDto.class);
-        verify(createSnippetUseCase).create(argument.capture());
-        NewSnippetDto dto = argument.getValue();
+        ArgumentCaptor<UpdatedSnippetDto> argument = ArgumentCaptor.forClass(UpdatedSnippetDto.class);
+        verify(updateSnippetUseCase).update(argument.capture());
+        UpdatedSnippetDto dto = argument.getValue();
         assertThat(dto).isNotNull();
+        assertThat(dto.id()).isEqualTo(testSnippet.getId());
         assertThat(dto.language()).isEqualTo(testSnippet.getLanguage());
         assertThat(dto.title()).isEqualTo(testSnippet.getTitle());
         assertThat(dto.description()).isEqualTo(testSnippet.getDescription());
@@ -60,9 +65,9 @@ class CreateSnippetTest extends SnippetControllerTest {
     }
 
     @Test
-    @DisplayName("returns the created code snippet")
+    @DisplayName("returns the updated code snippet")
     void returnCreatedSnippet() throws Exception {
-        sendRequest().andExpect(status().isCreated())
+        sendRequest().andExpect(status().isOk())
                      .andExpect(content().contentType(JsonApiDocument.MEDIA_TYPE))
                      .andExpect(jsonPath("$.data.type", is("snippet")))
                      .andExpect(jsonPath("$.data.id", is(testSnippet.getId())))
@@ -70,16 +75,9 @@ class CreateSnippetTest extends SnippetControllerTest {
                      .andExpect(jsonPath("$.data.attributes.description", is(testSnippet.getDescription())))
                      .andExpect(jsonPath("$.data.attributes.code", is(testSnippet.getCode())))
                      .andExpect(jsonPath("$.data.attributes.created", is(testSnippet.getCreated().toString())))
+                     .andExpect(jsonPath("$.data.attributes.modified", is(testSnippet.getModified().toString())))
                      .andExpect(jsonPath("$.data.relationships.language.links.related", is("http://localhost:8080/languages/18")))
                      .andExpect(jsonPath("$.data.links.self", is("http://localhost:8080/snippets/" + testSnippet.getId())));
-    }
-
-    @Test
-    @DisplayName("includes the link of the new snippet in the Location header")
-    void includeLocationHeader() throws Exception {
-        String snippetLink = "http://localhost:8080/snippets/" + testSnippet.getId();
-        sendRequest().andExpect(status().isCreated())
-                     .andExpect(header().string("Location", snippetLink));
     }
 
     @Test
@@ -87,13 +85,20 @@ class CreateSnippetTest extends SnippetControllerTest {
     void invalidSnippet() throws Exception {
         var exception = Mockito.mock(InvalidSnippetException.class);
         when(exception.getValidationMessages()).thenReturn(Map.of(SnippetProperty.TITLE, "dummy message"));
-        when(createSnippetUseCase.create(any(NewSnippetDto.class))).thenThrow(exception);
+        doThrow(exception).when(updateSnippetUseCase).update(any(UpdatedSnippetDto.class));
 
         sendRequest().andExpect(status().isBadRequest());
     }
 
     @Test
-    @DisplayName("fails if the referred programming language does not exist")
+    @DisplayName("returns 404 if the referred code snippet does not exist")
+    void snippetNotFound() throws Exception {
+        doThrow(SnippetNotExistsException.class).when(updateSnippetUseCase).update(any(UpdatedSnippetDto.class));
+        sendRequest().andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("returns 404 if the referred programming language does not exist")
     void languageNotFound() throws Exception {
         when(readLanguageUseCase.read(anyInt())).thenThrow(LanguageNotExistsException.class);
         sendRequest().andExpect(status().isNotFound());
@@ -108,7 +113,7 @@ class CreateSnippetTest extends SnippetControllerTest {
         );
 
         String requestBody = objectMapper.writeValueAsString(resource.asDocument());
-        return POST("/snippets", requestBody);
+        return PATCH("/snippets/" + SNIPPET_ID, requestBody);
     }
 
     private static class ClientSnippet extends ResourceObject {

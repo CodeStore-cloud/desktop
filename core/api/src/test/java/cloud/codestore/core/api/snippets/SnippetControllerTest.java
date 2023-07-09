@@ -9,6 +9,7 @@ import cloud.codestore.core.usecases.deletesnippet.DeleteSnippet;
 import cloud.codestore.core.usecases.listsnippets.ListSnippets;
 import cloud.codestore.core.usecases.readlanguage.ReadLanguage;
 import cloud.codestore.core.usecases.readsnippet.ReadSnippet;
+import cloud.codestore.core.usecases.updatesnippet.UpdateSnippet;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,6 +43,8 @@ class SnippetControllerTest {
     @MockBean
     protected CreateSnippet createSnippetUseCase;
     @MockBean
+    protected UpdateSnippet updateSnippetUseCase;
+    @MockBean
     protected DeleteSnippet deleteSnippetUseCase;
     @MockBean
     protected ReadLanguage readLanguageUseCase;
@@ -52,6 +55,10 @@ class SnippetControllerTest {
 
     ResultActions POST(String path, String requestBody) throws Exception {
         return mockMvc.perform(post(path).content(requestBody).contentType(JsonApiDocument.MEDIA_TYPE));
+    }
+
+    ResultActions PATCH(String path, String requestBody) throws Exception {
+        return mockMvc.perform(patch(path).content(requestBody).contentType(JsonApiDocument.MEDIA_TYPE));
     }
 
     ResultActions DELETE(String path) throws Exception {
