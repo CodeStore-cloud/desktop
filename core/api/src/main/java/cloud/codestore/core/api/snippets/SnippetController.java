@@ -105,6 +105,14 @@ public class SnippetController {
         return getSnippet(snippetId);
     }
 
+    @PostMapping(value = "/{snippetId}", headers = "X-HTTP-Method-Override=PATCH")
+    public JsonApiDocument updateSnippetViaPost(
+            @PathVariable("snippetId") String snippetId,
+            @RequestBody SingleResourceDocument<SnippetResource> document
+    ) throws SnippetNotExistsException, LanguageNotExistsException, InvalidSnippetException {
+        return updateSnippet(snippetId, document);
+    }
+
     @DeleteMapping("/{snippetId}")
     public JsonApiDocument deleteSnippet(@PathVariable("snippetId") String snippetId) throws SnippetNotExistsException {
         var snippetResource = getSnippet(snippetId);

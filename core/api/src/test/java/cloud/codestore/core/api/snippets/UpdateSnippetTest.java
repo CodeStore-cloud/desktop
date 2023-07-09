@@ -65,6 +65,22 @@ class UpdateSnippetTest extends SnippetControllerTest {
     }
 
     @Test
+    @DisplayName("can alternatively be called with POST and X-HTTP-Method-Override")
+    void updateSnippetViaPOST() throws Exception {
+        ClientSnippet resource = new ClientSnippet(
+                testSnippet.getLanguage(),
+                testSnippet.getTitle(),
+                testSnippet.getDescription(),
+                testSnippet.getCode()
+        );
+
+        String requestBody = objectMapper.writeValueAsString(resource.asDocument());
+        PATCHviaPOST("/snippets/" + SNIPPET_ID, requestBody).andExpect(status().isOk());
+
+        verify(updateSnippetUseCase).update(any(UpdatedSnippetDto.class));
+    }
+
+    @Test
     @DisplayName("returns the updated code snippet")
     void returnCreatedSnippet() throws Exception {
         sendRequest().andExpect(status().isOk())

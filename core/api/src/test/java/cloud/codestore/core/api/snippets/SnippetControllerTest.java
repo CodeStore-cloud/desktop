@@ -61,6 +61,13 @@ class SnippetControllerTest {
         return mockMvc.perform(patch(path).content(requestBody).contentType(JsonApiDocument.MEDIA_TYPE));
     }
 
+    ResultActions PATCHviaPOST(String path, String requestBody) throws Exception {
+        return mockMvc.perform(post("/snippets/" + SNIPPET_ID)
+                .content(requestBody)
+                .contentType(JsonApiDocument.MEDIA_TYPE)
+                .header("X-HTTP-Method-Override", "PATCH"));
+    }
+
     ResultActions DELETE(String path) throws Exception {
         return mockMvc.perform(delete(path));
     }
