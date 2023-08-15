@@ -75,7 +75,7 @@ class UpdateSnippetTest extends SnippetControllerTest {
         );
 
         String requestBody = objectMapper.writeValueAsString(resource.asDocument());
-        PATCHviaPOST("/snippets/" + SNIPPET_ID, requestBody).andExpect(status().isOk());
+        PATCHviaPOST(SNIPPET_URL, requestBody).andExpect(status().isOk());
 
         verify(updateSnippetUseCase).update(any(UpdatedSnippetDto.class));
     }
