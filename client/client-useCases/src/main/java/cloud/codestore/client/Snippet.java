@@ -19,11 +19,11 @@ public class Snippet {
 
     Snippet(
             @Nonnull String uri,
-            @Nonnull String title,
-            @Nonnull String description,
-            @Nonnull String code,
-            @Nonnull Language language,
-            @Nonnull OffsetDateTime created,
+            @Nullable String title,
+            @Nullable String description,
+            @Nullable String code,
+            @Nullable Language language,
+            @Nullable OffsetDateTime created,
             @Nullable OffsetDateTime modified
     ) {
         this.uri = uri;
@@ -40,27 +40,27 @@ public class Snippet {
         return uri;
     }
 
-    @Nonnull
+    @Nullable
     public String getTitle() {
         return title;
     }
 
-    @Nonnull
+    @Nullable
     public String getDescription() {
         return description;
     }
 
-    @Nonnull
+    @Nullable
     public String getCode() {
         return code;
     }
 
-    @Nonnull
+    @Nullable
     public Language getLanguage() {
         return language;
     }
 
-    @Nonnull
+    @Nullable
     public OffsetDateTime getCreated() {
         return created;
     }
