@@ -4,17 +4,29 @@ import cloud.codestore.core.Language;
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.SnippetBuilder;
 import cloud.codestore.core.SnippetNotExistsException;
+import cloud.codestore.core.usecases.deletesnippet.DeleteSnippet;
+import cloud.codestore.core.usecases.readsnippet.ReadSnippet;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@WebMvcTest(DeleteSnippetController.class)
+@Import({DeleteSnippetController.class})
 @DisplayName("DELETE /snippets/{snippetId}")
 class DeleteSnippetTest extends SnippetControllerTest {
+    @MockBean
+    private ReadSnippet readSnippetUseCase;
+    @MockBean
+    private DeleteSnippet deleteSnippetUseCase;
+
     @BeforeEach
     void setUp() throws SnippetNotExistsException {
         when(readSnippetUseCase.read(SNIPPET_ID)).thenReturn(testSnippet());

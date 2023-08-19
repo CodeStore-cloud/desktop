@@ -5,6 +5,8 @@ import cloud.codestore.core.Snippet;
 import cloud.codestore.core.SnippetBuilder;
 import cloud.codestore.core.SnippetNotExistsException;
 import cloud.codestore.core.usecases.readlanguage.LanguageNotExistsException;
+import cloud.codestore.core.usecases.readsnippet.ReadSnippet;
+import cloud.codestore.core.usecases.updatesnippet.UpdateSnippet;
 import cloud.codestore.core.usecases.updatesnippet.UpdatedSnippetDto;
 import cloud.codestore.core.validation.InvalidSnippetException;
 import cloud.codestore.core.validation.SnippetProperty;
@@ -19,6 +21,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.OffsetDateTime;
@@ -29,8 +34,14 @@ import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@WebMvcTest(UpdateSnippetController.class)
+@Import({UpdateSnippetController.class, ReadSnippetController.class})
 @DisplayName("PATCH /snippets/{snippetId}")
 class UpdateSnippetTest extends SnippetControllerTest {
+    @MockBean
+    private ReadSnippet readSnippetUseCase;
+    @MockBean
+    private UpdateSnippet updateSnippetUseCase;
     private Snippet testSnippet;
 
     @BeforeEach

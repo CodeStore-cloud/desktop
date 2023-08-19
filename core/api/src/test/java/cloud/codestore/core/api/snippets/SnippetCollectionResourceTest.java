@@ -2,9 +2,13 @@ package cloud.codestore.core.api.snippets;
 
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.SnippetBuilder;
+import cloud.codestore.core.usecases.listsnippets.ListSnippets;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -14,8 +18,13 @@ import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@WebMvcTest(ReadSnippetCollectionController.class)
+@Import(ReadSnippetCollectionController.class)
 @DisplayName("GET /snippets")
 class SnippetCollectionResourceTest extends SnippetControllerTest {
+    @MockBean
+    private ListSnippets listSnippetsUseCase;
+
     @Test
     @DisplayName("returns all available snippets")
     void returnSnippetCollection() throws Exception {

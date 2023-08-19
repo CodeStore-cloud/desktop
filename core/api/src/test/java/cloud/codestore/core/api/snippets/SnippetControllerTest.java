@@ -4,12 +4,7 @@ import cloud.codestore.core.api.DefaultLocale;
 import cloud.codestore.core.api.DummyWebServerInitializedEvent;
 import cloud.codestore.core.api.ErrorHandler;
 import cloud.codestore.core.api.TestConfig;
-import cloud.codestore.core.usecases.createsnippet.CreateSnippet;
-import cloud.codestore.core.usecases.deletesnippet.DeleteSnippet;
-import cloud.codestore.core.usecases.listsnippets.ListSnippets;
 import cloud.codestore.core.usecases.readlanguage.ReadLanguage;
-import cloud.codestore.core.usecases.readsnippet.ReadSnippet;
-import cloud.codestore.core.usecases.updatesnippet.UpdateSnippet;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,8 +20,8 @@ import java.util.UUID;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @ExtendWith(DefaultLocale.class)
-@WebMvcTest(SnippetController.class)
-@Import({TestConfig.class, SnippetController.class, ErrorHandler.class})
+@WebMvcTest(AbstractSnippetController.class)
+@Import({TestConfig.class, AbstractSnippetController.class, ErrorHandler.class})
 @ExtendWith(DummyWebServerInitializedEvent.class)
 class SnippetControllerTest {
     static final String SNIPPET_ID = UUID.randomUUID().toString();
@@ -36,16 +31,7 @@ class SnippetControllerTest {
     protected ObjectMapper objectMapper;
     @Autowired
     protected MockMvc mockMvc;
-    @MockBean
-    protected ListSnippets listSnippetsUseCase;
-    @MockBean
-    protected ReadSnippet readSnippetUseCase;
-    @MockBean
-    protected CreateSnippet createSnippetUseCase;
-    @MockBean
-    protected UpdateSnippet updateSnippetUseCase;
-    @MockBean
-    protected DeleteSnippet deleteSnippetUseCase;
+
     @MockBean
     protected ReadLanguage readLanguageUseCase;
 

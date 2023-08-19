@@ -3,9 +3,13 @@ package cloud.codestore.core.api.snippets;
 import cloud.codestore.core.Language;
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.SnippetBuilder;
+import cloud.codestore.core.usecases.readsnippet.ReadSnippet;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.StringEndsWith.endsWith;
@@ -13,8 +17,13 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@WebMvcTest(ReadSnippetController.class)
+@Import(ReadSnippetController.class)
 @DisplayName("GET /snippets/{snippetId}")
-class SnippetResourceTest extends SnippetControllerTest {
+class ReadSnippetResourceTest extends SnippetControllerTest {
+    @MockBean
+    private ReadSnippet readSnippetUseCase;
+
     @Test
     @DisplayName("returns a single programming languages")
     void returnLanguage() throws Exception {

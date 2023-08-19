@@ -3,6 +3,7 @@ package cloud.codestore.core.api.snippets;
 import cloud.codestore.core.Language;
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.SnippetBuilder;
+import cloud.codestore.core.usecases.createsnippet.CreateSnippet;
 import cloud.codestore.core.usecases.createsnippet.NewSnippetDto;
 import cloud.codestore.core.usecases.readlanguage.LanguageNotExistsException;
 import cloud.codestore.core.validation.InvalidSnippetException;
@@ -18,6 +19,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.Map;
@@ -27,8 +31,13 @@ import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@WebMvcTest(CreateSnippetController.class)
+@Import(CreateSnippetController.class)
 @DisplayName("POST /snippets")
 class CreateSnippetTest extends SnippetControllerTest {
+
+    @MockBean
+    protected CreateSnippet createSnippetUseCase;
     private Snippet testSnippet;
 
     @BeforeEach
