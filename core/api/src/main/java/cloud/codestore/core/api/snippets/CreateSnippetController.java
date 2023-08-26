@@ -4,7 +4,6 @@ import cloud.codestore.core.Snippet;
 import cloud.codestore.core.usecases.createsnippet.CreateSnippet;
 import cloud.codestore.core.usecases.createsnippet.NewSnippetDto;
 import cloud.codestore.core.usecases.readlanguage.LanguageNotExistsException;
-import cloud.codestore.core.usecases.readlanguage.ReadLanguage;
 import cloud.codestore.core.validation.InvalidSnippetException;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
 import cloud.codestore.jsonapi.document.SingleResourceDocument;
@@ -18,15 +17,16 @@ import javax.annotation.Nonnull;
 
 @RestController
 @RequestMapping(path = SnippetCollectionResource.PATH, produces = JsonApiDocument.MEDIA_TYPE)
-public class CreateSnippetController extends AbstractSnippetController {
+public class CreateSnippetController {
+    private final SnippetDeserializationHelper deserializationHelper;
     private final CreateSnippet createSnippetUseCase;
 
     @Autowired
     public CreateSnippetController(
-            @Nonnull ReadLanguage readLanguageUseCase,
+            @Nonnull SnippetDeserializationHelper deserializationHelper,
             @Nonnull CreateSnippet createSnippetUseCase
     ) {
-        super(readLanguageUseCase);
+        this.deserializationHelper = deserializationHelper;
         this.createSnippetUseCase = createSnippetUseCase;
     }
 
@@ -38,7 +38,7 @@ public class CreateSnippetController extends AbstractSnippetController {
     ) throws InvalidSnippetException, LanguageNotExistsException {
         SnippetResource resource = document.getData();
         NewSnippetDto dto = new NewSnippetDto(
-                getLanguage(resource.getLanguage()),
+                deserializationHelper.getLanguage(resource.getLanguage()),
                 resource.getTitle(),
                 resource.getCode(),
                 resource.getDescription()

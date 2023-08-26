@@ -38,6 +38,8 @@ class CreateSnippetTest extends SnippetControllerTest {
 
     @MockBean
     protected CreateSnippet createSnippetUseCase;
+    @MockBean
+    private SnippetDeserializationHelper deserializationHelper;
     private Snippet testSnippet;
 
     @BeforeEach
@@ -50,7 +52,7 @@ class CreateSnippetTest extends SnippetControllerTest {
                                           .build();
 
         when(createSnippetUseCase.create(any(NewSnippetDto.class))).thenReturn(testSnippet);
-        when(readLanguageUseCase.read(testSnippet.getLanguage().getId())).thenReturn(testSnippet.getLanguage());
+        when(deserializationHelper.getLanguage(any())).thenReturn(testSnippet.getLanguage());
     }
 
     @Test
@@ -104,7 +106,7 @@ class CreateSnippetTest extends SnippetControllerTest {
     @Test
     @DisplayName("fails if the referred programming language does not exist")
     void languageNotFound() throws Exception {
-        when(readLanguageUseCase.read(anyInt())).thenThrow(LanguageNotExistsException.class);
+        when(deserializationHelper.getLanguage(any())).thenThrow(LanguageNotExistsException.class);
         sendRequest().andExpect(status().isNotFound());
     }
 

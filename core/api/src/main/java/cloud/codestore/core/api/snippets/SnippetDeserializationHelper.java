@@ -4,26 +4,33 @@ import cloud.codestore.core.Language;
 import cloud.codestore.core.api.languages.LanguageResource;
 import cloud.codestore.core.usecases.readlanguage.LanguageNotExistsException;
 import cloud.codestore.core.usecases.readlanguage.ReadLanguage;
-import cloud.codestore.jsonapi.document.JsonApiDocument;
 import cloud.codestore.jsonapi.relationship.Relationship;
 import cloud.codestore.jsonapi.relationship.ToOneRelationship;
 import cloud.codestore.jsonapi.resource.ResourceIdentifierObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-@RestController
-@RequestMapping(path = SnippetCollectionResource.PATH, produces = JsonApiDocument.MEDIA_TYPE)
-public class AbstractSnippetController {
+@Component
+class SnippetDeserializationHelper {
     private ReadLanguage readLanguageUseCase;
 
     @Autowired
-    public AbstractSnippetController(@Nonnull ReadLanguage readLanguageUseCase) {
+    SnippetDeserializationHelper(@Nonnull ReadLanguage readLanguageUseCase) {
         this.readLanguageUseCase = readLanguageUseCase;
     }
 
+    /**
+     * Retrieves the related {@link Language} from the provided {@link Relationship} or {@code null} if the
+     * relationship does not link to a programming language.
+     *
+     * @param relationship a relationship.
+     * @return the related programming language or {@code null}.
+     * @throws LanguageNotExistsException if the related programming language does not exist.
+     */
+    @Nullable
     Language getLanguage(Relationship relationship) throws LanguageNotExistsException {
         if (relationship instanceof ToOneRelationship<?> toOneRelationship) {
             ResourceIdentifierObject identifier = toOneRelationship.getData();

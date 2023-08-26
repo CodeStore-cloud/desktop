@@ -35,17 +35,21 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UpdateSnippetController.class)
-@Import({UpdateSnippetController.class, ReadSnippetController.class})
+@Import(UpdateSnippetController.class)
 @DisplayName("PATCH /snippets/{snippetId}")
 class UpdateSnippetTest extends SnippetControllerTest {
     @MockBean
     private ReadSnippet readSnippetUseCase;
     @MockBean
     private UpdateSnippet updateSnippetUseCase;
+    @MockBean
+    private SnippetDeserializationHelper deserializationHelper;
     private Snippet testSnippet;
 
     @BeforeEach
     void setUp() throws LanguageNotExistsException, SnippetNotExistsException {
+        when(deserializationHelper.getLanguage(any())).thenReturn(Language.JAVA);
+
         testSnippet = new SnippetBuilder().id(SNIPPET_ID)
                                           .language(Language.PYTHON)
                                           .title("A simple code snippet")
@@ -56,7 +60,7 @@ class UpdateSnippetTest extends SnippetControllerTest {
                                           .build();
 
         when(readSnippetUseCase.read(SNIPPET_ID)).thenReturn(testSnippet);
-        when(readLanguageUseCase.read(testSnippet.getLanguage().getId())).thenReturn(testSnippet.getLanguage());
+        when(deserializationHelper.getLanguage(any())).thenReturn(testSnippet.getLanguage());
     }
 
     @Test
@@ -127,7 +131,7 @@ class UpdateSnippetTest extends SnippetControllerTest {
     @Test
     @DisplayName("returns 404 if the referred programming language does not exist")
     void languageNotFound() throws Exception {
-        when(readLanguageUseCase.read(anyInt())).thenThrow(LanguageNotExistsException.class);
+        when(deserializationHelper.getLanguage(any())).thenThrow(LanguageNotExistsException.class);
         sendRequest().andExpect(status().isNotFound());
     }
 
