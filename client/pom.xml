@@ -15,6 +15,7 @@
     <modules>
         <module>client-useCases</module>
         <module>client-repositories</module>
+        <module>client-ui</module>
     </modules>
 
 </project>

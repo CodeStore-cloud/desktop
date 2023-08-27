@@ -1,7 +1,7 @@
 package cloud.codestore.client.repositories.snippets;
 
-import cloud.codestore.client.Snippet;
 import cloud.codestore.client.repositories.HttpClient;
+import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
 import cloud.codestore.jsonapi.document.ResourceCollectionDocument;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -37,12 +37,12 @@ class LocalSnippetRepositoryTest {
         var resourceCollection = new ResourceCollectionDocument<>(testSnippets);
         when(client.getCollection(SNIPPETS_URL, SnippetResource.class)).thenReturn(resourceCollection);
 
-        List<Snippet> snippets = repository.get();
+        List<SnippetListItem> snippets = repository.get();
 
         assertThat(snippets).isNotNull().isNotEmpty().hasSameSizeAs(testSnippets);
-        for (Snippet snippet : snippets) {
-            assertThat(snippet.getUri()).isNotEmpty();
-            assertThat(snippet.getTitle()).isNotNull().isNotEmpty();
+        for (SnippetListItem snippet : snippets) {
+            assertThat(snippet.uri()).isNotEmpty();
+            assertThat(snippet.title()).isNotNull().isNotEmpty();
         }
 
         verify(client).getCollection(SNIPPETS_URL, SnippetResource.class);

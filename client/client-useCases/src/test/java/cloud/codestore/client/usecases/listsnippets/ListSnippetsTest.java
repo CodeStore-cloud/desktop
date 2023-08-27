@@ -1,7 +1,5 @@
 package cloud.codestore.client.usecases.listsnippets;
 
-import cloud.codestore.client.Snippet;
-import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.SnippetRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,7 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -38,14 +36,17 @@ class ListSnippetsTest {
         assertThat(snippets).isSameAs(expectedResult);
     }
 
-    private List<Snippet> allSnippets() {
-        return Stream.of("localhost:8080/snippets/1",
-                             "localhost:8080/snippets/2",
-                             "localhost:8080/snippets/3",
-                             "localhost:8080/snippets/4",
-                             "localhost:8080/snippets/5"
-                     )
-                     .map(uri -> new SnippetBuilder().uri(uri).build())
-                     .toList();
+    private List<SnippetListItem> allSnippets() {
+        return Map.of(
+                          "localhost:8080/snippets/1", "Snippet #1",
+                          "localhost:8080/snippets/2", "Snippet #2",
+                          "localhost:8080/snippets/3", "Snippet #3",
+                          "localhost:8080/snippets/4", "Snippet #4",
+                          "localhost:8080/snippets/5", "Snippet #5"
+                  )
+                  .entrySet()
+                  .stream()
+                  .map(entry -> new SnippetListItem(entry.getKey(), entry.getValue()))
+                  .toList();
     }
 }

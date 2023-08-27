@@ -1,10 +1,9 @@
 package cloud.codestore.client.repositories.snippets;
 
-import cloud.codestore.client.Snippet;
-import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.SnippetRepository;
 import cloud.codestore.client.repositories.HttpClient;
-import cloud.codestore.jsonapi.document.ResourceCollectionDocument;
+import cloud.codestore.client.repositories.Repository;
+import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
@@ -13,6 +12,7 @@ import java.util.List;
 /**
  * A {@link SnippetRepository} which saves/loads the code snippets from the local {CodeStore} Core.
  */
+@Repository
 class LocalSnippetRepository implements SnippetRepository {
 
     private final HttpClient client;
@@ -23,14 +23,10 @@ class LocalSnippetRepository implements SnippetRepository {
 
     @Nonnull
     @Override
-    public List<Snippet> get() {
-        String snippetCollectionUrl = client.getSnippetCollectionUrl();
-        ResourceCollectionDocument<SnippetResource> resourceCollection = client.getCollection(snippetCollectionUrl, SnippetResource.class);
+    public List<SnippetListItem> get() {
+        var resourceCollection = client.getCollection(client.getSnippetCollectionUrl(), SnippetResource.class);
         return Arrays.stream(resourceCollection.getData())
-                     .map(snippetResource -> new SnippetBuilder().uri(snippetResource.getSelfLink())
-                                                                 .title(snippetResource.getTitle())
-                                                                 .build()
-                     )
+                     .map(resource -> new SnippetListItem(resource.getSelfLink(), resource.getTitle()))
                      .toList();
     }
 }
