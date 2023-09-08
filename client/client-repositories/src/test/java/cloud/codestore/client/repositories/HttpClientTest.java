@@ -76,6 +76,48 @@ class HttpClientTest {
         assertThat(snippetResource).isNotNull();
         assertThat(snippetResource.getId()).isEqualTo("1");
         assertThat(snippetResource.getTitle()).isEqualTo("My first snippet");
+        assertThat(snippetResource.getSelfLink()).isEqualTo("http://localhost:8080/snippets/1");
+    }
+
+    @Test
+    @DisplayName("retrieves a collection of resources")
+    void retrieveResourceCollection() {
+        setResponse("""
+                {
+                    "data": [{
+                        "type": "snippet",
+                        "id": "1",
+                        "attributes": {
+                            "title": "My first snippet"
+                        },
+                        "links": {
+                            "self": "http://localhost:8080/snippets/1"
+                        }
+                    }, {
+                        "type": "snippet",
+                        "id": "2",
+                        "attributes": {
+                            "title": "My second snippet"
+                        },
+                        "links": {
+                            "self": "http://localhost:8080/snippets/2"
+                        }
+                    }, {
+                        "type": "snippet",
+                        "id": "3",
+                        "attributes": {
+                            "title": "My third snippet"
+                        },
+                        "links": {
+                            "self": "http://localhost:8080/snippets/3"
+                        }
+                    }]
+                }""");
+
+        var document = client.getCollection("http://localhost:8080/snippets", SnippetResource.class);
+
+        SnippetResource[] snippetResources = document.getData();
+        assertThat(snippetResources).isNotNull().hasSize(3);
     }
 
     private void setResponse(String responseBody) {

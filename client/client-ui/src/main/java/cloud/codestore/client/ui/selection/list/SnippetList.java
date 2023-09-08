@@ -1,5 +1,6 @@
 package cloud.codestore.client.ui.selection.list;
 
+import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.usecases.listsnippets.ListSnippets;
 import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
 import com.google.common.eventbus.EventBus;
@@ -12,6 +13,7 @@ import javafx.scene.control.SelectionMode;
 
 import java.util.List;
 
+@FxController
 public class SnippetList implements ChangeListener<SnippetListItem> {
     private final ListSnippets listSnippets;
     private final EventBus eventBus;

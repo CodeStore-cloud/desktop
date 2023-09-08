@@ -20,6 +20,7 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nonnull;
 
 public class HttpClient {
+    private static final int MAX_BUFFER_SIZE = 1024 * 1024;
 
     private final WebClient client;
     private final String rootUrl;
@@ -38,6 +39,7 @@ public class HttpClient {
                                    MimeType mimeType = MimeType.valueOf(JsonApiDocument.MEDIA_TYPE);
                                    configurer.defaultCodecs().jackson2JsonEncoder(new Jackson2JsonEncoder(objectMapper, mimeType));
                                    configurer.defaultCodecs().jackson2JsonDecoder(new Jackson2JsonDecoder(objectMapper, mimeType));
+                                   configurer.defaultCodecs().maxInMemorySize(MAX_BUFFER_SIZE);
                                })
                                .build();
     }
