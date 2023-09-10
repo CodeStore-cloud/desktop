@@ -30,3 +30,28 @@ synchronizing code snippets with the {CodeStore} cloud. The data can be accessed
 
 The GUI provides user-friendly access to the data managed by the {CodeStore} Core and extends its functionalities by
 UI specific functions like syntax-highlighting, autocompletion and quickfilter.
+
+## Clean Architecture
+
+The architecture of both modules is based on Uncle
+Bob's [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html).
+The basic idea is that the functionality does not depend on the implementation details and thus is independent of the
+interface or underlying data management.
+
+Both modules are in turn separated into multiple modules, each serving its own purpose:
+
+```
+desktop-app
+|
+|-- client
+|   |-- client-useCases      -> abstract application logic
+|   |-- client-ui            -> JavaFX based UI
+|   |-- client-repositories  -> access file system and Core API
+|   `-- client-application   -> main module and dependency injection
+|
+`-- core
+    |-- useCases             -> abstract application logic
+    |-- api                  -> REST API
+    |-- repositories         -> access file system and public server
+    `-- application          -> main module and dependency injection
+```
