@@ -19,6 +19,7 @@ public class FxApplication extends Application {
         setCodeStoreIcon(window);
         showMainWindow(window);
         hideLoadingScreen();
+        DefaultBrowser.init(getHostServices());
     }
 
     private void setCodeStoreIcon(Stage window) {

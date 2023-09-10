@@ -1,0 +1,20 @@
+@use "size";
+
+#root {
+    -fx-pref-width: size.$windowWidth;
+    -fx-pref-height: size.$windowHeight;
+    -fx-padding: 0 size.$primaryPadding;
+
+    .split-pane {
+        -fx-background-color: transparent;
+        -fx-padding: 0;
+
+        .split-pane-divider {
+            -fx-background-color: transparent;
+            -fx-max-width: size.$primaryPadding;
+            -fx-min-width: size.$primaryPadding;
+            -fx-pref-width: size.$primaryPadding;
+        }
+    }
+}
+

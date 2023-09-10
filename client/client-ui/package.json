@@ -1,0 +1,8 @@
+{
+    "scripts": {
+        "compile-css": "sass src/main/resources/cloud/codestore/client/ui/:src/main/resources/cloud/codestore/client/ui/ --no-source-map"
+    },
+    "dependencies": {
+        "sass": "1.66.1"
+    }
+}

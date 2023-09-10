@@ -1,0 +1,16 @@
+@use "colors";
+@use "size";
+
+.primaryBackground {
+    -fx-background-color: colors.$primaryBackgroundColor;
+    -fx-text-fill: colors.$primaryTextColor;
+}
+
+.secondaryBackground {
+    -fx-background-color: colors.$secondaryBackgroundColor;
+    -fx-text-fill: colors.$secondaryTextColor;
+}
+
+.primaryPadding {
+    -fx-padding: size.$primaryPadding;
+}
