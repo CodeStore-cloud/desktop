@@ -1,0 +1,8 @@
+@use "../colors";
+
+.separator {
+    -fx-pref-height: 1px;
+    -fx-min-height: 1px;
+    -fx-max-height: 1px;
+    -fx-background-color: colors.$borderColor;
+}

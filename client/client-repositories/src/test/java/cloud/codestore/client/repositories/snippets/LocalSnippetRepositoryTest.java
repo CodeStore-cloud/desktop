@@ -1,8 +1,10 @@
 package cloud.codestore.client.repositories.snippets;
 
+import cloud.codestore.client.Snippet;
 import cloud.codestore.client.repositories.HttpClient;
 import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
 import cloud.codestore.jsonapi.document.ResourceCollectionDocument;
+import cloud.codestore.jsonapi.document.SingleResourceDocument;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,6 +21,7 @@ import static org.mockito.Mockito.*;
 @DisplayName("The local snippet repository")
 class LocalSnippetRepositoryTest {
     private static final String SNIPPETS_URL = "http://localhost:8080/snippets";
+    private static final String SNIPPET_URI = "http://localhost:8080/snippets/1";
 
     @Mock
     private HttpClient client;
@@ -27,7 +30,6 @@ class LocalSnippetRepositoryTest {
     @BeforeEach
     void setUp() {
         repository = new LocalSnippetRepository(client);
-        when(client.getSnippetCollectionUrl()).thenReturn(SNIPPETS_URL);
     }
 
     @Test
@@ -36,6 +38,7 @@ class LocalSnippetRepositoryTest {
         SnippetResource[] testSnippets = testSnippets();
         var resourceCollection = new ResourceCollectionDocument<>(testSnippets);
         when(client.getCollection(SNIPPETS_URL, SnippetResource.class)).thenReturn(resourceCollection);
+        when(client.getSnippetCollectionUrl()).thenReturn(SNIPPETS_URL);
 
         List<SnippetListItem> snippets = repository.get();
 
@@ -46,6 +49,18 @@ class LocalSnippetRepositoryTest {
         }
 
         verify(client).getCollection(SNIPPETS_URL, SnippetResource.class);
+    }
+
+    @Test
+    @DisplayName("retrieves a single code snippet from the core")
+    void retrieveSingleSnippet() {
+        var document = new SingleResourceDocument<>(testSnippet(1, "A single snippet"));
+        when(client.get(SNIPPET_URI, SnippetResource.class)).thenReturn(document);
+
+        Snippet snippet = repository.get(SNIPPET_URI);
+
+        assertThat(snippet.getUri()).isEqualTo(SNIPPET_URI);
+        assertThat(snippet.getTitle()).isEqualTo("A single snippet");
     }
 
     private SnippetResource[] testSnippets() {

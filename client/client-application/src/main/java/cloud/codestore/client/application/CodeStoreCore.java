@@ -31,7 +31,7 @@ public class CodeStoreCore {
 
     @Bean
     public HttpClient httpClient() {
-        return new HttpClient("http://localhost:60566");
+        return new HttpClient("http://localhost:53142");
     }
 
     @Bean

@@ -15,4 +15,12 @@ public interface SnippetRepository {
      */
     @Nonnull
     List<SnippetListItem> get();
+
+    /**
+     * Reads the code snippet with the given URI.
+     * @param snippetUri the URI of the snippet to read.
+     * @return the corresponding code snippet.
+     */
+    @Nonnull
+    Snippet get(String snippetUri);
 }

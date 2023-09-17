@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="cloud.codestore.client.ui.snippet.SnippetController"
+      id="snippet" stylesheets="@snippet.css">
+    <fx:include source="./title/title.fxml" fx:id="snippetTitle"/>
+    <Separator/>
+</VBox>

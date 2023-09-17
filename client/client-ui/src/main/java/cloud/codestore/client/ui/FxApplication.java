@@ -12,6 +12,9 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.Optional;
 
+/**
+ * The JavaFX main class to show the GUI.
+ */
 public class FxApplication extends Application {
     @Override
     public void start(Stage window) {

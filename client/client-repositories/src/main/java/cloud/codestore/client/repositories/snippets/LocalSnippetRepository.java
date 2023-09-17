@@ -1,5 +1,7 @@
 package cloud.codestore.client.repositories.snippets;
 
+import cloud.codestore.client.Snippet;
+import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.SnippetRepository;
 import cloud.codestore.client.repositories.HttpClient;
 import cloud.codestore.client.repositories.Repository;
@@ -28,5 +30,14 @@ class LocalSnippetRepository implements SnippetRepository {
         return Arrays.stream(resourceCollection.getData())
                      .map(resource -> new SnippetListItem(resource.getSelfLink(), resource.getTitle()))
                      .toList();
+    }
+
+    @Nonnull
+    @Override
+    public Snippet get(String snippetUri) {
+        SnippetResource snippetResource = client.get(snippetUri, SnippetResource.class).getData();
+        return new SnippetBuilder().uri(snippetResource.getSelfLink())
+                                   .title(snippetResource.getTitle())
+                                   .build();
     }
 }
