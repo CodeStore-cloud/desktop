@@ -18,7 +18,7 @@ public class SnippetTitle {
     }
 
     @FXML
-    private void init() {
+    private void initialize() {
         snippetTitle.setEditable(false);
     }
 }

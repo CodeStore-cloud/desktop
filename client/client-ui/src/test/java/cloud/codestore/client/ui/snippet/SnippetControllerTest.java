@@ -3,6 +3,7 @@ package cloud.codestore.client.ui.snippet;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.selection.list.SnippetSelectedEvent;
+import cloud.codestore.client.ui.snippet.description.SnippetDescription;
 import cloud.codestore.client.ui.snippet.title.SnippetTitle;
 import cloud.codestore.client.usecases.readsnippet.ReadSnippet;
 import com.google.common.eventbus.EventBus;
@@ -14,8 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.testfx.framework.junit5.ApplicationExtension;
 
-import java.lang.reflect.Field;
-
+import static org.apache.commons.lang3.reflect.FieldUtils.writeField;
 import static org.mockito.Mockito.*;
 
 @ExtendWith({MockitoExtension.class, ApplicationExtension.class})
@@ -27,15 +27,17 @@ class SnippetControllerTest {
     private ReadSnippet readSnippetUseCase;
     @Mock
     private SnippetTitle snippetTitleController;
+    @Mock
+    private SnippetDescription snippetDescriptionController;
+
     private EventBus eventBus = new EventBus();
     private SnippetController snippetController;
 
     @BeforeEach
-    void setUp() throws NoSuchFieldException, IllegalAccessException {
-        Snippet testSnippet = testSnippet();
-        when(readSnippetUseCase.readSnippet(anyString())).thenReturn(testSnippet);
+    void setUp() throws IllegalAccessException {
+        when(readSnippetUseCase.readSnippet(anyString())).thenReturn(testSnippet());
         snippetController = new SnippetController(readSnippetUseCase, eventBus);
-        injectTitleController();
+        injectFxmlControllers();
     }
 
     @Test
@@ -58,9 +60,8 @@ class SnippetControllerTest {
                                    .build();
     }
 
-    private void injectTitleController() throws NoSuchFieldException, IllegalAccessException {
-        Field field = SnippetController.class.getDeclaredField("snippetTitleController");
-        field.setAccessible(true);
-        field.set(snippetController, snippetTitleController);
+    private void injectFxmlControllers() throws IllegalAccessException {
+        writeField(snippetController, "snippetTitleController", snippetTitleController, true);
+        writeField(snippetController, "snippetDescriptionController", snippetDescriptionController, true);
     }
 }
