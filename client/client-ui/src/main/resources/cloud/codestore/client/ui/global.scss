@@ -27,3 +27,9 @@
 .text-field, .text-area, .text-area .content {
     -fx-background-color: -fx-text-box-border, -fx-control-inner-background;
 }
+
+/* Show input placeholder even when input is focused */
+.text-field, .text-field:focused,
+.text-area, .text-area:focused {
+    -fx-prompt-text-fill: derive(-fx-control-inner-background, -30%);
+}

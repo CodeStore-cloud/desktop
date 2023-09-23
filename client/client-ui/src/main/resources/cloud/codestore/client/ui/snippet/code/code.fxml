@@ -3,5 +3,6 @@
 <?import javafx.scene.control.TextArea?>
 <TextArea xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
           fx:controller="cloud.codestore.client.ui.snippet.code.SnippetCode"
-          fx:id="snippetCode" styleClass="bordered">
+          fx:id="snippetCode" styleClass="bordered"
+          promptText="%snippet.code.placeholder">
 </TextArea>
