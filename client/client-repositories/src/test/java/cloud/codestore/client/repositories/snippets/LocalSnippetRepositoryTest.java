@@ -54,7 +54,12 @@ class LocalSnippetRepositoryTest {
     @Test
     @DisplayName("retrieves a single code snippet from the core")
     void retrieveSingleSnippet() {
-        var document = new SingleResourceDocument<>(testSnippet(1, "A single snippet", "With a short description"));
+        var document = new SingleResourceDocument<>(testSnippet(
+                1,
+                "A single snippet",
+                "With a short description",
+                "System.out.println(\"Hello, World!\");"
+        ));
         when(client.get(SNIPPET_URI, SnippetResource.class)).thenReturn(document);
 
         Snippet snippet = repository.get(SNIPPET_URI);
@@ -62,6 +67,7 @@ class LocalSnippetRepositoryTest {
         assertThat(snippet.getUri()).isEqualTo(SNIPPET_URI);
         assertThat(snippet.getTitle()).isEqualTo("A single snippet");
         assertThat(snippet.getDescription()).isEqualTo("With a short description");
+        assertThat(snippet.getCode()).isEqualTo("System.out.println(\"Hello, World!\");");
     }
 
     private SnippetResource[] testSnippets() {
@@ -73,14 +79,15 @@ class LocalSnippetRepositoryTest {
     }
 
     private SnippetResource testSnippet(int id, String title) {
-        return testSnippet(id, title, "");
+        return testSnippet(id, title, "", "");
     }
 
-    private SnippetResource testSnippet(int id, String title, String description) {
+    private SnippetResource testSnippet(int id, String title, String description, String code) {
         SnippetResource snippet = mock(SnippetResource.class);
-        when(snippet.getSelfLink()).thenReturn(SNIPPETS_URL + "/" + id);
-        when(snippet.getTitle()).thenReturn(title);
-        when(snippet.getDescription()).thenReturn(description);
+        lenient().when(snippet.getSelfLink()).thenReturn(SNIPPETS_URL + "/" + id);
+        lenient().when(snippet.getTitle()).thenReturn(title);
+        lenient().when(snippet.getDescription()).thenReturn(description);
+        lenient().when(snippet.getCode()).thenReturn(code);
         return snippet;
     }
 }

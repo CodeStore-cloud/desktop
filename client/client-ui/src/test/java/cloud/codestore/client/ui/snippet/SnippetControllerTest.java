@@ -3,6 +3,7 @@ package cloud.codestore.client.ui.snippet;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.selection.list.SnippetSelectedEvent;
+import cloud.codestore.client.ui.snippet.code.SnippetCode;
 import cloud.codestore.client.ui.snippet.description.SnippetDescription;
 import cloud.codestore.client.ui.snippet.title.SnippetTitle;
 import cloud.codestore.client.usecases.readsnippet.ReadSnippet;
@@ -29,6 +30,8 @@ class SnippetControllerTest {
     private SnippetTitle snippetTitleController;
     @Mock
     private SnippetDescription snippetDescriptionController;
+    @Mock
+    private SnippetCode snippetCodeController;
 
     private EventBus eventBus = new EventBus();
     private SnippetController snippetController;
@@ -52,16 +55,21 @@ class SnippetControllerTest {
     void setSnippetTitle() {
         eventBus.post(new SnippetSelectedEvent(SNIPPET_URI));
         verify(snippetTitleController).setText("A random title");
+        verify(snippetDescriptionController).setText("With a short description");
+        verify(snippetCodeController).setText("System.out.println(\"Hello, World!\");");
     }
 
     private Snippet testSnippet() {
         return new SnippetBuilder().uri(SNIPPET_URI)
                                    .title("A random title")
+                                   .description("With a short description")
+                                   .code("System.out.println(\"Hello, World!\");")
                                    .build();
     }
 
     private void injectFxmlControllers() throws IllegalAccessException {
         writeField(snippetController, "snippetTitleController", snippetTitleController, true);
         writeField(snippetController, "snippetDescriptionController", snippetDescriptionController, true);
+        writeField(snippetController, "snippetCodeController", snippetCodeController, true);
     }
 }

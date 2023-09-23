@@ -8,4 +8,6 @@
     <fx:include source="./title/title.fxml" fx:id="snippetTitle"/>
     <Separator/>
     <fx:include source="./description/description.fxml" fx:id="snippetDescription"/>
+    <Separator/>
+    <fx:include source="./code/code.fxml" fx:id="snippetCode"/>
 </VBox>

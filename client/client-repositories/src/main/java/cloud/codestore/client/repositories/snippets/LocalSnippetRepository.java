@@ -39,6 +39,7 @@ class LocalSnippetRepository implements SnippetRepository {
         return new SnippetBuilder().uri(snippetResource.getSelfLink())
                                    .title(snippetResource.getTitle())
                                    .description(snippetResource.getDescription())
+                                   .code(snippetResource.getCode())
                                    .build();
     }
 }
