@@ -22,3 +22,8 @@
     -fx-border-style: solid;
     -fx-border-color: colors.$borderColor;
 }
+
+/* remove shadow and focus-shadow of inputs */
+.text-field, .text-area, .text-area .content {
+    -fx-background-color: -fx-text-box-border, -fx-control-inner-background;
+}
