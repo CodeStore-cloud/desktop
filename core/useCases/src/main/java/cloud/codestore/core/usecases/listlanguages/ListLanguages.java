@@ -12,9 +12,6 @@ import java.util.List;
  */
 @UseCase
 public class ListLanguages {
-    /**
-     * @return a list of all available programming languages.
-     */
     @Nonnull
     public List<Language> list() {
         return Arrays.stream(Language.values())

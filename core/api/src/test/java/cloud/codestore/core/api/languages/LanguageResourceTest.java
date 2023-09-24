@@ -49,6 +49,7 @@ class LanguageResourceTest {
                .andExpect(jsonPath("$.data.type", is("language")))
                .andExpect(jsonPath("$.data.id", is(String.valueOf(language.getId()))))
                .andExpect(jsonPath("$.data.attributes.name", is(language.getName())))
+               .andExpect(jsonPath("$.data.relationships.snippets.links.related", is("http://localhost:8080/snippets?filter%5Blanguage%5D=" + language.getId())))
                .andExpect(jsonPath("$.data.links.self").exists());
     }
 

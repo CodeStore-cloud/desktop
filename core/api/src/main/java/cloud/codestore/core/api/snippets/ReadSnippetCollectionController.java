@@ -34,14 +34,14 @@ public class ReadSnippetCollectionController {
     public JsonApiDocument getSnippets(
             @RequestParam(value = "filter[language]", required = false) String languageId
     ) throws LanguageNotExistsException {
-        FilterProperties filterProperties = new FilterProperties(getLanguage(languageId));
+        FilterProperties filterProperties = new FilterProperties(getLanguageById(languageId));
 
         var snippets = listSnippetsUseCase.list(filterProperties);
         return new SnippetCollectionResource(snippets);
     }
 
     @Nullable
-    private Language getLanguage(@Nullable String languageId) throws LanguageNotExistsException {
+    private Language getLanguageById(@Nullable String languageId) throws LanguageNotExistsException {
         if (languageId == null) {
             return null;
         }

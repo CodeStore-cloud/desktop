@@ -7,6 +7,10 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * A factory which constructs the URIs to the resources.
@@ -28,7 +32,30 @@ public class UriFactory implements ApplicationListener<ServletWebServerInitializ
      * @return the absolute URI of the corresponding resource.
      */
     @Nonnull
-    public static String createUri(String path) {
+    public static String createUri(@Nonnull String path) {
         return ROOT_URI + path;
+    }
+
+    /**
+     * @param path          the path of a resource.
+     * @param urlParameters one or more query parameters to be added.
+     * @return the absolute URI of the corresponding resource.
+     */
+    @Nonnull
+    public static String createUri(@Nonnull String path, @Nonnull Map<String, Object> urlParameters) {
+        String querySegment = "";
+        if (!urlParameters.isEmpty()) {
+            querySegment += "?";
+            querySegment += urlParameters.entrySet()
+                                         .stream()
+                                         .map(entry -> "%s=%s".formatted(encode(entry.getKey()), encode(entry.getValue())))
+                                         .collect(Collectors.joining("&"));
+        }
+
+        return ROOT_URI + path + querySegment;
+    }
+
+    private static String encode(Object value) {
+        return URLEncoder.encode(value.toString(), StandardCharsets.UTF_8);
     }
 }
