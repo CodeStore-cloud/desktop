@@ -2,7 +2,6 @@ package cloud.codestore.core.usecases.readsnippet;
 
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.SnippetNotExistsException;
-import cloud.codestore.core.SnippetRepository;
 import cloud.codestore.core.UseCase;
 
 import javax.annotation.Nonnull;
@@ -12,10 +11,10 @@ import javax.annotation.Nonnull;
  */
 @UseCase
 public class ReadSnippet {
-    private final SnippetRepository repository;
+    private final ReadSnippetQuery query;
 
-    public ReadSnippet(SnippetRepository repository) {
-        this.repository = repository;
+    public ReadSnippet(ReadSnippetQuery query) {
+        this.query = query;
     }
 
     /**
@@ -27,10 +26,6 @@ public class ReadSnippet {
      */
     @Nonnull
     public Snippet read(@Nonnull String snippetId) throws SnippetNotExistsException {
-        if (!repository.contains(snippetId)) {
-            throw new SnippetNotExistsException();
-        }
-
-        return repository.get(snippetId);
+        return query.read(snippetId);
     }
 }

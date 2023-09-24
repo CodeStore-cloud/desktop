@@ -2,7 +2,6 @@ package cloud.codestore.core.usecases.createsnippet;
 
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.SnippetBuilder;
-import cloud.codestore.core.SnippetRepository;
 import cloud.codestore.core.UseCase;
 import cloud.codestore.core.validation.InvalidSnippetException;
 import cloud.codestore.core.validation.SnippetValidator;
@@ -15,11 +14,11 @@ import java.util.UUID;
  */
 @UseCase
 public class CreateSnippet {
-    private final SnippetRepository repository;
+    private final CreateSnippetQuery query;
     private final SnippetValidator validator;
 
-    public CreateSnippet(SnippetRepository repository, SnippetValidator validator) {
-        this.repository = repository;
+    public CreateSnippet(CreateSnippetQuery query, SnippetValidator validator) {
+        this.query = query;
         this.validator = validator;
     }
 
@@ -42,7 +41,7 @@ public class CreateSnippet {
                                               .build();
 
         validator.validate(snippet);
-        repository.put(snippet);
+        query.create(snippet);
         return snippet;
     }
 }

@@ -1,7 +1,6 @@
 package cloud.codestore.core.usecases.listsnippets;
 
 import cloud.codestore.core.Snippet;
-import cloud.codestore.core.SnippetRepository;
 import cloud.codestore.core.UseCase;
 
 import javax.annotation.Nonnull;
@@ -12,14 +11,14 @@ import java.util.List;
  */
 @UseCase
 public class ListSnippets {
-    private final SnippetRepository repository;
+    private final ReadSnippetsQuery query;
 
-    public ListSnippets(SnippetRepository repository) {
-        this.repository = repository;
+    public ListSnippets(ReadSnippetsQuery query) {
+        this.query = query;
     }
 
     @Nonnull
     public List<Snippet> list(FilterProperties filterProperties) {
-        return repository.get(filterProperties);
+        return query.readSnippets(filterProperties);
     }
 }

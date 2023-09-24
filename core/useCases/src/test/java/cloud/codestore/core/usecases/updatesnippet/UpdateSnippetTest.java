@@ -1,6 +1,10 @@
 package cloud.codestore.core.usecases.updatesnippet;
 
-import cloud.codestore.core.*;
+import cloud.codestore.core.Language;
+import cloud.codestore.core.Snippet;
+import cloud.codestore.core.SnippetBuilder;
+import cloud.codestore.core.SnippetNotExistsException;
+import cloud.codestore.core.usecases.readsnippet.ReadSnippet;
 import cloud.codestore.core.validation.SnippetValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,21 +29,23 @@ class UpdateSnippetTest {
     private static final String SNIPPET_ID = UUID.randomUUID().toString();
 
     @Mock
-    private SnippetRepository repository;
+    private ReadSnippet readSnippetUseCase;
+    @Mock
+    private UpdateSnippetQuery query;
     @Mock
     private SnippetValidator validator;
     private UpdateSnippet useCase;
 
     @BeforeEach
     void setUp() {
-        useCase = new UpdateSnippet(repository, validator);
+        useCase = new UpdateSnippet(readSnippetUseCase, query, validator);
     }
 
     @Test
     @DisplayName("throws a SnippetNotExistsException if the code snippet does not exist")
-    void snippetNotExist() {
+    void snippetNotExist() throws SnippetNotExistsException {
         String snippetId = UUID.randomUUID().toString();
-        when(repository.contains(snippetId)).thenReturn(false);
+        when(readSnippetUseCase.read(snippetId)).thenThrow(new SnippetNotExistsException());
         UpdatedSnippetDto dto = new UpdatedSnippetDto(snippetId, Language.TEXT, "", "", "");
         assertThatThrownBy(() -> useCase.update(dto)).isInstanceOf(SnippetNotExistsException.class);
     }
@@ -50,14 +56,13 @@ class UpdateSnippetTest {
         ArgumentCaptor<Snippet> snippetArgument = ArgumentCaptor.forClass(Snippet.class);
 
         Snippet currentSnippet = currentSnippet();
-        when(repository.contains(SNIPPET_ID)).thenReturn(true);
-        when(repository.get(SNIPPET_ID)).thenReturn(currentSnippet);
+        when(readSnippetUseCase.read(SNIPPET_ID)).thenReturn(currentSnippet);
 
         UpdatedSnippetDto dto = updatedSnippet();
         useCase.update(dto);
 
         verify(validator).validate(snippetArgument.capture());
-        verify(repository).put(snippetArgument.capture());
+        verify(query).update(snippetArgument.capture());
         Snippet snippet = snippetArgument.getValue();
         assertThat(snippet.getId()).isEqualTo(SNIPPET_ID);
         assertThat(snippet.getLanguage()).isEqualTo(dto.language());

@@ -1,6 +1,8 @@
 package cloud.codestore.core.usecases.readsnippet;
 
-import cloud.codestore.core.*;
+import cloud.codestore.core.Language;
+import cloud.codestore.core.Snippet;
+import cloud.codestore.core.SnippetBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,19 +14,18 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("The read-snippet use case")
 class ReadSnippetTest {
     @Mock
-    private SnippetRepository repository;
+    private ReadSnippetQuery query;
     private ReadSnippet useCase;
 
     @BeforeEach
     void setUp() {
-        useCase = new ReadSnippet(repository);
+        useCase = new ReadSnippet(query);
     }
 
     @Test
@@ -32,19 +33,10 @@ class ReadSnippetTest {
     void returnSnippet() throws Exception {
         var expectedSnippet = testSnippet();
         var snippetId = expectedSnippet.getId();
-        when(repository.contains(snippetId)).thenReturn(true);
-        when(repository.get(snippetId)).thenReturn(expectedSnippet);
+        when(query.read(snippetId)).thenReturn(expectedSnippet);
 
         var snippet = useCase.read(snippetId);
         assertThat(snippet).isEqualTo(expectedSnippet);
-    }
-
-    @Test
-    @DisplayName("throws a SnippetNotExistsException if the code snippet does not exist")
-    void snippetNotExist() {
-        String snippetId = UUID.randomUUID().toString();
-        when(repository.contains(snippetId)).thenReturn(false);
-        assertThatThrownBy(() -> useCase.read(snippetId)).isInstanceOf(SnippetNotExistsException.class);
     }
 
     private Snippet testSnippet() {

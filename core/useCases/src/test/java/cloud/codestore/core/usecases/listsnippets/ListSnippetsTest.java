@@ -2,7 +2,6 @@ package cloud.codestore.core.usecases.listsnippets;
 
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.SnippetBuilder;
-import cloud.codestore.core.SnippetRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,12 +19,12 @@ import static org.mockito.Mockito.when;
 @DisplayName("The list-snippets use case")
 class ListSnippetsTest {
     @Mock
-    private SnippetRepository repository;
+    private ReadSnippetsQuery query;
     private ListSnippets useCase;
 
     @BeforeEach
     void setUp() {
-        useCase = new ListSnippets(repository);
+        useCase = new ListSnippets(query);
     }
 
     @Test
@@ -33,7 +32,7 @@ class ListSnippetsTest {
     void returnAllSnippets() {
         var filter = new FilterProperties(null);
         var expectedResult = allSnippets();
-        when(repository.get(filter)).thenReturn(expectedResult);
+        when(query.readSnippets(filter)).thenReturn(expectedResult);
 
         var snippets = useCase.list(filter);
         assertThat(snippets).isSameAs(expectedResult);

@@ -1,7 +1,6 @@
 package cloud.codestore.core.usecases.deletesnippet;
 
 import cloud.codestore.core.SnippetNotExistsException;
-import cloud.codestore.core.SnippetRepository;
 import cloud.codestore.core.UseCase;
 
 import javax.annotation.Nonnull;
@@ -11,10 +10,10 @@ import javax.annotation.Nonnull;
  */
 @UseCase
 public class DeleteSnippet {
-    private final SnippetRepository repository;
+    private final DeleteSnippetQuery query;
 
-    public DeleteSnippet(SnippetRepository repository) {
-        this.repository = repository;
+    public DeleteSnippet(DeleteSnippetQuery query) {
+        this.query = query;
     }
 
     /**
@@ -23,10 +22,6 @@ public class DeleteSnippet {
      * @throws SnippetNotExistsException if the code snippet does not exist.
      */
     public void delete(@Nonnull String snippetId) throws SnippetNotExistsException {
-        if (!repository.contains(snippetId)) {
-            throw new SnippetNotExistsException();
-        }
-
-        repository.delete(snippetId);
+        query.delete(snippetId);
     }
 }

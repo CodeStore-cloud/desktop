@@ -1,6 +1,10 @@
 package cloud.codestore.core.usecases.updatesnippet;
 
-import cloud.codestore.core.*;
+import cloud.codestore.core.Snippet;
+import cloud.codestore.core.SnippetBuilder;
+import cloud.codestore.core.SnippetNotExistsException;
+import cloud.codestore.core.UseCase;
+import cloud.codestore.core.usecases.readsnippet.ReadSnippet;
 import cloud.codestore.core.validation.InvalidSnippetException;
 import cloud.codestore.core.validation.SnippetValidator;
 
@@ -12,11 +16,13 @@ import java.time.OffsetDateTime;
  */
 @UseCase
 public class UpdateSnippet {
-    private final SnippetRepository repository;
+    private final ReadSnippet readSnippetUseCase;
+    private final UpdateSnippetQuery query;
     private final SnippetValidator validator;
 
-    public UpdateSnippet(SnippetRepository repository, SnippetValidator validator) {
-        this.repository = repository;
+    public UpdateSnippet(ReadSnippet readSnippetUseCase, UpdateSnippetQuery query, SnippetValidator validator) {
+        this.readSnippetUseCase = readSnippetUseCase;
+        this.query = query;
         this.validator = validator;
     }
 
@@ -29,11 +35,7 @@ public class UpdateSnippet {
      * @throws InvalidSnippetException if the code snippet is invalid.
      */
     public void update(@Nonnull UpdatedSnippetDto dto) throws SnippetNotExistsException, InvalidSnippetException {
-        if (!repository.contains(dto.id())) {
-            throw new SnippetNotExistsException();
-        }
-
-        Snippet currentSnippet = repository.get(dto.id());
+        Snippet currentSnippet = readSnippetUseCase.read(dto.id());
         Snippet updatedSnippet = new SnippetBuilder().id(currentSnippet.getId())
                                                      .created(currentSnippet.getCreated())
                                                      .modified(OffsetDateTime.now())
@@ -44,6 +46,6 @@ public class UpdateSnippet {
                                                      .build();
 
         validator.validate(updatedSnippet);
-        repository.put(updatedSnippet);
+        query.update(updatedSnippet);
     }
 }
