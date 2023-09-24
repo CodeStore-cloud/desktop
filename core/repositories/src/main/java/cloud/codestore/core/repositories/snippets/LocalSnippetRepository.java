@@ -5,6 +5,7 @@ import cloud.codestore.core.SnippetRepository;
 import cloud.codestore.core.repositories.Directory;
 import cloud.codestore.core.repositories.File;
 import cloud.codestore.core.repositories.Repository;
+import cloud.codestore.core.usecases.listsnippets.FilterProperties;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.List;
@@ -43,7 +44,7 @@ class LocalSnippetRepository implements SnippetRepository {
     }
 
     @Override
-    public List<Snippet> get() {
+    public List<Snippet> get(FilterProperties filterProperties) {
         return snippetsDirectory.getFiles()
                                 .stream()
                                 .map(snippetReader::read)

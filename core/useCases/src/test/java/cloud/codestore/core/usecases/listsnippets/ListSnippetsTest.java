@@ -31,10 +31,11 @@ class ListSnippetsTest {
     @Test
     @DisplayName("returns all available code snippets")
     void returnAllSnippets() {
+        var filter = new FilterProperties(null);
         var expectedResult = allSnippets();
-        when(repository.get()).thenReturn(expectedResult);
+        when(repository.get(filter)).thenReturn(expectedResult);
 
-        var snippets = useCase.list();
+        var snippets = useCase.list(filter);
         assertThat(snippets).isSameAs(expectedResult);
     }
 

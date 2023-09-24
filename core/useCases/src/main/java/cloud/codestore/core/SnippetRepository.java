@@ -1,5 +1,7 @@
 package cloud.codestore.core;
 
+import cloud.codestore.core.usecases.listsnippets.FilterProperties;
+
 import java.util.List;
 
 /**
@@ -24,9 +26,10 @@ public interface SnippetRepository {
 
     /**
      * Reads all code snippets.
+     * @param filterProperties defines how to filter the code snippets.
      * @return all code snippets.
      */
-    List<Snippet> get();
+    List<Snippet> get(FilterProperties filterProperties);
 
     /**
      * Puts the given code snippet into this repository.

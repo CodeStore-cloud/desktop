@@ -20,11 +20,11 @@ public class ListSnippets {
 
     /**
      * Reads all code snippets.
-     *
+     * @param filterProperties defines how to filter the code snippets.
      * @return the code snippets.
      */
     @Nonnull
-    public List<Snippet> list() {
-        return repository.get();
+    public List<Snippet> list(FilterProperties filterProperties) {
+        return repository.get(filterProperties);
     }
 }
