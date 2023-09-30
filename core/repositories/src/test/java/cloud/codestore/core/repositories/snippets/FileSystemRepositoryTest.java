@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("The local snippet repository")
-class LocalSnippetRepositoryTest {
+class FileSystemRepositoryTest {
     private static final String SNIPPET_ID = UUID.randomUUID().toString();
     private static final String SNIPPET_FILE_NAME = SNIPPET_ID + FileSystemRepository.JSON_FILE_EXTENSION;
 
@@ -79,6 +79,7 @@ class LocalSnippetRepositoryTest {
     @Test
     @DisplayName("overrides the corresponding file when updating a code snippet")
     void updateSnippet() throws SnippetNotExistsException {
+        when(snippetFile.exists()).thenReturn(true);
         Snippet testSnippet = mock(Snippet.class);
         when(testSnippet.getId()).thenReturn(SNIPPET_ID);
 
