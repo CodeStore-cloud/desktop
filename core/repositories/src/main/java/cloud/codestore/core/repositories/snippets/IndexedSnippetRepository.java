@@ -9,11 +9,16 @@ import cloud.codestore.core.usecases.listsnippets.FilterProperties;
 import cloud.codestore.core.usecases.listsnippets.ReadSnippetsQuery;
 import cloud.codestore.core.usecases.readsnippet.ReadSnippetQuery;
 import cloud.codestore.core.usecases.updatesnippet.UpdateSnippetQuery;
+import org.apache.lucene.search.Query;
 import org.springframework.context.annotation.Primary;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.stream.Stream;
 
+/**
+ * A decorator around the {@link FileSystemRepository} which manages the {@link SnippetIndex}.
+ */
 @Primary
 @Repository
 public class IndexedSnippetRepository implements CreateSnippetQuery, UpdateSnippetQuery, DeleteSnippetQuery, ReadSnippetQuery, ReadSnippetsQuery {
@@ -45,7 +50,9 @@ public class IndexedSnippetRepository implements CreateSnippetQuery, UpdateSnipp
 
     @Override
     public List<Snippet> readSnippets(@Nonnull FilterProperties filterProperties) {
-        return localRepo.readSnippets(filterProperties);
+        Query filterQuery = new FilterQueryBuilder(filterProperties).buildFilterQuery();
+        Stream<String> snippetIds = index.query(filterQuery);
+        return localRepo.readSnippets(snippetIds);
     }
 
     @Override

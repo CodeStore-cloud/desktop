@@ -7,20 +7,19 @@ import cloud.codestore.core.repositories.File;
 import cloud.codestore.core.repositories.Repository;
 import cloud.codestore.core.usecases.createsnippet.CreateSnippetQuery;
 import cloud.codestore.core.usecases.deletesnippet.DeleteSnippetQuery;
-import cloud.codestore.core.usecases.listsnippets.FilterProperties;
-import cloud.codestore.core.usecases.listsnippets.ReadSnippetsQuery;
 import cloud.codestore.core.usecases.readsnippet.ReadSnippetQuery;
 import cloud.codestore.core.usecases.updatesnippet.UpdateSnippetQuery;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Represents a repository which loads/saves the code snippets on the file system.
  */
 @Repository
-class FileSystemRepository implements CreateSnippetQuery, UpdateSnippetQuery, DeleteSnippetQuery, ReadSnippetQuery, ReadSnippetsQuery {
+class FileSystemRepository implements CreateSnippetQuery, UpdateSnippetQuery, DeleteSnippetQuery, ReadSnippetQuery {
     static final String JSON_FILE_EXTENSION = ".json";
 
     private final Directory snippetsDirectory;
@@ -39,16 +38,14 @@ class FileSystemRepository implements CreateSnippetQuery, UpdateSnippetQuery, De
 
     @Override
     public void create(@Nonnull Snippet snippet) {
-        File file = newFile(snippet.getId());
+        File file = file(snippet.getId());
         snippetWriter.write(snippet, file);
     }
 
-    @Override
-    public List<Snippet> readSnippets(@Nonnull FilterProperties filterProperties) {
-        return snippetsDirectory.getFiles()
-                                .stream()
-                                .map(snippetReader::read)
-                                .toList();
+    List<Snippet> readSnippets(@Nonnull Stream<String> snippetIds) {
+        return snippetIds.map(this::file)
+                         .map(snippetReader::read)
+                         .toList();
     }
 
     @Override
@@ -69,7 +66,7 @@ class FileSystemRepository implements CreateSnippetQuery, UpdateSnippetQuery, De
     }
 
     private File existingFile(String snippetId) throws SnippetNotExistsException {
-        File file = newFile(snippetId);
+        File file = file(snippetId);
         if (!file.exists()) {
             throw new SnippetNotExistsException();
         }
@@ -77,7 +74,7 @@ class FileSystemRepository implements CreateSnippetQuery, UpdateSnippetQuery, De
         return file;
     }
 
-    private File newFile(String snippetId) {
+    private File file(String snippetId) {
         return snippetsDirectory.getFile(snippetId + JSON_FILE_EXTENSION);
     }
 }

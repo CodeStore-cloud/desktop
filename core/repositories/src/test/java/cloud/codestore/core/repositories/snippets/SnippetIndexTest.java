@@ -27,7 +27,7 @@ class SnippetIndexTest {
         Snippet snippet = testSnippet();
         index.add(snippet);
 
-        List<String> searchResult = index.query(snippetById());
+        List<String> searchResult = index.query(snippetById()).toList();
         assertThat(searchResult).hasSize(1);
         assertThat(searchResult.get(0)).isEqualTo(snippet.getId());
     }

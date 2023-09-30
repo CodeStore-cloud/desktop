@@ -22,7 +22,11 @@ import org.apache.lucene.store.Directory;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * An in-memory index which holds all available code snippets.
@@ -51,7 +55,7 @@ class SnippetIndex {
      * @return a potentially empty list containing the IDs of the found code snippets.
      */
     @Nonnull
-    List<String> query(Query query) {
+    Stream<String> query(Query query) {
         try {
             if (DirectoryReader.indexExists(index)) {
                 if (reader == null) {
@@ -68,11 +72,10 @@ class SnippetIndex {
 
                 TopDocs searchResults = searcher.search(query, Integer.MAX_VALUE);
                 return Arrays.stream(searchResults.scoreDocs)
-                             .map(scoreDoc -> getId(scoreDoc.doc))
-                             .toList();
+                             .map(scoreDoc -> getId(scoreDoc.doc));
             }
 
-            return Collections.emptyList();
+            return Stream.empty();
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }

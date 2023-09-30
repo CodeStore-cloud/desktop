@@ -4,7 +4,6 @@ import cloud.codestore.core.Snippet;
 import cloud.codestore.core.SnippetNotExistsException;
 import cloud.codestore.core.repositories.Directory;
 import cloud.codestore.core.repositories.File;
-import cloud.codestore.core.usecases.listsnippets.FilterProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,8 +11,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -54,15 +53,13 @@ class FileSystemRepositoryTest {
     }
 
     @Test
-    @DisplayName("read all snippets from the file system")
+    @DisplayName("reads multiple snippets from the file system")
     void readSnippets() {
-        var files = List.of(mock(File.class), mock(File.class), mock(File.class));
-        when(snippetDirectory.getFiles()).thenReturn(files);
+        when(snippetDirectory.getFile(anyString())).thenReturn(mock(File.class), mock(File.class), mock(File.class));
 
-        var snippets = repository.readSnippets(new FilterProperties(null));
+        var snippets = repository.readSnippets(Stream.of("1", "2", "3"));
 
-        assertThat(snippets).isNotNull();
-        assertThat(snippets).hasSize(files.size());
+        assertThat(snippets).isNotNull().hasSize(3);
         verify(snippetReader, times(3)).read(any(File.class));
     }
 
