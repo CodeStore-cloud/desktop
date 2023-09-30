@@ -2,7 +2,6 @@ package cloud.codestore.core.usecases.readsnippet;
 
 import cloud.codestore.core.Language;
 import cloud.codestore.core.Snippet;
-import cloud.codestore.core.SnippetBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,7 +39,7 @@ class ReadSnippetTest {
     }
 
     private Snippet testSnippet() {
-        return new SnippetBuilder()
+        return Snippet.builder()
                 .id(UUID.randomUUID().toString())
                 .language(Language.TEXT)
                 .title("title")

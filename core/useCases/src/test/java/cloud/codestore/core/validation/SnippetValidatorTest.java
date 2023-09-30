@@ -2,7 +2,6 @@ package cloud.codestore.core.validation;
 
 import cloud.codestore.core.DefaultLocale;
 import cloud.codestore.core.Snippet;
-import cloud.codestore.core.SnippetBuilder;
 import net.bytebuddy.utility.RandomString;
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Assertions;
@@ -22,10 +21,10 @@ class SnippetValidatorTest {
     @Test
     @DisplayName("the title is empty")
     void titleEmpty() {
-        Snippet validSnippet = new SnippetBuilder().title(ofLength(1)).build();
+        Snippet validSnippet = Snippet.builder().title(ofLength(1)).build();
         InvalidSnippetAssert.assertThat(validate(validSnippet)).hasNoValidationMessage(TITLE);
 
-        Snippet invalidSnippet = new SnippetBuilder().title("").build();
+        Snippet invalidSnippet = Snippet.builder().title("").build();
         InvalidSnippetAssert.assertThat(validate(invalidSnippet))
                             .hasValidationMessage(TITLE, "The code snippet must have a title.");
     }
@@ -33,10 +32,10 @@ class SnippetValidatorTest {
     @Test
     @DisplayName("the title is longer than 100 characters")
     void titleTooLong() {
-        Snippet validSnippet = new SnippetBuilder().title(ofLength(100)).build();
+        Snippet validSnippet = Snippet.builder().title(ofLength(100)).build();
         InvalidSnippetAssert.assertThat(validate(validSnippet)).hasNoValidationMessage(TITLE);
 
-        Snippet invalidSnippet = new SnippetBuilder().title(RandomString.make(101)).build();
+        Snippet invalidSnippet = Snippet.builder().title(RandomString.make(101)).build();
         InvalidSnippetAssert.assertThat(validate(invalidSnippet))
                             .hasValidationMessage(TITLE, "The title must not be longer than 100 characters.");
     }
@@ -44,10 +43,10 @@ class SnippetValidatorTest {
     @Test
     @DisplayName("the description is longer than 10,000 characters")
     void descriptionTooLong() {
-        Snippet validSnippet = new SnippetBuilder().description(ofLength(10000)).build();
+        Snippet validSnippet = Snippet.builder().description(ofLength(10000)).build();
         InvalidSnippetAssert.assertThat(validate(validSnippet)).hasNoValidationMessage(DESCRIPTION);
 
-        Snippet invalidSnippet = new SnippetBuilder().description(ofLength(10001)).build();
+        Snippet invalidSnippet = Snippet.builder().description(ofLength(10001)).build();
         InvalidSnippetAssert.assertThat(validate(invalidSnippet))
                             .hasValidationMessage(DESCRIPTION, "The description must not be longer than 10,000 characters.");
     }
@@ -55,10 +54,10 @@ class SnippetValidatorTest {
     @DisplayName("the code is empty")
     @Test
     void codeEmpty() {
-        Snippet validSnippet = new SnippetBuilder().code(ofLength(1)).build();
+        Snippet validSnippet = Snippet.builder().code(ofLength(1)).build();
         InvalidSnippetAssert.assertThat(validate(validSnippet)).hasNoValidationMessage(CODE);
 
-        Snippet invalidSnippet = new SnippetBuilder().code("").build();
+        Snippet invalidSnippet = Snippet.builder().code("").build();
         InvalidSnippetAssert.assertThat(validate(invalidSnippet))
                             .hasValidationMessage(CODE, "The code snippet must contain code.");
     }
@@ -66,10 +65,10 @@ class SnippetValidatorTest {
     @DisplayName("the code is longer than 10,000 characters")
     @Test
     void codeTooLong() {
-        Snippet validSnippet = new SnippetBuilder().code(ofLength(10000)).build();
+        Snippet validSnippet = Snippet.builder().code(ofLength(10000)).build();
         InvalidSnippetAssert.assertThat(validate(validSnippet)).hasNoValidationMessage(CODE);
 
-        Snippet invalidSnippet = new SnippetBuilder().code(ofLength(10001)).build();
+        Snippet invalidSnippet = Snippet.builder().code(ofLength(10001)).build();
         InvalidSnippetAssert.assertThat(validate(invalidSnippet))
                             .hasValidationMessage(CODE, "The code must not be longer than 10,000 characters.");
     }

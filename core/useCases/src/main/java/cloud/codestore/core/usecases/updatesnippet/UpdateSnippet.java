@@ -1,7 +1,6 @@
 package cloud.codestore.core.usecases.updatesnippet;
 
 import cloud.codestore.core.Snippet;
-import cloud.codestore.core.SnippetBuilder;
 import cloud.codestore.core.SnippetNotExistsException;
 import cloud.codestore.core.UseCase;
 import cloud.codestore.core.usecases.readsnippet.ReadSnippet;
@@ -36,7 +35,7 @@ public class UpdateSnippet {
      */
     public void update(@Nonnull UpdatedSnippetDto dto) throws SnippetNotExistsException, InvalidSnippetException {
         Snippet currentSnippet = readSnippetUseCase.read(dto.id());
-        Snippet updatedSnippet = new SnippetBuilder().id(currentSnippet.getId())
+        Snippet updatedSnippet = Snippet.builder().id(currentSnippet.getId())
                                                      .created(currentSnippet.getCreated())
                                                      .modified(OffsetDateTime.now())
                                                      .language(dto.language())

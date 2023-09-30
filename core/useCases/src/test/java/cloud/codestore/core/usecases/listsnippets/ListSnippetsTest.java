@@ -1,7 +1,6 @@
 package cloud.codestore.core.usecases.listsnippets;
 
 import cloud.codestore.core.Snippet;
-import cloud.codestore.core.SnippetBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,7 +39,7 @@ class ListSnippetsTest {
 
     private List<Snippet> allSnippets() {
         return Stream.of(1, 2, 3, 4, 5)
-                     .map(id -> new SnippetBuilder().id(String.valueOf(id)).build())
+                     .map(id -> Snippet.builder().id(String.valueOf(id)).build())
                      .toList();
     }
 }

@@ -2,7 +2,6 @@ package cloud.codestore.core.repositories.snippets;
 
 import cloud.codestore.core.Language;
 import cloud.codestore.core.Snippet;
-import cloud.codestore.core.SnippetBuilder;
 import cloud.codestore.core.repositories.File;
 import cloud.codestore.core.repositories.RepositoryException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,7 +23,7 @@ class SnippetReader {
 
     Snippet read(File file) {
         var dto = readDto(file);
-        return new SnippetBuilder().id(getSnippetId(file))
+        return Snippet.builder().id(getSnippetId(file))
                                    .title(dto.title())
                                    .description(dto.description())
                                    .code(dto.code())

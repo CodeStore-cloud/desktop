@@ -39,6 +39,10 @@ public class Snippet {
                                                           .withOffsetSameInstant(ZoneOffset.UTC);
     }
 
+    public static SnippetBuilder builder() {
+        return new SnippetBuilder();
+    }
+
     @Nonnull
     public String getId() {
         return id;

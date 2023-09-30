@@ -1,7 +1,6 @@
 package cloud.codestore.client.ui.snippet;
 
 import cloud.codestore.client.Snippet;
-import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.selection.list.SnippetSelectedEvent;
 import cloud.codestore.client.ui.snippet.code.SnippetCode;
 import cloud.codestore.client.ui.snippet.description.SnippetDescription;
@@ -60,7 +59,7 @@ class SnippetControllerTest {
     }
 
     private Snippet testSnippet() {
-        return new SnippetBuilder().uri(SNIPPET_URI)
+        return Snippet.builder().uri(SNIPPET_URI)
                                    .title("A random title")
                                    .description("With a short description")
                                    .code("System.out.println(\"Hello, World!\");")

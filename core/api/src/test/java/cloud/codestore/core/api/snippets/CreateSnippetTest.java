@@ -2,7 +2,6 @@ package cloud.codestore.core.api.snippets;
 
 import cloud.codestore.core.Language;
 import cloud.codestore.core.Snippet;
-import cloud.codestore.core.SnippetBuilder;
 import cloud.codestore.core.usecases.createsnippet.CreateSnippet;
 import cloud.codestore.core.usecases.createsnippet.NewSnippetDto;
 import cloud.codestore.core.usecases.readlanguage.LanguageNotExistsException;
@@ -44,7 +43,7 @@ class CreateSnippetTest extends SnippetControllerTest {
 
     @BeforeEach
     void setUp() throws InvalidSnippetException, LanguageNotExistsException {
-        testSnippet = new SnippetBuilder().id(SNIPPET_ID)
+        testSnippet = Snippet.builder().id(SNIPPET_ID)
                                           .language(Language.PYTHON)
                                           .title("A simple code snippet")
                                           .description("A short description")

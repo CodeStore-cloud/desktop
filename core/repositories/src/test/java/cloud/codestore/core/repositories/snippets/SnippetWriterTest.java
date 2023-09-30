@@ -2,7 +2,6 @@ package cloud.codestore.core.repositories.snippets;
 
 import cloud.codestore.core.Language;
 import cloud.codestore.core.Snippet;
-import cloud.codestore.core.SnippetBuilder;
 import cloud.codestore.core.repositories.DefaultLocale;
 import cloud.codestore.core.repositories.File;
 import cloud.codestore.core.repositories.RepositoryException;
@@ -59,7 +58,7 @@ class SnippetWriterTest {
         var created = OffsetDateTime.of(2023, 6, 24, 14, 47, 28, 100, ZoneOffset.UTC);
         var modified = OffsetDateTime.of(2023, 7, 13, 9, 15, 53, 20, ZoneOffset.UTC);
 
-        return new SnippetBuilder().id("")
+        return Snippet.builder().id("")
                                    .title("A random title")
                                    .description("A random description")
                                    .code("System.out.println(\"Hello, World!\")")

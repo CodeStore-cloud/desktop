@@ -2,7 +2,6 @@ package cloud.codestore.core.api.snippets;
 
 import cloud.codestore.core.Language;
 import cloud.codestore.core.Snippet;
-import cloud.codestore.core.SnippetBuilder;
 import cloud.codestore.core.usecases.readsnippet.ReadSnippet;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
 import org.junit.jupiter.api.DisplayName;
@@ -46,7 +45,7 @@ class ReadSnippetResourceTest extends SnippetControllerTest {
     }
 
     private Snippet testSnippet() {
-        return new SnippetBuilder()
+        return Snippet.builder()
                 .id(SNIPPET_ID)
                 .title("A simple test snippet")
                 .description("A snippet solely for this unit test.")

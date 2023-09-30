@@ -15,6 +15,8 @@ public class SnippetBuilder {
     private OffsetDateTime created;
     private OffsetDateTime modified;
 
+    SnippetBuilder() {}
+
     public SnippetBuilder id(String id) {
         this.id = id;
         return this;

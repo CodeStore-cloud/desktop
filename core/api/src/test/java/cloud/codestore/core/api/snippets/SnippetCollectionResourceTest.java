@@ -2,7 +2,6 @@ package cloud.codestore.core.api.snippets;
 
 import cloud.codestore.core.Language;
 import cloud.codestore.core.Snippet;
-import cloud.codestore.core.SnippetBuilder;
 import cloud.codestore.core.usecases.listsnippets.FilterProperties;
 import cloud.codestore.core.usecases.listsnippets.ListSnippets;
 import cloud.codestore.core.usecases.readlanguage.LanguageNotExistsException;
@@ -81,7 +80,7 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
 
     private List<Snippet> snippetList() {
         return Stream.of(1, 2, 3, 4, 5)
-                     .map(id -> new SnippetBuilder().id(String.valueOf(id)).build())
+                     .map(id -> Snippet.builder().id(String.valueOf(id)).build())
                      .toList();
     }
 }

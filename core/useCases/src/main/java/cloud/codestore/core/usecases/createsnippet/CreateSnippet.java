@@ -1,7 +1,6 @@
 package cloud.codestore.core.usecases.createsnippet;
 
 import cloud.codestore.core.Snippet;
-import cloud.codestore.core.SnippetBuilder;
 import cloud.codestore.core.UseCase;
 import cloud.codestore.core.validation.InvalidSnippetException;
 import cloud.codestore.core.validation.SnippetValidator;
@@ -32,7 +31,7 @@ public class CreateSnippet {
      */
     public Snippet create(NewSnippetDto newSnippet) throws InvalidSnippetException {
         String snippetId = UUID.randomUUID().toString();
-        Snippet snippet = new SnippetBuilder().id(snippetId)
+        Snippet snippet = Snippet.builder().id(snippetId)
                                               .created(OffsetDateTime.now())
                                               .language(newSnippet.language())
                                               .title(newSnippet.title())

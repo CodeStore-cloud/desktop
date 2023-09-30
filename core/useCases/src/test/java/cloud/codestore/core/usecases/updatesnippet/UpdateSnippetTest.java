@@ -2,7 +2,6 @@ package cloud.codestore.core.usecases.updatesnippet;
 
 import cloud.codestore.core.Language;
 import cloud.codestore.core.Snippet;
-import cloud.codestore.core.SnippetBuilder;
 import cloud.codestore.core.SnippetNotExistsException;
 import cloud.codestore.core.usecases.readsnippet.ReadSnippet;
 import cloud.codestore.core.validation.SnippetValidator;
@@ -76,7 +75,7 @@ class UpdateSnippetTest {
     private Snippet currentSnippet() {
         OffsetDateTime now = OffsetDateTime.now().truncatedTo(SECONDS);
         OffsetDateTime fiveWeeksAgo = now.minus(5, WEEKS);
-        return new SnippetBuilder()
+        return Snippet.builder()
                 .id(SNIPPET_ID)
                 .language(Language.JAVASCRIPT)
                 .title("title")
