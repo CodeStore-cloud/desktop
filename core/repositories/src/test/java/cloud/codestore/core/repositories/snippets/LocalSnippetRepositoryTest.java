@@ -67,12 +67,22 @@ class LocalSnippetRepositoryTest {
     }
 
     @Test
-    @DisplayName("saves a snippet in a file")
+    @DisplayName("saves a new snippet in a file")
     void saveSnippet() {
         Snippet testSnippet = mock(Snippet.class);
         when(testSnippet.getId()).thenReturn(SNIPPET_ID);
 
         repository.create(testSnippet);
+        verify(snippetWriter).write(testSnippet, snippetFile);
+    }
+
+    @Test
+    @DisplayName("overrides the corresponding file when updating a code snippet")
+    void updateSnippet() throws SnippetNotExistsException {
+        Snippet testSnippet = mock(Snippet.class);
+        when(testSnippet.getId()).thenReturn(SNIPPET_ID);
+
+        repository.update(testSnippet);
         verify(snippetWriter).write(testSnippet, snippetFile);
     }
 

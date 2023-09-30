@@ -12,10 +12,8 @@ import java.util.Objects;
 /**
  * Encapsulates the access to a file.
  */
-public class File {
+public record File(Path path) {
     private static final Logger LOGGER = LoggerFactory.getLogger(File.class);
-
-    private final Path path;
 
     /**
      * Creates a new {@link File} which is represented by the given {@link Path}.
@@ -33,6 +31,7 @@ public class File {
     /**
      * @return the {@link Path} of this file.
      */
+    @Override
     public Path path() {
         return path;
     }

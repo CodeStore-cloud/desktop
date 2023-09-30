@@ -14,9 +14,7 @@ import java.util.stream.Stream;
 /**
  * Encapsulates the access to a directory.
  */
-public class Directory {
-    private final Path path;
-
+public record Directory(Path path) {
     /**
      * Creates a new directory with the given path.
      *
@@ -33,6 +31,7 @@ public class Directory {
     /**
      * @return the {@link Path} of this directory.
      */
+    @Override
     public Path path() {
         return path;
     }
@@ -148,8 +147,4 @@ public class Directory {
         return Objects.equals(path, directory.path);
     }
 
-    @Override
-    public int hashCode() {
-        return path == null ? 0 : path.hashCode();
-    }
 }
