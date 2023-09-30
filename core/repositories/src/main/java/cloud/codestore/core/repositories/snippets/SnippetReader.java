@@ -61,6 +61,6 @@ class SnippetReader {
 
     private String getSnippetId(File file) {
         String fileName = file.getName();
-        return fileName.substring(0, fileName.length() - LocalSnippetRepository.JSON_FILE_EXTENSION.length());
+        return fileName.substring(0, fileName.length() - FileSystemRepository.JSON_FILE_EXTENSION.length());
     }
 }

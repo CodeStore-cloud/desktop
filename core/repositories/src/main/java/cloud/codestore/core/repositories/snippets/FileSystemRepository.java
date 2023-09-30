@@ -20,14 +20,14 @@ import java.util.List;
  * Represents a repository which loads/saves the code snippets on the file system.
  */
 @Repository
-class LocalSnippetRepository implements CreateSnippetQuery, UpdateSnippetQuery, DeleteSnippetQuery, ReadSnippetQuery, ReadSnippetsQuery {
+class FileSystemRepository implements CreateSnippetQuery, UpdateSnippetQuery, DeleteSnippetQuery, ReadSnippetQuery, ReadSnippetsQuery {
     static final String JSON_FILE_EXTENSION = ".json";
 
     private final Directory snippetsDirectory;
     private final SnippetReader snippetReader;
     private final SnippetWriter snippetWriter;
 
-    LocalSnippetRepository(
+    FileSystemRepository(
             @Qualifier("snippets") Directory snippetsDirectory,
             SnippetReader snippetReader,
             SnippetWriter snippetWriter
@@ -39,7 +39,7 @@ class LocalSnippetRepository implements CreateSnippetQuery, UpdateSnippetQuery, 
 
     @Override
     public void create(@Nonnull Snippet snippet) {
-        File file = getSnippetFile(snippet.getId());
+        File file = newFile(snippet.getId());
         snippetWriter.write(snippet, file);
     }
 
@@ -53,30 +53,31 @@ class LocalSnippetRepository implements CreateSnippetQuery, UpdateSnippetQuery, 
 
     @Override
     public Snippet read(@Nonnull String snippetId) throws SnippetNotExistsException {
-        File file = requireExists(getSnippetFile(snippetId));
+        File file = existingFile(snippetId);
         return snippetReader.read(file);
     }
 
     @Override
     public void update(@Nonnull Snippet snippet) throws SnippetNotExistsException {
-        File file = requireExists(getSnippetFile(snippet.getId()));
+        File file = existingFile(snippet.getId());
         snippetWriter.write(snippet, file);
     }
 
     @Override
     public void delete(@Nonnull String snippetId) throws SnippetNotExistsException {
-        requireExists(getSnippetFile(snippetId)).delete();
+        existingFile(snippetId).delete();
     }
 
-    private File getSnippetFile(String snippetId) {
-        return snippetsDirectory.getFile(snippetId + JSON_FILE_EXTENSION);
-    }
-
-    private File requireExists(File file) throws SnippetNotExistsException {
+    private File existingFile(String snippetId) throws SnippetNotExistsException {
+        File file = newFile(snippetId);
         if (!file.exists()) {
             throw new SnippetNotExistsException();
         }
 
         return file;
+    }
+
+    private File newFile(String snippetId) {
+        return snippetsDirectory.getFile(snippetId + JSON_FILE_EXTENSION);
     }
 }

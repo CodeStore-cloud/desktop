@@ -103,7 +103,7 @@ class SnippetIndex {
     /**
      * Removes the code snippet with the given ID from the index.
      */
-    void remove(@Nonnull String snippetId) {
+    void remove(String snippetId) {
         try (IndexWriter writer = createWriter()) {
             writer.deleteDocuments(new Term(SnippetField.ID, snippetId));
         } catch (IOException exception) {

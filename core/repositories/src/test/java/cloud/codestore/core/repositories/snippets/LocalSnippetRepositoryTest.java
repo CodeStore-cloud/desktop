@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 @DisplayName("The local snippet repository")
 class LocalSnippetRepositoryTest {
     private static final String SNIPPET_ID = UUID.randomUUID().toString();
-    private static final String SNIPPET_FILE_NAME = SNIPPET_ID + LocalSnippetRepository.JSON_FILE_EXTENSION;
+    private static final String SNIPPET_FILE_NAME = SNIPPET_ID + FileSystemRepository.JSON_FILE_EXTENSION;
 
     @Mock
     private File snippetFile;
@@ -33,12 +33,12 @@ class LocalSnippetRepositoryTest {
     private SnippetReader snippetReader;
     @Mock
     private SnippetWriter snippetWriter;
-    private LocalSnippetRepository repository;
+    private FileSystemRepository repository;
 
     @BeforeEach
     void setUp() {
         lenient().when(snippetDirectory.getFile(SNIPPET_FILE_NAME)).thenReturn(snippetFile);
-        repository = new LocalSnippetRepository(snippetDirectory, snippetReader, snippetWriter);
+        repository = new FileSystemRepository(snippetDirectory, snippetReader, snippetWriter);
     }
 
     @Test
