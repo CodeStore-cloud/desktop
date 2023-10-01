@@ -32,13 +32,7 @@ class FilterQueryBuilderTest {
     private static Stream<Arguments> langToQuery() {
         return Arrays.stream(Language.values())
                      .map(language -> {
-                         String languageName = switch (language) {
-                             case CLISP -> "lisp";
-                             case SHELL -> "shell";
-                             case BATCH -> "batch";
-                             default -> language.toString().toLowerCase();
-                         };
-                         String expectedQuery = "+language:%s".formatted(languageName);
+                         String expectedQuery = "+language:" + language.getId();
                          return Arguments.of(language, expectedQuery);
                      });
     }

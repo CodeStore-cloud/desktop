@@ -19,6 +19,7 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -31,6 +32,7 @@ import java.util.stream.Stream;
 /**
  * An in-memory index which holds all available code snippets.
  */
+@Component
 class SnippetIndex {
     static final class SnippetField {
         static final String ID = "id";
@@ -119,10 +121,6 @@ class SnippetIndex {
     }
 
     private IndexWriter createWriter() throws IOException {
-        return new IndexWriter(index, new IndexWriterConfig(createAnalyzer()));
-    }
-
-    private Analyzer createAnalyzer() {
         var keywordAnalyzer = new KeywordAnalyzer();
         var simpleAnalyzer = new SimpleAnalyzer();
         var whitespaceAnalyzer = new WhitespaceAnalyzer();
@@ -134,7 +132,9 @@ class SnippetIndex {
         analyzerMap.put(SnippetField.ID, keywordAnalyzer);
         analyzerMap.put(SnippetField.LANGUAGE, keywordAnalyzer);
 
-        return new PerFieldAnalyzerWrapper(new SimpleAnalyzer(), analyzerMap);
+        var analyzer = new PerFieldAnalyzerWrapper(new SimpleAnalyzer(), analyzerMap);
+
+        return new IndexWriter(index, new IndexWriterConfig(analyzer));
     }
 
     private String getId(int docId) {
@@ -153,6 +153,9 @@ class SnippetIndex {
         document.add(new TextField(SnippetField.TITLE, snippet.getTitle().toLowerCase(), Field.Store.NO));
         document.add(new TextField(SnippetField.DESCRIPTION, snippet.getDescription(), Field.Store.NO));
         document.add(new TextField(SnippetField.CODE, snippet.getCode(), Field.Store.NO));
+
+        int languageId = snippet.getLanguage().getId();
+        document.add(new StringField(SnippetField.LANGUAGE, String.valueOf(languageId), Field.Store.NO));
 
         return document;
     }

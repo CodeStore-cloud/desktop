@@ -30,13 +30,7 @@ class FilterQueryBuilder {
 
     private void filterByLanguage(@Nullable Language language) {
         if (language != null) {
-            String languageName = switch (language) {
-                case CLISP -> "lisp";
-                case SHELL -> "shell";
-                case BATCH -> "batch";
-                default -> language.toString().toLowerCase();
-            };
-            addFilter(LANGUAGE, languageName);
+            addFilter(LANGUAGE, String.valueOf(language.getId()));
         }
     }
 
