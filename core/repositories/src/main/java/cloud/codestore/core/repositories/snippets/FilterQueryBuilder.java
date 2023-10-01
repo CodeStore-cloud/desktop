@@ -21,7 +21,10 @@ class FilterQueryBuilder {
     }
 
     Query buildFilterQuery() {
-        filterByLanguage(filterProperties.language());
+        if (!filterProperties.isEmpty()) {
+            filterByLanguage(filterProperties.language());
+        }
+
         return filterQuery.build();
     }
 

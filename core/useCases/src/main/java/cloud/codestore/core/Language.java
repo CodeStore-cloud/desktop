@@ -33,7 +33,7 @@ public enum Language {
     GO(26, "Go"),
     SHELL(27, "Unix Shell"),
     DOCKERFILE(28, "Dockerfile"),
-    BATCH(29, "Batch"),
+    BATCH(29, "Batch Script"),
     TYPESCRIPT(30, "TypeScript"),
     KOTLIN(31, "Kotlin");
 
