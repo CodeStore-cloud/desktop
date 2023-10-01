@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -60,6 +61,18 @@ class FileSystemRepositoryTest {
         var snippets = repository.readSnippets(Stream.of("1", "2", "3"));
 
         assertThat(snippets).isNotNull().hasSize(3);
+        verify(snippetReader, times(3)).read(any(File.class));
+    }
+
+    @Test
+    @DisplayName("reads all code snippets from the file system")
+    void readAllSnippets() {
+        var files = List.of(mock(File.class), mock(File.class), mock(File.class));
+        when(snippetDirectory.getFiles()).thenReturn(files);
+
+        var snippets = repository.readSnippets();
+
+        assertThat(snippets).isNotNull().hasSize(files.size());
         verify(snippetReader, times(3)).read(any(File.class));
     }
 

@@ -10,6 +10,8 @@ import cloud.codestore.core.usecases.listsnippets.ReadSnippetsQuery;
 import cloud.codestore.core.usecases.readsnippet.ReadSnippetQuery;
 import cloud.codestore.core.usecases.updatesnippet.UpdateSnippetQuery;
 import org.apache.lucene.search.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
 
 import javax.annotation.Nonnull;
@@ -22,12 +24,15 @@ import java.util.stream.Stream;
 @Primary
 @Repository
 public class IndexedSnippetRepository implements CreateSnippetQuery, UpdateSnippetQuery, DeleteSnippetQuery, ReadSnippetQuery, ReadSnippetsQuery {
+    private static final Logger LOGGER = LoggerFactory.getLogger(IndexedSnippetRepository.class);
+
     private SnippetIndex index;
     private FileSystemRepository localRepo;
 
     public IndexedSnippetRepository(SnippetIndex index, FileSystemRepository localRepo) {
         this.index = index;
         this.localRepo = localRepo;
+        indexAllSnippets();
     }
 
     @Override
@@ -52,11 +57,18 @@ public class IndexedSnippetRepository implements CreateSnippetQuery, UpdateSnipp
     public List<Snippet> readSnippets(@Nonnull FilterProperties filterProperties) {
         Query filterQuery = new FilterQueryBuilder(filterProperties).buildFilterQuery();
         Stream<String> snippetIds = index.query(filterQuery);
-        return localRepo.readSnippets(snippetIds);
+        return localRepo.readSnippets(snippetIds).toList();
     }
 
     @Override
     public Snippet read(@Nonnull String snippetId) throws SnippetNotExistsException {
         return localRepo.read(snippetId);
+    }
+
+    private void indexAllSnippets() {
+        long startTime = System.currentTimeMillis();
+        index.add(localRepo.readSnippets());
+        long endTime = System.currentTimeMillis();
+        LOGGER.info("Indexing finished after " + (endTime - startTime) + "ms");
     }
 }

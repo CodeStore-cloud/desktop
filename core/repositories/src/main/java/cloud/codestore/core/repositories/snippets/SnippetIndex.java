@@ -84,6 +84,17 @@ class SnippetIndex {
     }
 
     /**
+     * Adds all code snippets of the given stream to this index.
+     */
+    void add(Stream<Snippet> snippets) {
+        try (IndexWriter writer = createWriter()) {
+            snippets.forEach(snippet -> add(snippet, writer));
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+
+    /**
      * Adds the given code snippet to the index.
      */
     void add(@Nonnull Snippet snippet) {
@@ -116,8 +127,12 @@ class SnippetIndex {
         }
     }
 
-    private void add(Snippet snippet, IndexWriter writer) throws IOException {
-        writer.addDocument(document(snippet));
+    private void add(Snippet snippet, IndexWriter writer) {
+        try {
+            writer.addDocument(document(snippet));
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
+        }
     }
 
     private IndexWriter createWriter() throws IOException {

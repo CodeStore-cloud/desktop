@@ -11,7 +11,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -33,6 +32,17 @@ class IndexedSnippetRepositoryTest {
     @BeforeEach
     void setUp() {
         repository = new IndexedSnippetRepository(index, localRepo);
+    }
+
+    @Test
+    @DisplayName("indexes all snippets when created")
+    void indexAllSnippets() {
+        Stream<Snippet> snippetStream = Stream.of(mock(Snippet.class), mock(Snippet.class), mock(Snippet.class));
+        when(localRepo.readSnippets()).thenReturn(snippetStream);
+
+        new IndexedSnippetRepository(index, localRepo);
+
+        verify(index).add(snippetStream);
     }
 
     @Test
@@ -68,9 +78,9 @@ class IndexedSnippetRepositoryTest {
         FilterProperties filterProperties = mock(FilterProperties.class);
         when(index.query(any(Query.class))).thenReturn(Stream.of("1", "2", "3"));
         when(localRepo.readSnippets(any(Stream.class))).thenReturn(
-                List.of(snippetWithId("1"), snippetWithId("2"), snippetWithId("3")));
+                Stream.of(snippetWithId("1"), snippetWithId("2"), snippetWithId("3")));
 
-        List<Snippet> snippets = repository.readSnippets(filterProperties);
+        var snippets = repository.readSnippets(filterProperties);
 
         assertThat(snippets).containsExactly(snippetWithId("1"), snippetWithId("2"), snippetWithId("3"));
         verify(localRepo).readSnippets(any(Stream.class));

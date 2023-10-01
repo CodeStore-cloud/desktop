@@ -12,7 +12,6 @@ import cloud.codestore.core.usecases.updatesnippet.UpdateSnippetQuery;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.annotation.Nonnull;
-import java.util.List;
 import java.util.stream.Stream;
 
 /**
@@ -36,10 +35,23 @@ class FileSystemRepository implements CreateSnippetQuery, UpdateSnippetQuery, De
         this.snippetWriter = snippetWriter;
     }
 
-    List<Snippet> readSnippets(@Nonnull Stream<String> snippetIds) {
+    /**
+     * @return all available code snippets as stream.
+     */
+    Stream<Snippet> readSnippets() {
+        return snippetsDirectory.getFiles()
+                                .stream()
+                                .map(snippetReader::read);
+    }
+
+    /**
+     * Loads all snippets defined by the given IDs.
+     * @param snippetIds a stream of snippet IDs.
+     * @return the corresponding code snippets.
+     */
+    Stream<Snippet> readSnippets(@Nonnull Stream<String> snippetIds) {
         return snippetIds.map(this::file)
-                         .map(snippetReader::read)
-                         .toList();
+                         .map(snippetReader::read);
     }
 
     @Override

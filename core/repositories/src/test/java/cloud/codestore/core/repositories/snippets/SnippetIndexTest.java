@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static cloud.codestore.core.repositories.snippets.SnippetIndex.SnippetField;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,12 +29,23 @@ class SnippetIndexTest {
     void addSnippet() {
         assertThat(index.query(snippetById())).isEmpty();
 
-        Snippet snippet = testSnippet();
+        Snippet snippet = testSnippet(SNIPPET_ID);
         index.add(snippet);
 
         List<String> searchResult = index.query(snippetById()).toList();
         assertThat(searchResult).hasSize(1);
         assertThat(searchResult.get(0)).isEqualTo(snippet.getId());
+    }
+
+    @Test
+    @DisplayName("adds multiple snippets at once")
+    void addMultipleSnippets() {
+        Stream<Snippet> snippetStream = Stream.of(testSnippet("1"), testSnippet("2"), testSnippet("3"));
+        assertThat(index.query(new MatchAllDocsQuery())).isEmpty();
+
+        index.add(snippetStream);
+
+        assertThat(index.query(new MatchAllDocsQuery())).hasSize(3);
     }
 
     @Test
@@ -61,7 +73,7 @@ class SnippetIndexTest {
     @Test
     @DisplayName("removes existing snippets")
     void removeSnippet() {
-        index.add(testSnippet());
+        index.add(testSnippet(SNIPPET_ID));
         index.remove(SNIPPET_ID);
         assertThat(index.query(snippetById())).isEmpty();
     }
@@ -85,25 +97,25 @@ class SnippetIndexTest {
         }
 
         @Test
-        @DisplayName("indexes the snippet title")
+        @DisplayName("title")
         void indexTitle() {
             assertThat(index.query(snippetByTitle("title"))).isNotEmpty();
         }
 
         @Test
-        @DisplayName("indexes the snippet description")
+        @DisplayName("description")
         void indexDescription() {
             assertThat(index.query(snippetByDescription("description"))).isNotEmpty();
         }
 
         @Test
-        @DisplayName("indexes the snippet code")
+        @DisplayName("code")
         void indexCode() {
             assertThat(index.query(snippetByCode("code"))).isNotEmpty();
         }
 
         @Test
-        @DisplayName("indexes the snippet language")
+        @DisplayName("language")
         void indexLanguage() {
             assertThat(index.query(snippetByLanguage(Language.JAVA))).isNotEmpty();
         }
@@ -125,9 +137,8 @@ class SnippetIndexTest {
         }
     }
 
-
-    private Snippet testSnippet() {
-        return Snippet.builder().id(SNIPPET_ID).build();
+    private Snippet testSnippet(String id) {
+        return Snippet.builder().id(id).build();
     }
 
     private Query snippetById() {
