@@ -36,16 +36,16 @@ class FileSystemRepository implements CreateSnippetQuery, UpdateSnippetQuery, De
         this.snippetWriter = snippetWriter;
     }
 
-    @Override
-    public void create(@Nonnull Snippet snippet) {
-        File file = file(snippet.getId());
-        snippetWriter.write(snippet, file);
-    }
-
     List<Snippet> readSnippets(@Nonnull Stream<String> snippetIds) {
         return snippetIds.map(this::file)
                          .map(snippetReader::read)
                          .toList();
+    }
+
+    @Override
+    public void create(@Nonnull Snippet snippet) {
+        File file = file(snippet.getId());
+        snippetWriter.write(snippet, file);
     }
 
     @Override

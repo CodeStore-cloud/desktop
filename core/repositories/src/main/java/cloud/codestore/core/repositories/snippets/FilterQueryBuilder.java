@@ -25,10 +25,8 @@ class FilterQueryBuilder {
         return filterQuery.build();
     }
 
-    private void filterByLanguage(@Nullable Language language)
-    {
-        if(language != null)
-        {
+    private void filterByLanguage(@Nullable Language language) {
+        if (language != null) {
             String languageName = switch (language) {
                 case CLISP -> "lisp";
                 case SHELL -> "shell";
@@ -39,8 +37,7 @@ class FilterQueryBuilder {
         }
     }
 
-    private void addFilter(String field, String value)
-    {
+    private void addFilter(String field, String value) {
         Query query = new TermQuery(new Term(field, value));
         filterQuery.add(query, BooleanClause.Occur.MUST);
     }

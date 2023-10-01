@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * A decorator around the {@link FileSystemRepository} which manages the {@link SnippetIndex}.
+ * A decorator around the {@link FileSystemRepository} which stores code snippets in the {@link SnippetIndex}.
  */
 @Primary
 @Repository
