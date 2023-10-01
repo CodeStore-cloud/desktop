@@ -1,6 +1,8 @@
 package cloud.codestore.core;
 
 import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -12,6 +14,7 @@ public class SnippetBuilder {
     private String title;
     private String description;
     private String code;
+    private List<String> tags;
     private OffsetDateTime created;
     private OffsetDateTime modified;
 
@@ -42,6 +45,11 @@ public class SnippetBuilder {
         return this;
     }
 
+    public SnippetBuilder tags(List<String> tags) {
+        this.tags = tags;
+        return this;
+    }
+
     public SnippetBuilder created(OffsetDateTime created) {
         this.created = created;
         return this;
@@ -58,6 +66,7 @@ public class SnippetBuilder {
                 Objects.requireNonNullElse(title, ""),
                 Objects.requireNonNullElse(description, ""),
                 Objects.requireNonNullElse(code, ""),
+                tags == null ? Collections.emptyList() : Collections.unmodifiableList(tags),
                 Objects.requireNonNullElseGet(language, Language::getDefault),
                 Objects.requireNonNullElseGet(created, OffsetDateTime::now),
                 modified

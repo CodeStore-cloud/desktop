@@ -89,6 +89,7 @@ class SnippetIndexTest {
                             .title("title")
                             .description("description")
                             .code("code")
+                            .tags(List.of("tag"))
                             .language(Language.JAVA)
                             .build();
 
@@ -115,6 +116,12 @@ class SnippetIndexTest {
         }
 
         @Test
+        @DisplayName("tags")
+        void indexTags() {
+            assertThat(index.query(snippetByTag("tag"))).isNotEmpty();
+        }
+
+        @Test
         @DisplayName("language")
         void indexLanguage() {
             assertThat(index.query(snippetByLanguage(Language.JAVA))).isNotEmpty();
@@ -134,6 +141,10 @@ class SnippetIndexTest {
 
         private Query snippetByLanguage(Language language) {
             return new TermQuery(new Term(SnippetField.LANGUAGE, String.valueOf(language.getId())));
+        }
+
+        private Query snippetByTag(String tag) {
+            return new TermQuery(new Term(SnippetField.TAG, tag));
         }
     }
 

@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -15,6 +16,7 @@ public class Snippet {
     private final String title;
     private final String description;
     private final String code;
+    private final List<String> tags;
     private final Language language;
     private final OffsetDateTime created;
     private final OffsetDateTime modified;
@@ -24,6 +26,7 @@ public class Snippet {
             @Nonnull String title,
             @Nonnull String description,
             @Nonnull String code,
+            @Nonnull List<String> tags,
             @Nonnull Language language,
             @Nonnull OffsetDateTime created,
             @Nullable OffsetDateTime modified
@@ -32,6 +35,7 @@ public class Snippet {
         this.title = title;
         this.description = description;
         this.code = code;
+        this.tags = tags;
         this.language = language;
         this.created = created.truncatedTo(ChronoUnit.SECONDS)
                               .withOffsetSameInstant(ZoneOffset.UTC);
@@ -61,6 +65,11 @@ public class Snippet {
     @Nonnull
     public String getCode() {
         return code;
+    }
+
+    @Nonnull
+    public List<String> getTags() {
+        return tags;
     }
 
     @Nonnull

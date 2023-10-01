@@ -40,6 +40,7 @@ class SnippetIndex {
         static final String TITLE = "title";
         static final String DESCRIPTION = "description";
         static final String CODE = "code";
+        static final String TAG = "tag";
     }
 
     private Directory index;
@@ -53,6 +54,7 @@ class SnippetIndex {
 
     /**
      * Searches for code snippets based on the given query.
+     *
      * @param query the query for searching.
      * @return a potentially empty list containing the IDs of the found code snippets.
      */
@@ -145,6 +147,7 @@ class SnippetIndex {
         analyzerMap.put(SnippetField.DESCRIPTION, simpleAnalyzer);
         analyzerMap.put(SnippetField.CODE, simpleAnalyzer);
         analyzerMap.put(SnippetField.ID, keywordAnalyzer);
+        analyzerMap.put(SnippetField.TAG, keywordAnalyzer);
         analyzerMap.put(SnippetField.LANGUAGE, keywordAnalyzer);
 
         var analyzer = new PerFieldAnalyzerWrapper(new SimpleAnalyzer(), analyzerMap);
@@ -172,7 +175,15 @@ class SnippetIndex {
         int languageId = snippet.getLanguage().getId();
         document.add(new StringField(SnippetField.LANGUAGE, String.valueOf(languageId), Field.Store.NO));
 
+        for (String tag : snippet.getTags()) {
+            document.add(new StringField(SnippetField.TAG, normalize(tag), Field.Store.NO));
+        }
+
         return document;
+    }
+
+    private String normalize(String tag) {
+        return tag.toLowerCase().replace("-", "").replace("_", "");
     }
 
     private void closeOnShutdown() {

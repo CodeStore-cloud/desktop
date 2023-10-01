@@ -44,6 +44,7 @@ class SnippetReaderTest {
                 "title":"Test Snippet",
                 "description":"This is a test snippet",
                 "code":"System.out.println(\\"Hello, World!\\");",
+                "tags":["test", "hello", "world"],
                 "language":10,
                 "created":"2022-06-25T10:55:45Z",
                 "modified":"2022-12-02T14:30:26Z"
@@ -57,6 +58,7 @@ class SnippetReaderTest {
         assertThat(snippet.getTitle()).isEqualTo("Test Snippet");
         assertThat(snippet.getDescription()).isEqualTo("This is a test snippet");
         assertThat(snippet.getCode()).isEqualTo("System.out.println(\"Hello, World!\");");
+        assertThat(snippet.getTags()).containsExactlyInAnyOrder("test", "hello", "world");
         assertThat(snippet.getLanguage()).isEqualTo(Language.JAVA);
         assertThat(snippet.getCreated()).isEqualTo(OffsetDateTime.parse("2022-06-25T10:55:45Z"));
         assertThat(snippet.getModified()).isEqualTo(OffsetDateTime.parse("2022-12-02T14:30:26Z"));
@@ -74,6 +76,7 @@ class SnippetReaderTest {
         assertThat(snippet.getTitle()).isEmpty();
         assertThat(snippet.getDescription()).isEmpty();
         assertThat(snippet.getCode()).isEmpty();
+        assertThat(snippet.getTags()).isEmpty();
         assertThat(snippet.getLanguage()).isEqualTo(Language.TEXT);
         assertThat(snippet.getCreated()).isCloseTo(OffsetDateTime.now(), within(3, SECONDS));
         assertThat(snippet.getModified()).isNull();
@@ -86,7 +89,7 @@ class SnippetReaderTest {
         when(testFile.readOrElse(anyString())).thenReturn("invalid-json");
 
         assertThatThrownBy(() -> snippetReader.read(testFile))
-                  .isInstanceOf(RepositoryException.class)
-                  .hasMessage("The format of the file test.json is invalid.");
+                .isInstanceOf(RepositoryException.class)
+                .hasMessage("The format of the file test.json is invalid.");
     }
 }

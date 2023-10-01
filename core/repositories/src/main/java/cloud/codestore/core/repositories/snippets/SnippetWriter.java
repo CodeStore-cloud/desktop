@@ -24,6 +24,7 @@ class SnippetWriter {
                 snippet.getTitle(),
                 snippet.getDescription(),
                 snippet.getCode(),
+                snippet.getTags(),
                 snippet.getCreated().toString(),
                 Objects.toString(snippet.getModified(), null)
         );

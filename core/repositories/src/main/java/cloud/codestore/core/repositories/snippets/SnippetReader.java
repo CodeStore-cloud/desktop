@@ -23,14 +23,16 @@ class SnippetReader {
 
     Snippet read(File file) {
         var dto = readDto(file);
-        return Snippet.builder().id(getSnippetId(file))
-                                   .title(dto.title())
-                                   .description(dto.description())
-                                   .code(dto.code())
-                                   .language(getLanguageById(dto.language()))
-                                   .created(parseDateTime(dto.created()))
-                                   .modified(parseDateTime(dto.modified()))
-                                   .build();
+        return Snippet.builder()
+                      .id(getSnippetId(file))
+                      .title(dto.title())
+                      .description(dto.description())
+                      .code(dto.code())
+                      .tags(dto.tags())
+                      .language(getLanguageById(dto.language()))
+                      .created(parseDateTime(dto.created()))
+                      .modified(parseDateTime(dto.modified()))
+                      .build();
     }
 
     private PersistentSnippetDto readDto(File file) {
