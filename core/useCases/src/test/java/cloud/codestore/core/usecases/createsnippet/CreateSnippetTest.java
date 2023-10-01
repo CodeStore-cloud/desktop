@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -49,6 +50,7 @@ class CreateSnippetTest {
         assertThat(snippet.getTitle()).isEqualTo(dto.title());
         assertThat(snippet.getCode()).isEqualTo(dto.code());
         assertThat(snippet.getDescription()).isEqualTo(dto.description());
+        assertThat(snippet.getTags()).containsExactlyInAnyOrder("hello", "world");
         assertThat(snippet.getCreated()).isEqualTo(now);
         assertThat(snippet.getModified()).isNull();
     }
@@ -58,6 +60,7 @@ class CreateSnippetTest {
                 Language.JAVA,
                 "hello world",
                 "System.out.println(\"Hello, World!\")",
+                List.of("hello", "world"),
                 "A Java hello world example."
         );
     }

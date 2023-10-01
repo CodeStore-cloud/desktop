@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
@@ -45,7 +46,7 @@ class UpdateSnippetTest {
     void snippetNotExist() throws SnippetNotExistsException {
         String snippetId = UUID.randomUUID().toString();
         when(readSnippetUseCase.read(snippetId)).thenThrow(new SnippetNotExistsException());
-        UpdatedSnippetDto dto = new UpdatedSnippetDto(snippetId, Language.TEXT, "", "", "");
+        UpdatedSnippetDto dto = new UpdatedSnippetDto(snippetId, Language.TEXT, "", "", null, "");
         assertThatThrownBy(() -> useCase.update(dto)).isInstanceOf(SnippetNotExistsException.class);
     }
 
@@ -68,6 +69,7 @@ class UpdateSnippetTest {
         assertThat(snippet.getTitle()).isEqualTo(dto.title());
         assertThat(snippet.getCode()).isEqualTo(dto.code());
         assertThat(snippet.getDescription()).isEqualTo(dto.description());
+        assertThat(snippet.getTags()).containsExactlyInAnyOrder("other", "tags");
         assertThat(snippet.getCreated()).isEqualTo(currentSnippet.getCreated());
         assertThat(snippet.getModified()).isCloseTo(OffsetDateTime.now(), within(3, SECONDS));
     }
@@ -76,13 +78,14 @@ class UpdateSnippetTest {
         OffsetDateTime now = OffsetDateTime.now().truncatedTo(SECONDS);
         OffsetDateTime fiveWeeksAgo = now.minus(5, WEEKS);
         return Snippet.builder()
-                .id(SNIPPET_ID)
-                .language(Language.JAVASCRIPT)
-                .title("title")
-                .description("description")
-                .code("code")
-                .created(fiveWeeksAgo)
-                .build();
+                      .id(SNIPPET_ID)
+                      .language(Language.JAVASCRIPT)
+                      .title("title")
+                      .description("description")
+                      .code("code")
+                      .tags(List.of("hello", "world"))
+                      .created(fiveWeeksAgo)
+                      .build();
     }
 
     private static UpdatedSnippetDto updatedSnippet() {
@@ -91,6 +94,7 @@ class UpdateSnippetTest {
                 Language.JAVA,
                 "new title",
                 "new code",
+                List.of("other", "tags"),
                 "new description"
         );
     }
