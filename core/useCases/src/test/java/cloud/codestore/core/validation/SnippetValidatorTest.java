@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.util.List;
 import java.util.Optional;
 
 import static cloud.codestore.core.validation.SnippetProperty.*;
@@ -71,6 +72,19 @@ class SnippetValidatorTest {
         Snippet invalidSnippet = Snippet.builder().code(ofLength(10001)).build();
         InvalidSnippetAssert.assertThat(validate(invalidSnippet))
                             .hasValidationMessage(CODE, "The code must not be longer than 10,000 characters.");
+    }
+
+    @Test
+    @DisplayName("it contains more than 10 tags")
+    void tooManyTags() {
+        List<String> tags = List.of("1", "2", "3", "4", "5", "6", "7", "8", "9", "10");
+        Snippet validSnippet = Snippet.builder().tags(tags).build();
+        InvalidSnippetAssert.assertThat(validate(validSnippet)).hasNoValidationMessage(TAGS);
+
+        tags = List.of("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11");
+        Snippet invalidSnippet = Snippet.builder().tags(tags).build();
+        InvalidSnippetAssert.assertThat(validate(invalidSnippet))
+                            .hasValidationMessage(TAGS, "The code snippet must not contain more than 10 tags.");
     }
 
     private InvalidSnippetException validate(Snippet snippet) {
