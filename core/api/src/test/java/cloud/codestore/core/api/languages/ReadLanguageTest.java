@@ -1,13 +1,10 @@
 package cloud.codestore.core.api.languages;
 
 import cloud.codestore.core.Language;
-import cloud.codestore.core.api.DummyWebServerInitializedEvent;
-import cloud.codestore.core.api.TestConfig;
-import cloud.codestore.core.usecases.listlanguages.ListLanguages;
+import cloud.codestore.core.api.AbstractControllerTest;
 import cloud.codestore.core.usecases.readlanguage.ReadLanguage;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -26,15 +23,12 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(LanguageController.class)
-@Import({TestConfig.class, LanguageController.class})
-@ExtendWith(DummyWebServerInitializedEvent.class)
+@WebMvcTest(ReadLanguageController.class)
+@Import(ReadLanguageController.class)
 @DisplayName("GET /languages/{languageId}")
-class LanguageResourceTest {
+class ReadLanguageTest extends AbstractControllerTest {
     @Autowired
     private MockMvc mockMvc;
-    @MockBean
-    private ListLanguages listLanguagesUseCase;
     @MockBean
     private ReadLanguage readLanguageUseCase;
 

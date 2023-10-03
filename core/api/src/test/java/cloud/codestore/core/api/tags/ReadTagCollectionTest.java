@@ -1,14 +1,12 @@
 package cloud.codestore.core.api.tags;
 
 import cloud.codestore.core.Snippet;
-import cloud.codestore.core.api.DummyWebServerInitializedEvent;
-import cloud.codestore.core.api.TestConfig;
+import cloud.codestore.core.api.AbstractControllerTest;
 import cloud.codestore.core.usecases.readsnippet.ReadSnippet;
 import cloud.codestore.core.usecases.readtags.ReadTags;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -25,10 +23,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ReadTagCollectionController.class)
-@Import({TestConfig.class, ReadTagCollectionController.class})
-@ExtendWith(DummyWebServerInitializedEvent.class)
+@Import(ReadTagCollectionController.class)
 @DisplayName("GET /tags")
-class ReadTagCollectionControllerTest {
+class ReadTagCollectionTest extends AbstractControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @MockBean

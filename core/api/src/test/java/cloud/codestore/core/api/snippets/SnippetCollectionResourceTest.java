@@ -39,13 +39,14 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
     @DisplayName("returns all available snippets")
     void returnSnippetCollection() throws Exception {
         when(listSnippetsUseCase.list(any())).thenReturn(snippetList());
-        GET("/snippets").andExpect(status().isOk())
-                        .andExpect(content().contentType(JsonApiDocument.MEDIA_TYPE))
-                        .andExpect(jsonPath("$.data").isArray())
-                        .andExpect(jsonPath("$.data.length()", is(5)))
-                        .andExpect(jsonPath("$.data[*].type", everyItem(is("snippet"))))
-                        .andExpect(jsonPath("$.data[*].attributes").exists())
-                        .andExpect(jsonPath("$.data[*].links.self").exists());
+        GET("/snippets")
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(JsonApiDocument.MEDIA_TYPE))
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.data.length()", is(5)))
+                .andExpect(jsonPath("$.data[*].type", everyItem(is("snippet"))))
+                .andExpect(jsonPath("$.data[*].attributes").exists())
+                .andExpect(jsonPath("$.data[*].links.self").exists());
     }
 
     @Nested

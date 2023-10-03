@@ -1,34 +1,16 @@
 package cloud.codestore.core.api.snippets;
 
-import cloud.codestore.core.api.DefaultLocale;
-import cloud.codestore.core.api.DummyWebServerInitializedEvent;
-import cloud.codestore.core.api.ErrorHandler;
-import cloud.codestore.core.api.TestConfig;
+import cloud.codestore.core.api.AbstractControllerTest;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
-@WebMvcTest
-@ExtendWith(DefaultLocale.class)
-@Import({TestConfig.class, ErrorHandler.class})
-@ExtendWith(DummyWebServerInitializedEvent.class)
-class SnippetControllerTest {
+class SnippetControllerTest extends AbstractControllerTest {
     static final String SNIPPET_ID = UUID.randomUUID().toString();
     static final String SNIPPET_URL = "/snippets/" + SNIPPET_ID;
-
-    @Autowired
-    protected ObjectMapper objectMapper;
-    @Autowired
-    protected MockMvc mockMvc;
 
     ResultActions GET(String path) throws Exception {
         return mockMvc.perform(get(path));
