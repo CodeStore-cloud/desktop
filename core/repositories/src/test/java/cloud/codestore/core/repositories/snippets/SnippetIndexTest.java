@@ -40,11 +40,8 @@ class SnippetIndexTest {
     @Test
     @DisplayName("adds multiple snippets at once")
     void addMultipleSnippets() {
-        Stream<Snippet> snippetStream = Stream.of(testSnippet("1"), testSnippet("2"), testSnippet("3"));
         assertThat(index.query(new MatchAllDocsQuery())).isEmpty();
-
-        index.add(snippetStream);
-
+        index.add(Stream.of(testSnippet("1"), testSnippet("2"), testSnippet("3")));
         assertThat(index.query(new MatchAllDocsQuery())).hasSize(3);
     }
 

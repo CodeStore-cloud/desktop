@@ -31,6 +31,14 @@ public class SnippetCollectionResource extends ResourceCollectionDocument<Snippe
         return UriFactory.createUri(PATH, Map.of("filter[language]", language.getId()));
     }
 
+    /**
+     * @param tag a tag. Must not be {@code null}.
+     * @return the URI to the snippet collection resource filtered by the given tag.
+     */
+    public static String getLink(@Nonnull String tag) {
+        return UriFactory.createUri(PATH, Map.of("filter[tags]", tag));
+    }
+
     private static SnippetResource[] convertToSnippetResource(List<Snippet> snippets) {
         return snippets.stream()
                        .map(SnippetResource::new)

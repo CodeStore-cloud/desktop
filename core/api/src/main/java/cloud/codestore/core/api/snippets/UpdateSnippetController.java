@@ -11,6 +11,7 @@ import cloud.codestore.jsonapi.document.SingleResourceDocument;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 
 @RestController
 @RequestMapping(path = SnippetCollectionResource.PATH, produces = JsonApiDocument.MEDIA_TYPE)
@@ -41,6 +42,7 @@ public class UpdateSnippetController {
                 deserializationHelper.getLanguage(resource.getLanguage()),
                 resource.getTitle(),
                 resource.getCode(),
+                Collections.emptyList(),
                 resource.getDescription()
         );
 

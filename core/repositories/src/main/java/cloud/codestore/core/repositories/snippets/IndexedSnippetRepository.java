@@ -3,6 +3,7 @@ package cloud.codestore.core.repositories.snippets;
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.SnippetNotExistsException;
 import cloud.codestore.core.repositories.Repository;
+import cloud.codestore.core.repositories.tags.TagRepository;
 import cloud.codestore.core.usecases.createsnippet.CreateSnippetQuery;
 import cloud.codestore.core.usecases.deletesnippet.DeleteSnippetQuery;
 import cloud.codestore.core.usecases.listsnippets.FilterProperties;
@@ -28,10 +29,12 @@ public class IndexedSnippetRepository implements CreateSnippetQuery, UpdateSnipp
 
     private SnippetIndex index;
     private FileSystemRepository localRepo;
+    private TagRepository tagRepository;
 
-    public IndexedSnippetRepository(SnippetIndex index, FileSystemRepository localRepo) {
+    public IndexedSnippetRepository(SnippetIndex index, FileSystemRepository localRepo, TagRepository tagRepository) {
         this.index = index;
         this.localRepo = localRepo;
+        this.tagRepository = tagRepository;
         indexAllSnippets();
     }
 
@@ -67,7 +70,11 @@ public class IndexedSnippetRepository implements CreateSnippetQuery, UpdateSnipp
 
     private void indexAllSnippets() {
         long startTime = System.currentTimeMillis();
-        index.add(localRepo.readSnippets());
+
+        Stream<Snippet> snippetStream = localRepo.readSnippets();
+        snippetStream = snippetStream.peek(snippet -> tagRepository.add(snippet.getTags()));
+        index.add(snippetStream);
+
         long endTime = System.currentTimeMillis();
         LOGGER.info("Indexing finished after " + (endTime - startTime) + "ms");
     }

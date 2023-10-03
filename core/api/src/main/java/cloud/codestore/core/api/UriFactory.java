@@ -56,6 +56,6 @@ public class UriFactory implements ApplicationListener<ServletWebServerInitializ
     }
 
     private static String encode(Object value) {
-        return URLEncoder.encode(value.toString(), StandardCharsets.UTF_8);
+        return URLEncoder.encode(String.valueOf(value), StandardCharsets.UTF_8);
     }
 }

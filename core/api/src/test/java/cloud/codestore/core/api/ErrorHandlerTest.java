@@ -1,6 +1,7 @@
 package cloud.codestore.core.api;
 
 import cloud.codestore.core.SnippetNotExistsException;
+import cloud.codestore.core.TagNotExistsException;
 import cloud.codestore.core.usecases.readlanguage.LanguageNotExistsException;
 import cloud.codestore.core.validation.InvalidSnippetException;
 import cloud.codestore.core.validation.SnippetProperty;
@@ -41,6 +42,13 @@ class ErrorHandlerTest {
     void languageNotFound() {
         ResponseEntity<Object> response = errorHandler.languageNotExists(new LanguageNotExistsException(), request);
         assertNotExists(response, "The programming language does not exist.");
+    }
+
+    @Test
+    @DisplayName("returns 404 if a tag does not exist")
+    void tagNotFound() {
+        ResponseEntity<Object> response = errorHandler.tagNotExists(new TagNotExistsException("some-tag"), request);
+        assertNotExists(response, "The tag \"some-tag\" does not exist.");
     }
 
     private void assertNotExists(ResponseEntity<Object> response, String expectedMessage) {

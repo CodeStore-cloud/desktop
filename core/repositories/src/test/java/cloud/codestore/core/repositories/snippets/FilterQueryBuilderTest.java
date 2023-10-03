@@ -17,9 +17,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("The filter-query builder")
 class FilterQueryBuilderTest {
     @Test
-    @DisplayName("returns an empty query if the filter properties are empty")
+    @DisplayName("returns a query matching all code snippets if the filter properties are empty")
     void emptyQuery() {
-        assertFilterProducesQuery(new FilterProperties(null), "");
+        assertFilterProducesQuery(new FilterProperties(null), "*:*");
     }
 
     @ParameterizedTest

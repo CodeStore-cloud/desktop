@@ -3,10 +3,7 @@ package cloud.codestore.core.repositories.snippets;
 import cloud.codestore.core.Language;
 import cloud.codestore.core.usecases.listsnippets.FilterProperties;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.BooleanClause;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.*;
 
 import javax.annotation.Nullable;
 
@@ -21,10 +18,11 @@ class FilterQueryBuilder {
     }
 
     Query buildFilterQuery() {
-        if (!filterProperties.isEmpty()) {
-            filterByLanguage(filterProperties.language());
+        if (filterProperties.isEmpty()) {
+            return new MatchAllDocsQuery();
         }
 
+        filterByLanguage(filterProperties.language());
         return filterQuery.build();
     }
 

@@ -2,15 +2,19 @@ package cloud.codestore.core.repositories.snippets;
 
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.SnippetNotExistsException;
+import cloud.codestore.core.repositories.tags.TagRepository;
 import cloud.codestore.core.usecases.listsnippets.FilterProperties;
 import org.apache.lucene.search.Query;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -27,22 +31,29 @@ class IndexedSnippetRepositoryTest {
     private SnippetIndex index;
     @Mock
     private FileSystemRepository localRepo;
+    @Mock
+    private TagRepository tagRepository;
     private IndexedSnippetRepository repository;
 
     @BeforeEach
     void setUp() {
-        repository = new IndexedSnippetRepository(index, localRepo);
+        repository = new IndexedSnippetRepository(index, localRepo, tagRepository);
     }
 
     @Test
     @DisplayName("indexes all snippets when created")
+    @SuppressWarnings("unchecked")
     void indexAllSnippets() {
-        Stream<Snippet> snippetStream = Stream.of(mock(Snippet.class), mock(Snippet.class), mock(Snippet.class));
-        when(localRepo.readSnippets()).thenReturn(snippetStream);
+        Mockito.reset(index);
+        var argument = ArgumentCaptor.forClass(Stream.class);
+        var snippets = List.of(mock(Snippet.class), mock(Snippet.class), mock(Snippet.class));
+        when(localRepo.readSnippets()).thenReturn(snippets.stream());
 
-        new IndexedSnippetRepository(index, localRepo);
+        new IndexedSnippetRepository(index, localRepo, tagRepository);
 
-        verify(index).add(snippetStream);
+        verify(index).add(argument.capture());
+        assertThat(argument.getValue().toList()).isEqualTo(snippets);
+        verify(tagRepository, times(3)).add(any());
     }
 
     @Test

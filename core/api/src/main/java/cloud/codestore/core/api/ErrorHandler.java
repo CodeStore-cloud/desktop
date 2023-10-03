@@ -1,6 +1,7 @@
 package cloud.codestore.core.api;
 
 import cloud.codestore.core.SnippetNotExistsException;
+import cloud.codestore.core.TagNotExistsException;
 import cloud.codestore.core.usecases.readlanguage.LanguageNotExistsException;
 import cloud.codestore.core.validation.InvalidSnippetException;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.text.MessageFormat;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -52,6 +54,15 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
         return notFound(exception, request, errorObject);
     }
 
+    @ExceptionHandler(TagNotExistsException.class)
+    public ResponseEntity<Object> tagNotExists(TagNotExistsException exception, WebRequest request) {
+        ErrorObject errorObject = new ErrorObject().setCode("NOT_FOUND")
+                                                   .setTitle(message("notFound.title"))
+                                                   .setDetail(message("notFound.detail.tag", exception.getTag()));
+
+        return notFound(exception, request, errorObject);
+    }
+
     @ExceptionHandler(LanguageNotExistsException.class)
     public ResponseEntity<Object> languageNotExists(LanguageNotExistsException exception, WebRequest request) {
         ErrorObject errorObject = new ErrorObject().setCode("NOT_FOUND")
@@ -75,7 +86,11 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(exception, responseBody, headers, httpStatus, request);
     }
 
-    private String message(String messageKey) {
-        return resourceBundle.getString(messageKey);
+    private String message(String messageKey, String... messageArguments) {
+        if (messageArguments.length == 0)
+            return resourceBundle.getString(messageKey);
+
+        MessageFormat formatter = new MessageFormat(resourceBundle.getString(messageKey));
+        return formatter.format(messageArguments);
     }
 }
