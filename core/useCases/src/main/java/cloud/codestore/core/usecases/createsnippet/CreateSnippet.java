@@ -5,6 +5,7 @@ import cloud.codestore.core.UseCase;
 import cloud.codestore.core.validation.InvalidSnippetException;
 import cloud.codestore.core.validation.SnippetValidator;
 
+import javax.annotation.Nonnull;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -28,7 +29,7 @@ public class CreateSnippet {
      * @return the created code snippet.
      * @throws InvalidSnippetException if the new code snippet is invalid.
      */
-    public Snippet create(NewSnippetDto newSnippet) throws InvalidSnippetException {
+    public Snippet create(@Nonnull NewSnippetDto newSnippet) throws InvalidSnippetException {
         String snippetId = UUID.randomUUID().toString();
         Snippet snippet = Snippet.builder()
                                  .id(snippetId)

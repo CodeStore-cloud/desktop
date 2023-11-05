@@ -151,7 +151,6 @@ class SnippetIndex {
         analyzerMap.put(SnippetField.LANGUAGE, keywordAnalyzer);
 
         var analyzer = new PerFieldAnalyzerWrapper(new SimpleAnalyzer(), analyzerMap);
-
         return new IndexWriter(index, new IndexWriterConfig(analyzer));
     }
 

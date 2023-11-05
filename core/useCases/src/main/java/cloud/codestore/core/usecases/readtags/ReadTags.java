@@ -10,7 +10,7 @@ import java.util.Collection;
  */
 @UseCase
 public class ReadTags {
-    private ReadTagsQuery readTagsQuery;
+    private final ReadTagsQuery readTagsQuery;
 
     public ReadTags(ReadTagsQuery readTagsQuery) {
         this.readTagsQuery = readTagsQuery;

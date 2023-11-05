@@ -24,35 +24,35 @@ import java.util.stream.Stream;
  */
 @Primary
 @Repository
-public class IndexedSnippetRepository implements CreateSnippetQuery, UpdateSnippetQuery, DeleteSnippetQuery, ReadSnippetQuery, ReadSnippetsQuery {
+class IndexedSnippetRepository implements CreateSnippetQuery, UpdateSnippetQuery, DeleteSnippetQuery, ReadSnippetQuery, ReadSnippetsQuery {
     private static final Logger LOGGER = LoggerFactory.getLogger(IndexedSnippetRepository.class);
 
     private SnippetIndex index;
-    private FileSystemRepository localRepo;
+    private FileSystemRepository fsRepo;
     private TagRepository tagRepository;
 
-    public IndexedSnippetRepository(SnippetIndex index, FileSystemRepository localRepo, TagRepository tagRepository) {
+    IndexedSnippetRepository(SnippetIndex index, FileSystemRepository fsRepo, TagRepository tagRepository) {
         this.index = index;
-        this.localRepo = localRepo;
+        this.fsRepo = fsRepo;
         this.tagRepository = tagRepository;
         indexAllSnippets();
     }
 
     @Override
     public void create(@Nonnull Snippet snippet) {
-        localRepo.create(snippet);
+        fsRepo.create(snippet);
         index.add(snippet);
     }
 
     @Override
     public void update(@Nonnull Snippet snippet) throws SnippetNotExistsException {
-        localRepo.update(snippet);
+        fsRepo.update(snippet);
         index.update(snippet);
     }
 
     @Override
     public void delete(@Nonnull String snippetId) throws SnippetNotExistsException {
-        localRepo.delete(snippetId);
+        fsRepo.delete(snippetId);
         index.remove(snippetId);
     }
 
@@ -60,18 +60,18 @@ public class IndexedSnippetRepository implements CreateSnippetQuery, UpdateSnipp
     public List<Snippet> readSnippets(@Nonnull FilterProperties filterProperties) {
         Query filterQuery = new FilterQueryBuilder(filterProperties).buildFilterQuery();
         Stream<String> snippetIds = index.query(filterQuery);
-        return localRepo.readSnippets(snippetIds).toList();
+        return fsRepo.readSnippets(snippetIds).toList();
     }
 
     @Override
     public Snippet read(@Nonnull String snippetId) throws SnippetNotExistsException {
-        return localRepo.read(snippetId);
+        return fsRepo.read(snippetId);
     }
 
     private void indexAllSnippets() {
         long startTime = System.currentTimeMillis();
 
-        Stream<Snippet> snippetStream = localRepo.readSnippets();
+        Stream<Snippet> snippetStream = fsRepo.readSnippets();
         snippetStream = snippetStream.peek(snippet -> tagRepository.add(snippet.getTags()));
         index.add(snippetStream);
 

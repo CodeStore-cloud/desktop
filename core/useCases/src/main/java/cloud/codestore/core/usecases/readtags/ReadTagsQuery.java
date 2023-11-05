@@ -1,10 +1,10 @@
 package cloud.codestore.core.usecases.readtags;
 
-import java.util.Set;
+import java.util.Collection;
 
 public interface ReadTagsQuery {
     /**
      * @return all available tags.
      */
-    Set<String> read();
+    Collection<String> read();
 }

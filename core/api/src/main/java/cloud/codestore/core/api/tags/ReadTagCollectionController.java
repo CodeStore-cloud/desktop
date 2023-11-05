@@ -14,8 +14,8 @@ import javax.annotation.Nullable;
 @RestController
 @RequestMapping(path = TagCollectionResource.PATH, produces = JsonApiDocument.MEDIA_TYPE)
 public class ReadTagCollectionController {
-    private ReadTags readTagsUseCase;
-    private ReadSnippet readSnippetUseCase;
+    private final ReadTags readTagsUseCase;
+    private final ReadSnippet readSnippetUseCase;
 
     public ReadTagCollectionController(ReadTags readTagsUseCase, ReadSnippet readSnippetUseCase) {
         this.readTagsUseCase = readTagsUseCase;
