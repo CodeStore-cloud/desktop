@@ -12,13 +12,12 @@ public class TagCollectionResource extends ResourceCollectionDocument<TagResourc
 
     TagCollectionResource(@Nonnull Collection<String> tags) {
         super(convertToTagResource(tags));
-        setSelfLink(getLink());
     }
 
     /**
      * @return the URI to the tag collection resource.
      */
-    static String getLink() {
+    public static String getLink() {
         return UriFactory.createUri(PATH);
     }
 

@@ -3,6 +3,7 @@ package cloud.codestore.core.api.root;
 import cloud.codestore.core.api.UriFactory;
 import cloud.codestore.core.api.languages.LanguageCollectionResource;
 import cloud.codestore.core.api.snippets.SnippetCollectionResource;
+import cloud.codestore.core.api.tags.TagCollectionResource;
 import cloud.codestore.jsonapi.relationship.Relationship;
 import cloud.codestore.jsonapi.resource.ResourceObject;
 import com.fasterxml.jackson.annotation.JsonGetter;
@@ -46,5 +47,10 @@ class RootResource extends ResourceObject {
     @JsonGetter("languages")
     Relationship getLanguages() {
         return new Relationship(LanguageCollectionResource.getLink());
+    }
+
+    @JsonGetter("tags")
+    Relationship getTags() {
+        return new Relationship(TagCollectionResource.getLink());
     }
 }

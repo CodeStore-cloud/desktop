@@ -58,6 +58,11 @@ class RootResourceTest {
                                "links": {
                                  "related": "http://localhost:8080/snippets"
                                }
+                             },
+                             "tags": {
+                               "links": {
+                                 "related": "http://localhost:8080/tags"
+                               }
                              }
                            },
                            "links": {

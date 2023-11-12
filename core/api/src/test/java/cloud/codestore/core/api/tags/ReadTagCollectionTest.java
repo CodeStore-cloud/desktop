@@ -92,10 +92,7 @@ class ReadTagCollectionTest extends AbstractControllerTest {
                                        "self": "http://localhost:8080/tags/tagC"
                                    }
                                }
-                           ],
-                           "links": {
-                               "self": "http://localhost:8080/tags"
-                           }
+                           ]
                        }"""));
     }
 
