@@ -33,7 +33,7 @@ class CreateTagTest extends AbstractControllerTest {
         mockMvc.perform(postRequest())
                .andExpect(status().isCreated())
                .andExpect(content().contentType(JsonApiDocument.MEDIA_TYPE))
-                .andExpect(header().string(HttpHeaders.LOCATION, "http://localhost:8080/tags/test-tag"))
+               .andExpect(header().string(HttpHeaders.LOCATION, "http://localhost:8080/tags/test-tag"))
                .andExpect(content().json("""
                        {
                            "data": {
@@ -74,11 +74,11 @@ class CreateTagTest extends AbstractControllerTest {
                 .content("""
                         {
                             "data": {
-                               "type": "tag",
-                               "attributes": {
-                                   "name": "test-tag"
-                               }
-                           }
+                                "type": "tag",
+                                "attributes": {
+                                    "name": "test-tag"
+                                }
+                            }
                         }""");
     }
 }

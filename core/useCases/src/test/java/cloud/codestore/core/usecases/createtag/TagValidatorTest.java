@@ -6,8 +6,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(DefaultLocale.class)
 @DisplayName("A tag is invalid if")
@@ -17,24 +17,25 @@ class TagValidatorTest {
     @Test
     @DisplayName("the tag is empty")
     void empty() {
-        validate("", "The tag must not be empty.");
+        expectError("", "The tag must not be empty.");
     }
 
     @Test
     @DisplayName("the tag is too long")
-    void tooLong() throws InvalidTagException {
-        validator.validate(RandomString.make(30));
-        validate(RandomString.make(31), "The tag must not be longer than 30 characters.");
+    void tooLong() {
+        assertThatNoException().isThrownBy(() -> validator.validate(RandomString.make(30)));
+        expectError(RandomString.make(31), "The tag must not be longer than 30 characters.");
     }
 
     @Test
     @DisplayName("the tag contains whitespaces")
     void containsWhitespace() {
-        validate("test tag", "The tag must not contain whitespaces.");
+        expectError("test tag", "The tag must not contain whitespaces.");
     }
 
-    private void validate(String tag, String errorMessage) {
-        var exception = catchThrowableOfType(() -> validator.validate(tag), InvalidTagException.class);
-        assertThat(exception.getMessage()).isEqualTo(errorMessage);
+    private void expectError(String tag, String errorMessage) {
+        assertThatThrownBy(() -> validator.validate(tag))
+                .isInstanceOf(InvalidTagException.class)
+                .hasMessage(errorMessage);
     }
 }

@@ -1,7 +1,10 @@
 package cloud.codestore.core.usecases.createtag;
 
+import cloud.codestore.core.Validator;
+
 import javax.annotation.Nonnull;
 
+@Validator
 class TagValidator {
     private static final int MAX_TAG_LENGTH = 30;
 
