@@ -1,9 +1,11 @@
 package cloud.codestore.core.usecases.readtags;
 
+import cloud.codestore.core.TagNotExistsException;
 import cloud.codestore.core.UseCase;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
+import java.util.Set;
 
 /**
  * Use case: read all available tags.
@@ -19,5 +21,17 @@ public class ReadTags {
     @Nonnull
     public Collection<String> readTags() {
         return readTagsQuery.read();
+    }
+
+    @Nonnull
+    public Collection<String> readTags(@Nonnull String... tags) throws TagNotExistsException {
+        var availableTags = readTags();
+        for (String tag : tags) {
+            if (!availableTags.contains(tag)) {
+                throw new TagNotExistsException(tag);
+            }
+        }
+
+        return Set.of(tags);
     }
 }

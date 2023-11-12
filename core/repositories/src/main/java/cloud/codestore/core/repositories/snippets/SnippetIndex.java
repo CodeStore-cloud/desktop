@@ -181,7 +181,7 @@ class SnippetIndex {
         return document;
     }
 
-    private String normalize(String tag) {
+    static String normalize(String tag) {
         return tag.toLowerCase().replace("-", "").replace("_", "");
     }
 

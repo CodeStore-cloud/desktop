@@ -13,19 +13,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.text.MessageFormat;
 import java.util.Map;
 import java.util.ResourceBundle;
 
 @ControllerAdvice
-public class ErrorHandler extends ResponseEntityExceptionHandler {
+public class ErrorHandler {
     private final ResourceBundle resourceBundle = ResourceBundle.getBundle("error");
 
     @ExceptionHandler(InvalidSnippetException.class)
-    public ResponseEntity<Object> invalidSnippet(InvalidSnippetException exception, WebRequest request) {
+    public ResponseEntity<Object> invalidSnippet(InvalidSnippetException exception) {
         var errors = exception.getValidationMessages()
                               .entrySet()
                               .stream()
@@ -41,49 +39,46 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
                               })
                               .toArray(ErrorObject[]::new);
 
-
-        return createResponse(exception, request, HttpStatus.BAD_REQUEST, errors);
+        return createResponse(HttpStatus.BAD_REQUEST, errors);
     }
 
     @ExceptionHandler(SnippetNotExistsException.class)
-    public ResponseEntity<Object> snippetNotExists(SnippetNotExistsException exception, WebRequest request) {
+    public ResponseEntity<Object> snippetNotExists() {
         ErrorObject errorObject = new ErrorObject().setCode("NOT_FOUND")
                                                    .setTitle(message("notFound.title"))
                                                    .setDetail(message("notFound.detail.snippet"));
 
-        return notFound(exception, request, errorObject);
+        return notFound(errorObject);
     }
 
     @ExceptionHandler(TagNotExistsException.class)
-    public ResponseEntity<Object> tagNotExists(TagNotExistsException exception, WebRequest request) {
+    public ResponseEntity<Object> tagNotExists(TagNotExistsException exception) {
         ErrorObject errorObject = new ErrorObject().setCode("NOT_FOUND")
                                                    .setTitle(message("notFound.title"))
                                                    .setDetail(message("notFound.detail.tag", exception.getTag()));
 
-        return notFound(exception, request, errorObject);
+        return notFound(errorObject);
     }
 
     @ExceptionHandler(LanguageNotExistsException.class)
-    public ResponseEntity<Object> languageNotExists(LanguageNotExistsException exception, WebRequest request) {
+    public ResponseEntity<Object> languageNotExists() {
         ErrorObject errorObject = new ErrorObject().setCode("NOT_FOUND")
                                                    .setTitle(message("notFound.title"))
                                                    .setDetail(message("notFound.detail.language"));
 
-        return notFound(exception, request, errorObject);
+        return notFound(errorObject);
     }
 
-    private ResponseEntity<Object> notFound(Exception exception, WebRequest request, ErrorObject... errorObjects) {
-        return createResponse(exception, request, HttpStatus.NOT_FOUND, errorObjects);
+    private ResponseEntity<Object> notFound(ErrorObject... errorObjects) {
+        return createResponse(HttpStatus.NOT_FOUND, errorObjects);
     }
 
-    private ResponseEntity<Object> createResponse(
-            Exception exception, WebRequest request, HttpStatus httpStatus, ErrorObject... errorObjects
-    ) {
+    private ResponseEntity<Object> createResponse(HttpStatus httpStatus, ErrorObject... errorObjects) {
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.CONTENT_TYPE, JsonApiDocument.MEDIA_TYPE);
 
         ErrorDocument responseBody = new ErrorDocument(errorObjects);
-        return handleExceptionInternal(exception, responseBody, headers, httpStatus, request);
+        return new ResponseEntity<>(responseBody, headers, httpStatus);
     }
 
     private String message(String messageKey, String... messageArguments) {

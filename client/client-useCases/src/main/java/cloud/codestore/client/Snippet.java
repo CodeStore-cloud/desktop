@@ -35,6 +35,10 @@ public class Snippet {
         this.modified = modified;
     }
 
+    public static SnippetBuilder builder() {
+        return new SnippetBuilder();
+    }
+
     @Nonnull
     public String getUri() {
         return uri;

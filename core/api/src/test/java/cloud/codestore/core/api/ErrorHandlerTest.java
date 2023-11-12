@@ -1,8 +1,6 @@
 package cloud.codestore.core.api;
 
-import cloud.codestore.core.SnippetNotExistsException;
 import cloud.codestore.core.TagNotExistsException;
-import cloud.codestore.core.usecases.readlanguage.LanguageNotExistsException;
 import cloud.codestore.core.validation.InvalidSnippetException;
 import cloud.codestore.core.validation.SnippetProperty;
 import cloud.codestore.jsonapi.error.ErrorDocument;
@@ -10,12 +8,10 @@ import cloud.codestore.jsonapi.error.ErrorObject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.context.request.WebRequest;
 
 import java.util.Map;
 
@@ -26,28 +22,26 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("The error handler")
 class ErrorHandlerTest {
-    @Mock
-    private WebRequest request;
     private ErrorHandler errorHandler = new ErrorHandler();
 
     @Test
     @DisplayName("returns 404 if a snippet does not exist")
     void snippetNotFound() {
-        ResponseEntity<Object> response = errorHandler.snippetNotExists(new SnippetNotExistsException(), request);
+        ResponseEntity<Object> response = errorHandler.snippetNotExists();
         assertNotExists(response, "The code snippet does not exist.");
     }
 
     @Test
     @DisplayName("returns 404 if a programming language does not exist")
     void languageNotFound() {
-        ResponseEntity<Object> response = errorHandler.languageNotExists(new LanguageNotExistsException(), request);
+        ResponseEntity<Object> response = errorHandler.languageNotExists();
         assertNotExists(response, "The programming language does not exist.");
     }
 
     @Test
     @DisplayName("returns 404 if a tag does not exist")
     void tagNotFound() {
-        ResponseEntity<Object> response = errorHandler.tagNotExists(new TagNotExistsException("some-tag"), request);
+        ResponseEntity<Object> response = errorHandler.tagNotExists(new TagNotExistsException("some-tag"));
         assertNotExists(response, "The tag \"some-tag\" does not exist.");
     }
 
@@ -73,7 +67,7 @@ class ErrorHandlerTest {
         var exception = Mockito.mock(InvalidSnippetException.class);
         when(exception.getValidationMessages()).thenReturn(validationMessages);
 
-        ResponseEntity<Object> response = errorHandler.invalidSnippet(exception, request);
+        ResponseEntity<Object> response = errorHandler.invalidSnippet(exception);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         ErrorObject[] errors = assertErrors(response, 3);

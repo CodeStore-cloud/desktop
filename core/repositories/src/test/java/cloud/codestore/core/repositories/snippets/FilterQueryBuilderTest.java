@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,14 +20,14 @@ class FilterQueryBuilderTest {
     @Test
     @DisplayName("returns a query matching all code snippets if the filter properties are empty")
     void emptyQuery() {
-        assertFilterProducesQuery(new FilterProperties(null), "*:*");
+        assertFilterProducesQuery(new FilterProperties(), "*:*");
     }
 
     @ParameterizedTest
     @MethodSource("langToQuery")
     @DisplayName("returns a query which contains a programming language")
     void filterByLanguage(Language language, String expectedQuery) {
-        assertFilterProducesQuery(new FilterProperties(language), expectedQuery);
+        assertFilterProducesQuery(new FilterProperties(language, null), expectedQuery);
     }
 
     private static Stream<Arguments> langToQuery() {
@@ -37,8 +38,16 @@ class FilterQueryBuilderTest {
                      });
     }
 
-    private void assertFilterProducesQuery(FilterProperties filterProperties, String expectedQuery) {
+    @Test
+    @DisplayName("returns a query which contains the provided tags")
+    void filterByLanguage() {
+        Set<String> tags = Set.of("Tag-A", "Tag_B", "TagC");
+        String[] expectedQuery = new String[]{"+tag:taga", "+tag:tagb", "+tag:tagc"};
+        assertFilterProducesQuery(new FilterProperties(null, tags), expectedQuery);
+    }
+
+    private void assertFilterProducesQuery(FilterProperties filterProperties, String... expectedQueryParts) {
         Query query = new FilterQueryBuilder(filterProperties).buildFilterQuery();
-        assertThat(query.toString()).isEqualTo(expectedQuery);
+        assertThat(query.toString()).contains(expectedQueryParts);
     }
 }

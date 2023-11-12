@@ -2,12 +2,13 @@ package cloud.codestore.core.api.snippets;
 
 import cloud.codestore.core.Language;
 import cloud.codestore.core.Snippet;
+import cloud.codestore.core.TagNotExistsException;
 import cloud.codestore.core.usecases.listsnippets.FilterProperties;
 import cloud.codestore.core.usecases.listsnippets.ListSnippets;
 import cloud.codestore.core.usecases.readlanguage.LanguageNotExistsException;
 import cloud.codestore.core.usecases.readlanguage.ReadLanguage;
+import cloud.codestore.core.usecases.readtags.ReadTags;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -17,8 +18,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Every.everyItem;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,6 +37,8 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
     private ListSnippets listSnippetsUseCase;
     @MockBean
     private ReadLanguage readLanguageUseCase;
+    @MockBean
+    private ReadTags readTagsUseCase;
 
     @Test
     @DisplayName("returns all available snippets")
@@ -57,12 +62,12 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
         void filterByLanguage() throws Exception {
             when(readLanguageUseCase.read(10)).thenReturn(Language.JAVA);
             when(listSnippetsUseCase.list(any())).thenReturn(snippetList());
-            ArgumentCaptor<FilterProperties> argument = ArgumentCaptor.forClass(FilterProperties.class);
+            var argument = ArgumentCaptor.forClass(FilterProperties.class);
 
             GET("/snippets?filter[language]=10").andExpect(status().isOk());
 
             verify(listSnippetsUseCase).list(argument.capture());
-            Assertions.assertThat(argument.getValue().language()).isEqualTo(Language.JAVA);
+            assertThat(argument.getValue().language()).isEqualTo(Language.JAVA);
         }
 
         @Test
@@ -76,6 +81,30 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
         @DisplayName("fails if the provided ID is not an integer")
         void filterByLanguageNoInteger() throws Exception {
             GET("/snippets?filter[language]=java").andExpect(status().isNotFound());
+        }
+    }
+
+    @Nested
+    @DisplayName("with tags filter")
+    class FilterByTags {
+        @Test
+        @DisplayName("returns all snippets with the specified tags")
+        void filterByTags() throws Exception {
+            when(readTagsUseCase.readTags(any(String[].class))).thenReturn(Set.of("TagA", "TagB", "TagC"));
+            when(listSnippetsUseCase.list(any())).thenReturn(snippetList());
+            var argument = ArgumentCaptor.forClass(FilterProperties.class);
+
+            GET("/snippets?filter[tags]=TagA,TagB,TagC").andExpect(status().isOk());
+
+            verify(listSnippetsUseCase).list(argument.capture());
+            assertThat(argument.getValue().tags()).containsExactlyInAnyOrder("TagA", "TagB", "TagC");
+        }
+
+        @Test
+        @DisplayName("fails if one of the referred tags does not exist")
+        void filterByInvalidTag() throws Exception {
+            when(readTagsUseCase.readTags(any(String[].class))).thenThrow(new TagNotExistsException("InvalidTag"));
+            GET("/snippets?filter[tags]=InvalidTag").andExpect(status().isNotFound());
         }
     }
 

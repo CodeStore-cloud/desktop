@@ -1,7 +1,6 @@
 package cloud.codestore.core.usecases.readlanguage;
 
 import cloud.codestore.core.Language;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -16,12 +15,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("The read-language use case")
 class ReadLanguageTest {
-    private ReadLanguage useCase;
-
-    @BeforeEach
-    void setUp() {
-        useCase = new ReadLanguage();
-    }
+    private ReadLanguage useCase = new ReadLanguage();
 
     @ParameterizedTest
     @MethodSource("languageStream")

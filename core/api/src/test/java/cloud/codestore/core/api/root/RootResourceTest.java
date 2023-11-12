@@ -1,30 +1,20 @@
 package cloud.codestore.core.api.root;
 
-import cloud.codestore.core.api.DummyWebServerInitializedEvent;
-import cloud.codestore.core.api.TestConfig;
+import cloud.codestore.core.api.AbstractControllerTest;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
 @WebMvcTest(RootController.class)
-@Import({TestConfig.class, RootController.class})
-@ExtendWith(DummyWebServerInitializedEvent.class)
+@Import(RootController.class)
 @DisplayName("GET /")
-class RootResourceTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
+class RootResourceTest extends AbstractControllerTest {
     @Test
     @DisplayName("returns the core resource")
     void getRootResource() throws Exception {

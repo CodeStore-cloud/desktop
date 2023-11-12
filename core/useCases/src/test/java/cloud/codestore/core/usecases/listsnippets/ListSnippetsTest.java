@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,17 +28,18 @@ class ListSnippetsTest {
     }
 
     @Test
-    @DisplayName("returns all available code snippets")
+    @DisplayName("returns code snippets based on the filter properties")
     void returnAllSnippets() {
-        var filter = new FilterProperties(null);
-        var expectedResult = allSnippets();
+        var filter = new FilterProperties();
+        var expectedResult = filteredSnippets();
         when(query.readSnippets(filter)).thenReturn(expectedResult);
 
         var snippets = useCase.list(filter);
         assertThat(snippets).isSameAs(expectedResult);
+        verify(query).readSnippets(filter);
     }
 
-    private List<Snippet> allSnippets() {
+    private List<Snippet> filteredSnippets() {
         return Stream.of(1, 2, 3, 4, 5)
                      .map(id -> Snippet.builder().id(String.valueOf(id)).build())
                      .toList();

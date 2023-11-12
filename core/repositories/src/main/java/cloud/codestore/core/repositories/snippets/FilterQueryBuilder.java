@@ -6,8 +6,10 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 
 import static cloud.codestore.core.repositories.snippets.SnippetIndex.SnippetField.LANGUAGE;
+import static cloud.codestore.core.repositories.snippets.SnippetIndex.SnippetField.TAG;
 
 class FilterQueryBuilder {
     private final FilterProperties filterProperties;
@@ -23,12 +25,21 @@ class FilterQueryBuilder {
         }
 
         filterByLanguage(filterProperties.language());
+        filterByTags(filterProperties.tags());
         return filterQuery.build();
     }
 
     private void filterByLanguage(@Nullable Language language) {
         if (language != null) {
             addFilter(LANGUAGE, String.valueOf(language.getId()));
+        }
+    }
+
+    private void filterByTags(@Nullable Collection<String> tags) {
+        if (tags != null) {
+            for (String tag : tags) {
+                addFilter(TAG, SnippetIndex.normalize(tag));
+            }
         }
     }
 

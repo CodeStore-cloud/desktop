@@ -7,11 +7,9 @@ import cloud.codestore.core.usecases.readtags.ReadTags;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,8 +24,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(ReadTagCollectionController.class)
 @DisplayName("GET /tags")
 class ReadTagCollectionTest extends AbstractControllerTest {
-    @Autowired
-    private MockMvc mockMvc;
     @MockBean
     private ReadSnippet readSnippetUseCase;
     @MockBean

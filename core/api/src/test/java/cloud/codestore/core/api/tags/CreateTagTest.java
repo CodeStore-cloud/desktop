@@ -6,12 +6,10 @@ import cloud.codestore.core.usecases.createtag.InvalidTagException;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import static org.mockito.Mockito.*;
@@ -22,8 +20,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(CreateTagController.class)
 @DisplayName("POST /tags")
 class CreateTagTest extends AbstractControllerTest {
-    @Autowired
-    private MockMvc mockMvc;
     @MockBean
     private CreateTag createTagUseCase;
 
