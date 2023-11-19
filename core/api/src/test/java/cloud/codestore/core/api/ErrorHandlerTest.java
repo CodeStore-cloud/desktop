@@ -1,6 +1,7 @@
 package cloud.codestore.core.api;
 
 import cloud.codestore.core.TagNotExistsException;
+import cloud.codestore.core.usecases.createtag.InvalidTagException;
 import cloud.codestore.core.validation.InvalidSnippetException;
 import cloud.codestore.core.validation.SnippetProperty;
 import cloud.codestore.jsonapi.error.ErrorDocument;
@@ -75,6 +76,21 @@ class ErrorHandlerTest {
         assertInvalidSnippet(errors[0], "invalid title", "/data/attributes/title");
         assertInvalidSnippet(errors[1], "invalid description", "/data/attributes/description");
         assertInvalidSnippet(errors[2], "invalid code", "/data/attributes/code");
+    }
+
+    @Test
+    @DisplayName("returns 400 if a tag is invalid")
+    void invalidTag() {
+        var exception = Mockito.mock(InvalidTagException.class);
+        when(exception.getMessage()).thenReturn("Detailed error message");
+
+        var response = errorHandler.invalidTag(exception);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        var error = assertErrors(response, 1)[0];
+        assertThat(error.getTitle()).isEqualTo("Invalid Tag");
+        assertThat(error.getDetail()).isEqualTo("Detailed error message");
+        assertThat(error.getSource().getPointer()).isEqualTo("/data/attributes/name");
     }
 
     private ErrorObject[] assertErrors(ResponseEntity<Object> response, int expectedErrorCount) {

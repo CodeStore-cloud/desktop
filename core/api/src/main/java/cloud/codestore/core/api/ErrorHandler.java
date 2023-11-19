@@ -2,6 +2,7 @@ package cloud.codestore.core.api;
 
 import cloud.codestore.core.SnippetNotExistsException;
 import cloud.codestore.core.TagNotExistsException;
+import cloud.codestore.core.usecases.createtag.InvalidTagException;
 import cloud.codestore.core.usecases.readlanguage.LanguageNotExistsException;
 import cloud.codestore.core.validation.InvalidSnippetException;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
@@ -58,6 +59,17 @@ public class ErrorHandler {
                                                    .setDetail(message("notFound.detail.tag", exception.getTag()));
 
         return notFound(errorObject);
+    }
+
+    @ExceptionHandler(InvalidTagException.class)
+    public ResponseEntity<Object> invalidTag(InvalidTagException exception) {
+        var errorSource = new ErrorSource().setPointer("/data/attributes/name");
+        ErrorObject errorObject = new ErrorObject().setCode("INVALID_TAG")
+                                                   .setTitle(message("invalidTag.title"))
+                                                   .setDetail(exception.getMessage())
+                                                   .setSource(errorSource);
+
+        return createResponse(HttpStatus.BAD_REQUEST, errorObject);
     }
 
     @ExceptionHandler(LanguageNotExistsException.class)
