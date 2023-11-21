@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("The snippet repository")
-class LocalSnippetRepositoryTest {
+class SnippetRepositoryTest {
     private static final String SNIPPETS_URL = "http://localhost:8080/snippets";
     private static final String SNIPPET_URI = "http://localhost:8080/snippets/1";
     private static final String TAGS_URI = "http://localhost:8080/tags?filter[snippet]=1";

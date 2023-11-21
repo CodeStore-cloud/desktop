@@ -21,7 +21,7 @@ import java.util.ResourceBundle;
 
 @ControllerAdvice
 public class ErrorHandler {
-    private final ResourceBundle resourceBundle = ResourceBundle.getBundle("error");
+    private final ResourceBundle resourceBundle = ResourceBundle.getBundle("api-error");
 
     @ExceptionHandler(InvalidSnippetException.class)
     public ResponseEntity<Object> invalidSnippet(InvalidSnippetException exception) {

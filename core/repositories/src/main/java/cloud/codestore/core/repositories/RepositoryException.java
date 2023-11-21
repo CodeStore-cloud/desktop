@@ -16,7 +16,7 @@ public class RepositoryException extends RuntimeException {
     }
 
     private static String createMessage(String messageKey, Object... messageArguments) {
-        ResourceBundle resourceBundle = ResourceBundle.getBundle("error");
+        ResourceBundle resourceBundle = ResourceBundle.getBundle("repo-error");
 
         if (messageArguments.length == 0)
             return resourceBundle.getString(messageKey);
