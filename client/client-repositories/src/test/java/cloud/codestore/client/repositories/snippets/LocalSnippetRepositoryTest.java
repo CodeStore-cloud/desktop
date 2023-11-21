@@ -2,9 +2,11 @@ package cloud.codestore.client.repositories.snippets;
 
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.repositories.HttpClient;
+import cloud.codestore.client.repositories.tags.TagRepository;
 import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
 import cloud.codestore.jsonapi.document.ResourceCollectionDocument;
 import cloud.codestore.jsonapi.document.SingleResourceDocument;
+import cloud.codestore.jsonapi.relationship.Relationship;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,18 +20,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("The local snippet repository")
+@DisplayName("The snippet repository")
 class LocalSnippetRepositoryTest {
     private static final String SNIPPETS_URL = "http://localhost:8080/snippets";
     private static final String SNIPPET_URI = "http://localhost:8080/snippets/1";
+    private static final String TAGS_URI = "http://localhost:8080/tags?filter[snippet]=1";
 
     @Mock
     private HttpClient client;
-    private LocalSnippetRepository repository;
+    @Mock
+    private TagRepository tagRepository;
+    private SnippetRepository repository;
 
     @BeforeEach
     void setUp() {
-        repository = new LocalSnippetRepository(client);
+        repository = new SnippetRepository(client, tagRepository);
     }
 
     @Test
@@ -61,6 +66,7 @@ class LocalSnippetRepositoryTest {
                 "System.out.println(\"Hello, World!\");"
         ));
         when(client.get(SNIPPET_URI, SnippetResource.class)).thenReturn(document);
+        when(tagRepository.get(TAGS_URI)).thenReturn(List.of("hello", "world"));
 
         Snippet snippet = repository.get(SNIPPET_URI);
 
@@ -68,6 +74,7 @@ class LocalSnippetRepositoryTest {
         assertThat(snippet.getTitle()).isEqualTo("A single snippet");
         assertThat(snippet.getDescription()).isEqualTo("With a short description");
         assertThat(snippet.getCode()).isEqualTo("System.out.println(\"Hello, World!\");");
+        assertThat(snippet.getTags()).containsExactlyInAnyOrder("hello", "world");
     }
 
     private SnippetResource[] testSnippets() {
@@ -88,6 +95,7 @@ class LocalSnippetRepositoryTest {
         lenient().when(snippet.getTitle()).thenReturn(title);
         lenient().when(snippet.getDescription()).thenReturn(description);
         lenient().when(snippet.getCode()).thenReturn(code);
+        lenient().when(snippet.getTags()).thenReturn(new Relationship(TAGS_URI));
         return snippet;
     }
 }

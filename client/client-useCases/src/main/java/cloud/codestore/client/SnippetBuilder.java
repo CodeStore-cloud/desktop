@@ -1,6 +1,7 @@
 package cloud.codestore.client;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 /**
  * A builder for dynamically creating {@link Snippet code snippets}.
@@ -11,6 +12,7 @@ public class SnippetBuilder {
     private String title;
     private String description;
     private String code;
+    private List<String> tags;
     private OffsetDateTime created;
     private OffsetDateTime modified;
 
@@ -39,6 +41,11 @@ public class SnippetBuilder {
         return this;
     }
 
+    public SnippetBuilder tags(List<String> tags) {
+        this.tags = tags;
+        return this;
+    }
+
     public SnippetBuilder created(OffsetDateTime created) {
         this.created = created;
         return this;
@@ -50,6 +57,6 @@ public class SnippetBuilder {
     }
 
     public Snippet build() {
-        return new Snippet(uri, title, description, code, language, created, modified);
+        return new Snippet(uri, title, description, code, language, tags, created, modified);
     }
 }

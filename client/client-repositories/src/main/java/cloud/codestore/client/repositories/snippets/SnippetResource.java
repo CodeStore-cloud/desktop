@@ -16,6 +16,7 @@ public class SnippetResource extends ResourceObject {
     private OffsetDateTime created;
     private OffsetDateTime modified;
     private Relationship language;
+    private Relationship tags;
 
     @JsonCreator
     public SnippetResource(
@@ -24,7 +25,8 @@ public class SnippetResource extends ResourceObject {
             @JsonProperty("code") String code,
             @JsonProperty("created") String created,
             @JsonProperty("modified") String modified,
-            @JsonProperty("language") Relationship language
+            @JsonProperty("language") Relationship language,
+            @JsonProperty("tags") Relationship tags
     ) {
         super(RESOURCE_TYPE);
         this.title = title;
@@ -33,6 +35,7 @@ public class SnippetResource extends ResourceObject {
         this.created = created == null ? null : OffsetDateTime.parse(created);
         this.modified = modified == null ? null : OffsetDateTime.parse(modified);
         this.language = language;
+        this.tags = tags;
     }
 
     public String getTitle() {
@@ -57,5 +60,9 @@ public class SnippetResource extends ResourceObject {
 
     public Relationship getLanguage() {
         return language;
+    }
+
+    public Relationship getTags() {
+        return tags;
     }
 }

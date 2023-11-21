@@ -4,10 +4,11 @@
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
       fx:controller="cloud.codestore.client.ui.snippet.SnippetController"
-      id="snippet" stylesheets="@snippet.css">
+      id="snippet" stylesheets="@snippet.css" styleClass="primarySpacing">
     <fx:include source="./title/title.fxml" fx:id="snippetTitle"/>
     <Separator/>
     <fx:include source="./description/description.fxml" fx:id="snippetDescription"/>
     <Separator/>
     <fx:include source="./code/code.fxml" fx:id="snippetCode"/>
+    <fx:include source="./details/details.fxml" fx:id="snippetDetails"/>
 </VBox>

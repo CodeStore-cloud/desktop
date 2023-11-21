@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import cloud.codestore.client.ui.separator.Separator?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="cloud.codestore.client.ui.snippet.details.SnippetDetails"
+      fx:id="details" stylesheets="@details.css" styleClass="primarySpacing">
+    <Separator/>
+    <HBox>
+        <FlowPane fx:id="tagPane" />
+    </HBox>
+</VBox>

@@ -15,6 +15,10 @@
     -fx-padding: size.$primaryPadding;
 }
 
+.primarySpacing {
+    -fx-spacing: size.$primaryPadding;
+}
+
 .bordered {
     -fx-border-insets: 0;
     -fx-border-radius: 0;

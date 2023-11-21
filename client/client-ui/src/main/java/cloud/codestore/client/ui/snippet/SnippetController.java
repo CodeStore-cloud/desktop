@@ -5,6 +5,7 @@ import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.selection.list.SnippetSelectedEvent;
 import cloud.codestore.client.ui.snippet.code.SnippetCode;
 import cloud.codestore.client.ui.snippet.description.SnippetDescription;
+import cloud.codestore.client.ui.snippet.details.SnippetDetails;
 import cloud.codestore.client.ui.snippet.title.SnippetTitle;
 import cloud.codestore.client.usecases.readsnippet.ReadSnippet;
 import com.google.common.eventbus.EventBus;
@@ -23,10 +24,12 @@ public class SnippetController {
     private SnippetDescription snippetDescriptionController;
     @FXML
     private SnippetCode snippetCodeController;
+    @FXML
+    private SnippetDetails snippetDetailsController;
 
     SnippetController(@Nonnull ReadSnippet readSnippetUseCase, @Nonnull EventBus eventBus) {
-        eventBus.register(this);
         this.readSnippetUseCase = readSnippetUseCase;
+        eventBus.register(this);
     }
 
     @Subscribe
@@ -35,5 +38,6 @@ public class SnippetController {
         snippetTitleController.setText(snippet.getTitle());
         snippetDescriptionController.setText(snippet.getDescription());
         snippetCodeController.setText(snippet.getCode());
+        snippetDetailsController.setTags(snippet.getTags());
     }
 }

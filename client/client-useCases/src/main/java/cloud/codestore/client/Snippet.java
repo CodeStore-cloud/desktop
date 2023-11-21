@@ -3,6 +3,8 @@ package cloud.codestore.client;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -14,6 +16,7 @@ public class Snippet {
     private final String description;
     private final String code;
     private final Language language;
+    private final List<String> tags;
     private final OffsetDateTime created;
     private final OffsetDateTime modified;
 
@@ -23,6 +26,7 @@ public class Snippet {
             @Nullable String description,
             @Nullable String code,
             @Nullable Language language,
+            @Nullable List<String> tags,
             @Nullable OffsetDateTime created,
             @Nullable OffsetDateTime modified
     ) {
@@ -31,6 +35,7 @@ public class Snippet {
         this.description = description;
         this.code = code;
         this.language = language;
+        this.tags = tags == null ? Collections.emptyList() : tags;
         this.created = created;
         this.modified = modified;
     }
@@ -57,6 +62,11 @@ public class Snippet {
     @Nullable
     public String getCode() {
         return code;
+    }
+
+    @Nonnull
+    public List<String> getTags() {
+        return tags;
     }
 
     @Nullable
