@@ -21,11 +21,11 @@ class TagRepositoryTest {
 
     @Mock
     private HttpClient client;
-    private TagRepository repository;
+    private LocalTagRepository repository;
 
     @BeforeEach
     void setUp() {
-        repository = new TagRepository(client);
+        repository = new LocalTagRepository(client);
     }
 
     @Test

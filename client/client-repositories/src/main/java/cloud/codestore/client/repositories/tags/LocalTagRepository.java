@@ -1,15 +1,17 @@
 package cloud.codestore.client.repositories.tags;
 
 import cloud.codestore.client.repositories.HttpClient;
+import cloud.codestore.client.repositories.Repository;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.List;
 
-public class TagRepository implements cloud.codestore.client.TagRepository {
+@Repository
+public class LocalTagRepository implements cloud.codestore.client.TagRepository {
     private final HttpClient client;
 
-    TagRepository(HttpClient client) {
+    LocalTagRepository(HttpClient client) {
         this.client = client;
     }
 
@@ -17,7 +19,8 @@ public class TagRepository implements cloud.codestore.client.TagRepository {
     @Override
     public List<String> get(String tagsUri) {
         var resourceCollection = client.getCollection(tagsUri, TagResource.class);
-        return Arrays.stream(resourceCollection.getData())
+        TagResource[] data = resourceCollection.getData(TagResource.class);
+        return Arrays.stream(data)
                      .map(TagResource::getName)
                      .toList();
     }

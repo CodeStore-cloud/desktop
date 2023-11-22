@@ -2,7 +2,7 @@ package cloud.codestore.client.repositories.snippets;
 
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.repositories.HttpClient;
-import cloud.codestore.client.repositories.tags.TagRepository;
+import cloud.codestore.client.repositories.tags.LocalTagRepository;
 import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
 import cloud.codestore.jsonapi.document.ResourceCollectionDocument;
 import cloud.codestore.jsonapi.document.SingleResourceDocument;
@@ -29,12 +29,12 @@ class SnippetRepositoryTest {
     @Mock
     private HttpClient client;
     @Mock
-    private TagRepository tagRepository;
-    private SnippetRepository repository;
+    private LocalTagRepository tagRepository;
+    private LocalSnippetRepository repository;
 
     @BeforeEach
     void setUp() {
-        repository = new SnippetRepository(client, tagRepository);
+        repository = new LocalSnippetRepository(client, tagRepository);
     }
 
     @Test
