@@ -28,15 +28,17 @@ class ListSnippetsTest {
     }
 
     @Test
-    @DisplayName("returns code snippets based on the filter properties")
+    @DisplayName("returns code snippets based on the filter- and sort-properties")
     void returnAllSnippets() {
         var filter = new FilterProperties();
+        var sort = new SortProperties();
         var expectedResult = filteredSnippets();
-        when(query.readSnippets(filter)).thenReturn(expectedResult);
+        when(query.readSnippets(filter, sort)).thenReturn(expectedResult);
 
-        var snippets = useCase.list(filter);
+        var snippets = useCase.list(filter, sort);
+
         assertThat(snippets).isSameAs(expectedResult);
-        verify(query).readSnippets(filter);
+        verify(query).readSnippets(filter, sort);
     }
 
     private List<Snippet> filteredSnippets() {

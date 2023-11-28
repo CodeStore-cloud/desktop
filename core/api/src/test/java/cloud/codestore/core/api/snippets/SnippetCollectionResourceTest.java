@@ -5,10 +5,12 @@ import cloud.codestore.core.Snippet;
 import cloud.codestore.core.TagNotExistsException;
 import cloud.codestore.core.usecases.listsnippets.FilterProperties;
 import cloud.codestore.core.usecases.listsnippets.ListSnippets;
+import cloud.codestore.core.usecases.listsnippets.SortProperties;
 import cloud.codestore.core.usecases.readlanguage.LanguageNotExistsException;
 import cloud.codestore.core.usecases.readlanguage.ReadLanguage;
 import cloud.codestore.core.usecases.readtags.ReadTags;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -21,12 +23,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static cloud.codestore.core.usecases.listsnippets.SortProperties.SnippetProperty;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Every.everyItem;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ReadSnippetCollectionController.class)
@@ -40,10 +43,14 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
     @MockBean
     private ReadTags readTagsUseCase;
 
+    @BeforeEach
+    void setUp() {
+        lenient().when(listSnippetsUseCase.list(any(), any())).thenReturn(snippetList());
+    }
+
     @Test
     @DisplayName("returns all available snippets")
     void returnSnippetCollection() throws Exception {
-        when(listSnippetsUseCase.list(any())).thenReturn(snippetList());
         GET("/snippets")
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(JsonApiDocument.MEDIA_TYPE))
@@ -54,6 +61,13 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
                 .andExpect(jsonPath("$.data[*].links.self").exists());
     }
 
+    @Test
+    @DisplayName("sorts the code snippets creation time by default")
+    void sortByCreationTime() throws Exception {
+        GET("/snippets").andExpect(status().isOk());
+        verify(listSnippetsUseCase).list(any(), eq(new SortProperties()));
+    }
+
     @Nested
     @DisplayName("with language filter")
     class FilterByLanguage {
@@ -61,12 +75,11 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
         @DisplayName("returns all snippets of the specified programming language")
         void filterByLanguage() throws Exception {
             when(readLanguageUseCase.read(10)).thenReturn(Language.JAVA);
-            when(listSnippetsUseCase.list(any())).thenReturn(snippetList());
             var argument = ArgumentCaptor.forClass(FilterProperties.class);
 
             GET("/snippets?filter[language]=10").andExpect(status().isOk());
 
-            verify(listSnippetsUseCase).list(argument.capture());
+            verify(listSnippetsUseCase).list(argument.capture(), any());
             assertThat(argument.getValue().language()).isEqualTo(Language.JAVA);
         }
 
@@ -91,12 +104,11 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
         @DisplayName("returns all snippets with the specified tags")
         void filterByTags() throws Exception {
             when(readTagsUseCase.readTags(any(String[].class))).thenReturn(Set.of("TagA", "TagB", "TagC"));
-            when(listSnippetsUseCase.list(any())).thenReturn(snippetList());
             var argument = ArgumentCaptor.forClass(FilterProperties.class);
 
             GET("/snippets?filter[tags]=TagA,TagB,TagC").andExpect(status().isOk());
 
-            verify(listSnippetsUseCase).list(argument.capture());
+            verify(listSnippetsUseCase).list(argument.capture(), any());
             assertThat(argument.getValue().tags()).containsExactlyInAnyOrder("TagA", "TagB", "TagC");
         }
 
@@ -105,6 +117,46 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
         void filterByInvalidTag() throws Exception {
             when(readTagsUseCase.readTags(any(String[].class))).thenThrow(new TagNotExistsException("InvalidTag"));
             GET("/snippets?filter[tags]=InvalidTag").andExpect(status().isNotFound());
+        }
+    }
+
+    @Nested
+    @DisplayName("with sort parameter")
+    class Sort {
+        @Test
+        @DisplayName("sorts snippets by title")
+        void sortByTitle() throws Exception {
+            GET("/snippets?sort=title").andExpect(status().isOk());
+            verify(listSnippetsUseCase).list(any(), eq(new SortProperties(SnippetProperty.TITLE, true)));
+
+            GET("/snippets?sort=-title").andExpect(status().isOk());
+            verify(listSnippetsUseCase).list(any(), eq(new SortProperties(SnippetProperty.TITLE, false)));
+        }
+
+        @Test
+        @DisplayName("sorts snippets by creation time")
+        void sortByCreationTime() throws Exception {
+            GET("/snippets?sort=created").andExpect(status().isOk());
+            verify(listSnippetsUseCase).list(any(), eq(new SortProperties(SnippetProperty.CREATED, true)));
+
+            GET("/snippets?sort=-created").andExpect(status().isOk());
+            verify(listSnippetsUseCase).list(any(), eq(new SortProperties(SnippetProperty.CREATED, false)));
+        }
+
+        @Test
+        @DisplayName("sorts snippets by modification time")
+        void sortByModificationTime() throws Exception {
+            GET("/snippets?sort=modified").andExpect(status().isOk());
+            verify(listSnippetsUseCase).list(any(), eq(new SortProperties(SnippetProperty.MODIFIED, true)));
+
+            GET("/snippets?sort=-modified").andExpect(status().isOk());
+            verify(listSnippetsUseCase).list(any(), eq(new SortProperties(SnippetProperty.MODIFIED, false)));
+        }
+
+        @Test
+        @DisplayName("fails if the sort parameter is invalid")
+        void failForInvalidSortParameter() throws Exception {
+            GET("/snippets?sort=unknownProperty").andExpect(status().isBadRequest());
         }
     }
 

@@ -18,7 +18,7 @@ public class ListSnippets {
     }
 
     @Nonnull
-    public List<Snippet> list(FilterProperties filterProperties) {
-        return query.readSnippets(filterProperties);
+    public List<Snippet> list(FilterProperties filterProperties, SortProperties sortProperties) {
+        return query.readSnippets(filterProperties, sortProperties);
     }
 }

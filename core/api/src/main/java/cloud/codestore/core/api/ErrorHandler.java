@@ -81,8 +81,22 @@ public class ErrorHandler {
         return notFound(errorObject);
     }
 
+    @ExceptionHandler(InvalidParameterException.class)
+    public ResponseEntity<Object> invalidParameter(InvalidParameterException exception) {
+        ErrorObject errorObject = new ErrorObject().setCode("INVALID_PARAMETER")
+                                                   .setTitle(message("invalidParameter.title"))
+                                                   .setDetail(message("invalidParameter.detail", exception.getParameterName()))
+                                                   .setSource(new ErrorSource().setParameter(exception.getParameterName()));
+
+        return badRequest(errorObject);
+    }
+
     private ResponseEntity<Object> notFound(ErrorObject... errorObjects) {
         return createResponse(HttpStatus.NOT_FOUND, errorObjects);
+    }
+
+    private ResponseEntity<Object> badRequest(ErrorObject... errorObjects) {
+        return createResponse(HttpStatus.BAD_REQUEST, errorObjects);
     }
 
     private ResponseEntity<Object> createResponse(HttpStatus httpStatus, ErrorObject... errorObjects) {

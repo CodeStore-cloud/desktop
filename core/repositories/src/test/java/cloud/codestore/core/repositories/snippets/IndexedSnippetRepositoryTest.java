@@ -4,11 +4,15 @@ import cloud.codestore.core.Snippet;
 import cloud.codestore.core.SnippetNotExistsException;
 import cloud.codestore.core.repositories.tags.TagRepository;
 import cloud.codestore.core.usecases.listsnippets.FilterProperties;
-import org.apache.lucene.search.Query;
+import cloud.codestore.core.usecases.listsnippets.SortProperties;
+import org.apache.lucene.search.SortField;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -18,6 +22,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static cloud.codestore.core.usecases.listsnippets.SortProperties.SnippetProperty;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -86,15 +91,40 @@ class IndexedSnippetRepositoryTest {
     @DisplayName("filters the snippets to read from the file system")
     @SuppressWarnings("unchecked")
     void filterSnippets() {
-        FilterProperties filterProperties = mock(FilterProperties.class);
-        when(index.query(any(Query.class))).thenReturn(Stream.of("1", "2", "3"));
+        when(index.query(any(), any())).thenReturn(Stream.of("1", "2", "3"));
         when(localRepo.readSnippets(any(Stream.class))).thenReturn(
                 Stream.of(snippetWithId("1"), snippetWithId("2"), snippetWithId("3")));
 
-        var snippets = repository.readSnippets(filterProperties);
+        var snippets = repository.readSnippets(new FilterProperties(), new SortProperties());
 
         assertThat(snippets).containsExactly(snippetWithId("1"), snippetWithId("2"), snippetWithId("3"));
         verify(localRepo).readSnippets(any(Stream.class));
+    }
+
+    @ParameterizedTest
+    @MethodSource("sortParams")
+    @DisplayName("sorts the requested snippets")
+    void sortSnippets(SortProperties sortProperties, String expectedSnippetField, boolean expectedOrder) {
+        var sortFieldArgument = ArgumentCaptor.forClass(SortField.class);
+        when(index.query(any(), any())).thenReturn(Stream.empty());
+
+        repository.readSnippets(new FilterProperties(), sortProperties);
+
+        verify(index).query(any(), sortFieldArgument.capture());
+        SortField sortField = sortFieldArgument.getValue();
+        assertThat(sortField.getField()).isEqualTo(expectedSnippetField);
+        assertThat(sortField.getReverse()).isEqualTo(!expectedOrder);
+    }
+
+    private static Stream<Arguments> sortParams() {
+        return Stream.of(
+                Arguments.of(new SortProperties(SnippetProperty.TITLE, true), "title", true),
+                Arguments.of(new SortProperties(SnippetProperty.TITLE, false), "title", false),
+                Arguments.of(new SortProperties(SnippetProperty.CREATED, true), "created", true),
+                Arguments.of(new SortProperties(SnippetProperty.CREATED, false), "created", false),
+                Arguments.of(new SortProperties(SnippetProperty.MODIFIED, true), "modified", true),
+                Arguments.of(new SortProperties(SnippetProperty.MODIFIED, false), "modified", false)
+        );
     }
 
     private Snippet testSnippet() {

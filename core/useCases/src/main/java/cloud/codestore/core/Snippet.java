@@ -7,6 +7,7 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Represents a code snippet.
@@ -85,6 +86,11 @@ public class Snippet {
     @Nullable
     public OffsetDateTime getModified() {
         return modified;
+    }
+
+    @Nonnull
+    public Optional<OffsetDateTime> getOptionalModified() {
+        return Optional.ofNullable(modified);
     }
 
     @Override

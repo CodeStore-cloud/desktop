@@ -6,19 +6,15 @@ import org.apache.lucene.analysis.core.KeywordAnalyzer;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
+import org.apache.lucene.document.*;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.*;
 import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.util.BytesRef;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
@@ -41,6 +37,8 @@ class SnippetIndex {
         static final String DESCRIPTION = "description";
         static final String CODE = "code";
         static final String TAG = "tag";
+        static final String CREATED = "created";
+        static final String MODIFIED = "modified";
     }
 
     private Directory index;
@@ -59,7 +57,7 @@ class SnippetIndex {
      * @return a potentially empty list containing the IDs of the found code snippets.
      */
     @Nonnull
-    Stream<String> query(Query query) {
+    Stream<String> query(Query query, SortField sortField) {
         try {
             if (DirectoryReader.indexExists(index)) {
                 if (reader == null) {
@@ -74,7 +72,7 @@ class SnippetIndex {
                     }
                 }
 
-                TopDocs searchResults = searcher.search(query, Integer.MAX_VALUE);
+                TopDocs searchResults = searcher.search(query, Integer.MAX_VALUE, new Sort(sortField));
                 return Arrays.stream(searchResults.scoreDocs)
                              .map(scoreDoc -> getId(scoreDoc.doc));
             }
@@ -167,9 +165,11 @@ class SnippetIndex {
         Document document = new Document();
 
         document.add(new StringField(SnippetField.ID, snippet.getId(), Field.Store.YES));
-        document.add(new TextField(SnippetField.TITLE, snippet.getTitle().toLowerCase(), Field.Store.NO));
+        document.add(new SortedDocValuesField(SnippetField.TITLE, new BytesRef(snippet.getTitle().toLowerCase())));
         document.add(new TextField(SnippetField.DESCRIPTION, snippet.getDescription(), Field.Store.NO));
         document.add(new TextField(SnippetField.CODE, snippet.getCode(), Field.Store.NO));
+        document.add(new NumericDocValuesField(SnippetField.CREATED, snippet.getCreated().toEpochSecond()));
+        document.add(new NumericDocValuesField(SnippetField.MODIFIED, snippet.getOptionalModified().orElse(snippet.getCreated()).toEpochSecond()));
 
         int languageId = snippet.getLanguage().getId();
         document.add(new StringField(SnippetField.LANGUAGE, String.valueOf(languageId), Field.Store.NO));
