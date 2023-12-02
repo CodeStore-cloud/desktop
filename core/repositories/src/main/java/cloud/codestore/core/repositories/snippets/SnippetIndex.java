@@ -165,11 +165,14 @@ class SnippetIndex {
         Document document = new Document();
 
         document.add(new StringField(SnippetField.ID, snippet.getId(), Field.Store.YES));
-        document.add(new SortedDocValuesField(SnippetField.TITLE, new BytesRef(snippet.getTitle().toLowerCase())));
         document.add(new TextField(SnippetField.DESCRIPTION, snippet.getDescription(), Field.Store.NO));
         document.add(new TextField(SnippetField.CODE, snippet.getCode(), Field.Store.NO));
         document.add(new NumericDocValuesField(SnippetField.CREATED, snippet.getCreated().toEpochSecond()));
         document.add(new NumericDocValuesField(SnippetField.MODIFIED, snippet.getOptionalModified().orElse(snippet.getCreated()).toEpochSecond()));
+
+        String title = snippet.getTitle().toLowerCase();
+        document.add(new SortedDocValuesField(SnippetField.TITLE, new BytesRef(title)));
+        document.add(new TextField(SnippetField.TITLE, title, Field.Store.NO));
 
         int languageId = snippet.getLanguage().getId();
         document.add(new StringField(SnippetField.LANGUAGE, String.valueOf(languageId), Field.Store.NO));
