@@ -13,7 +13,7 @@ public class InvalidParameterException extends Exception {
     }
 
     @Nonnull
-    public String getParameterName() {
+    String getParameterName() {
         return parameterName;
     }
 }

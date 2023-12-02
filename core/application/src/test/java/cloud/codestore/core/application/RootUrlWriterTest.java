@@ -20,7 +20,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("The root-url writer")
 class RootUrlWriterTest {
-
     @Mock
     private Directory binDirectory;
     @Mock
@@ -44,7 +43,6 @@ class RootUrlWriterTest {
         when(rootUrlFile.path()).thenReturn(filePath);
         java.io.File nativeFile = mock(java.io.File.class);
         when(filePath.toFile()).thenReturn(nativeFile);
-
 
         new RootUrlWriter(binDirectory).writeRootUrl();
 
