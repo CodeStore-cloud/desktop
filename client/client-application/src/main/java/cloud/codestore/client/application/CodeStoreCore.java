@@ -11,6 +11,9 @@ import javafx.application.Application;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.*;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 /**
  * The main class of the {CodeStore} Client.
  */
@@ -31,11 +34,21 @@ public class CodeStoreCore {
 
     @Bean
     public HttpClient httpClient() {
-        return new HttpClient("http://localhost:9000");
+        String apiRootUrl = new RootUrlReader().readApiUrl(getBinDirectory());
+        return new HttpClient(apiRootUrl);
     }
 
     @Bean
     public EventBus eventBus() {
         return new EventBus();
+    }
+
+    private Path getBinDirectory() {
+        Path devFile = Path.of("bin");
+        if (Files.exists(devFile)) {
+            return devFile;
+        }
+
+        return Path.of("..");
     }
 }
