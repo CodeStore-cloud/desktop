@@ -15,12 +15,18 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Configuration
-public class RepositoryConfiguration {
+class RepositoryConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(RepositoryConfiguration.class);
 
     @Value("${codestore.data:}")
     private String dataPath;
 
+    @Value("${codestore.bin:..}")
+    private String binaryPath;
+
+    /**
+     * @return an {@link ObjectMapper} for serializing and deserializing code snippets.
+     */
     @Bean("snippetMapper")
     public ObjectMapper objectMapper() {
         return new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
@@ -29,6 +35,9 @@ public class RepositoryConfiguration {
                                  .configure(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE, false);
     }
 
+    /**
+     * @return the {@link Directory} where the user specific data are located.
+     */
     @Bean("data")
     public Directory dataDirectory() {
         Directory dataDirectory;
@@ -44,8 +53,21 @@ public class RepositoryConfiguration {
         return dataDirectory;
     }
 
+    /**
+     * @return the {@link Directory} where the code snippets are located.
+     */
     @Bean("snippets")
     public Directory snippetsDirectory(@Qualifier("data") Directory dataDirectory) {
         return dataDirectory.getSubDirectory("snippets");
+    }
+
+    /**
+     * @return the {@link Directory} where the binary executables of {CodeStore} are located.
+     */
+    @Bean("bin")
+    public Directory binDirectory() {
+        Directory binDirectory = new Directory(Path.of(binaryPath).toAbsolutePath());
+        LOGGER.info("Binary directory: {}", binDirectory);
+        return binDirectory;
     }
 }

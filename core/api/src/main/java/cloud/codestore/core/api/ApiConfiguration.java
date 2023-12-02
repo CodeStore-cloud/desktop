@@ -12,6 +12,9 @@ import org.springframework.context.annotation.Primary;
 
 @Configuration
 public class ApiConfiguration {
+    /**
+     * @return an {@link ObjectMapper} for serializing and deserializing JSON:API DTOs.
+     */
     @Bean
     @Primary
     public ObjectMapper objectMapper() {
