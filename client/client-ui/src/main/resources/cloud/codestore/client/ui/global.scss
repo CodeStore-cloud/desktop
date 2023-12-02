@@ -27,13 +27,20 @@
     -fx-border-color: colors.$borderColor;
 }
 
-/* remove shadow and focus-shadow of inputs */
+// remove border, shadow and focus-shadow of inputs
 .text-field, .text-area, .text-area .content {
     -fx-background-color: -fx-text-box-border, -fx-control-inner-background;
 }
 
-/* Show input placeholder even when input is focused */
+// Show input placeholder even when input is focused
 .text-field, .text-field:focused,
 .text-area, .text-area:focused {
     -fx-prompt-text-fill: derive(-fx-control-inner-background, -30%);
+}
+
+// remove default border fom JavaFX elements
+.text-field,
+.text-area,
+.list-view, .list-view .list-cell {
+    -fx-background-insets: 0;
 }

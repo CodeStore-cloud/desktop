@@ -3,6 +3,7 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns:fx="http://javafx.com/fxml" xmlns="http://javafx.com/javafx"
-      fx:controller="cloud.codestore.client.ui.selection.list.SnippetList">
+      fx:controller="cloud.codestore.client.ui.selection.list.SnippetList"
+      stylesheets="@snippetList.css">
     <ListView fx:id="list" VBox.vgrow="ALWAYS"/>
 </VBox>

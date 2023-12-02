@@ -1,0 +1,18 @@
+@use "../../colors";
+@use "sass:color";
+
+#list {
+    .list-cell {
+        &:filled:selected {
+            -fx-background-color: color.change(colors.$codeStoreBlue, $alpha: 0.1)
+        }
+
+        &:filled:selected {
+            -fx-background: -fx-control-inner-background;
+        }
+
+        &:odd:filled:selected {
+            -fx-background: -fx-control-inner-background-alt;
+        }
+    }
+}
