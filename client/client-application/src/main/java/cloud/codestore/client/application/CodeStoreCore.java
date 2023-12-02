@@ -34,8 +34,10 @@ public class CodeStoreCore {
 
     @Bean
     public HttpClient httpClient() {
-        String apiRootUrl = new RootUrlReader().readApiUrl(getBinDirectory());
-        return new HttpClient(apiRootUrl);
+        Path binDirectory = getBinDirectory();
+        String apiRootUrl = new RootUrlReader().readApiUrl(binDirectory);
+        String accessToken = new AccessTokenReader().readAccessToken(binDirectory);
+        return new HttpClient(apiRootUrl, accessToken);
     }
 
     @Bean

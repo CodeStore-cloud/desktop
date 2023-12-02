@@ -17,8 +17,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("The http client")
 class HttpClientTest {
+    private static final String ACCESS_TOKEN = "dummy-token";
+
     private static MockWebServer mockBackEnd;
-    private HttpClient client = new HttpClient("http://localhost:8080");
+    private HttpClient client = new HttpClient("http://localhost:8080", ACCESS_TOKEN);
 
     @BeforeAll
     static void beforeAll() throws IOException {
@@ -116,8 +118,17 @@ class HttpClientTest {
 
         var document = client.getCollection("http://localhost:8080/snippets", SnippetResource.class);
 
-        SnippetResource[] snippetResources = document.getData();
+        SnippetResource[] snippetResources = document.getData(SnippetResource.class);
         assertThat(snippetResources).isNotNull().hasSize(3);
+    }
+
+    @Test
+    @DisplayName("sends the access token in the Authorization header")
+    void sendAuthorizationHeader() throws InterruptedException {
+        retrieveCollectionUrls();
+
+        String token = mockBackEnd.takeRequest().getHeader(HttpHeaders.AUTHORIZATION);
+        assertThat(token).isEqualTo("Bearer " + ACCESS_TOKEN);
     }
 
     private void setResponse(String responseBody) {

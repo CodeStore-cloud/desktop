@@ -28,7 +28,7 @@ public class HttpClient {
     private final String rootUrl;
     private String snippetCollectionUrl;
 
-    public HttpClient(String rootUrl) {
+    public HttpClient(@Nonnull String rootUrl, @Nonnull String accessToken) {
         this.rootUrl = rootUrl;
 
         ObjectMapper objectMapper = new JsonApiObjectMapper()
@@ -41,7 +41,10 @@ public class HttpClient {
 
         this.client = WebClient.builder()
                                .uriBuilderFactory(uriBuilderFactory)
-                               .defaultHeader(HttpHeaders.ACCEPT, JsonApiDocument.MEDIA_TYPE)
+                               .defaultHeaders(httpHeaders -> {
+                                   httpHeaders.set(HttpHeaders.ACCEPT, JsonApiDocument.MEDIA_TYPE);
+                                   httpHeaders.setBearerAuth(accessToken);
+                               })
                                .codecs(configurer -> {
                                    MimeType mimeType = MimeType.valueOf(JsonApiDocument.MEDIA_TYPE);
                                    configurer.defaultCodecs().jackson2JsonEncoder(new Jackson2JsonEncoder(objectMapper, mimeType));
