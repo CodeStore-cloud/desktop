@@ -9,12 +9,12 @@ import java.nio.file.Path;
  * Reads the root URL to the {CodeStore} Core API.
  */
 class RootUrlReader {
-    String readApiUrl(@Nonnull Path binDirectory) {
-        Path rootUrlFile = binDirectory.resolve("core-api-url").toAbsolutePath();
+    String readApiUrl(@Nonnull Path directory) {
+        Path file = directory.resolve("core-api-url").toAbsolutePath();
         try {
-            return Files.readString(rootUrlFile);
+            return Files.readString(file);
         } catch (IOException ioException) {
-            throw new IllegalStateException("Unable to read API URL from file " + rootUrlFile, ioException);
+            throw new IllegalStateException("Unable to read API URL from file " + file, ioException);
         }
     }
 }

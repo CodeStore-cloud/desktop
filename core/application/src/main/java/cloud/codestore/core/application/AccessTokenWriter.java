@@ -12,20 +12,20 @@ import org.springframework.stereotype.Component;
  */
 @Component
 class AccessTokenWriter {
-    private final Directory binDirectory;
+    private final Directory dataDirectory;
     private final String accessToken;
 
     AccessTokenWriter(
-            @Qualifier("bin") Directory binDirectory,
+            @Qualifier("data") Directory dataDirectory,
             @Qualifier("accessToken") String accessToken
     ) {
-        this.binDirectory = binDirectory;
+        this.dataDirectory = dataDirectory;
         this.accessToken = accessToken;
     }
 
     @EventListener(ApplicationReadyEvent.class)
     public void writeAccessToken() {
-        File tokenFile = binDirectory.getFile("core-api-access-token");
+        File tokenFile = dataDirectory.getFile("core-api-access-token");
         tokenFile.write(accessToken);
         tokenFile.path().toFile().deleteOnExit();
     }

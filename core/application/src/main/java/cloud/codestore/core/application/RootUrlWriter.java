@@ -13,16 +13,16 @@ import org.springframework.stereotype.Component;
  */
 @Component
 class RootUrlWriter {
-    private final Directory binDirectory;
+    private final Directory dataDirectory;
 
-    RootUrlWriter(@Qualifier("bin") Directory binDirectory) {
-        this.binDirectory = binDirectory;
+    RootUrlWriter(@Qualifier("data") Directory dataDirectory) {
+        this.dataDirectory = dataDirectory;
     }
 
     @EventListener(ApplicationReadyEvent.class)
     public void writeRootUrl() {
         String rootUrl = UriFactory.createUri("");
-        File rootUrlFile = binDirectory.getFile("core-api-url");
+        File rootUrlFile = dataDirectory.getFile("core-api-url");
         rootUrlFile.write(rootUrl);
         rootUrlFile.path().toFile().deleteOnExit();
     }

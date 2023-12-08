@@ -20,20 +20,20 @@ class AccessTokenWriterTest {
     private static final String ACCESS_TOKEN = RandomString.make();
 
     @Mock
-    private Directory binDirectory;
+    private Directory directory;
     @Mock
     private File accessTokenFile;
 
     @Test
-    @DisplayName("writes the API root url to a file in the bin directory")
+    @DisplayName("writes the API root url to a file in the data directory")
     void writeUrlToFile() {
-        when(binDirectory.getFile(anyString())).thenReturn(accessTokenFile);
+        when(directory.getFile(anyString())).thenReturn(accessTokenFile);
         Path filePath = mock(Path.class);
         when(accessTokenFile.path()).thenReturn(filePath);
         java.io.File nativeFile = mock(java.io.File.class);
         when(filePath.toFile()).thenReturn(nativeFile);
 
-        new AccessTokenWriter(binDirectory, ACCESS_TOKEN).writeAccessToken();
+        new AccessTokenWriter(directory, ACCESS_TOKEN).writeAccessToken();
 
         verify(accessTokenFile).write(ACCESS_TOKEN);
         verify(nativeFile).deleteOnExit();

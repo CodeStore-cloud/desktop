@@ -9,8 +9,8 @@ import java.nio.file.Path;
  * Reads the access token to the {CodeStore} Core API.
  */
 class AccessTokenReader {
-    String readAccessToken(@Nonnull Path binDirectory) {
-        Path file = binDirectory.resolve("core-api-access-token").toAbsolutePath();
+    String readAccessToken(@Nonnull Path directory) {
+        Path file = directory.resolve("core-api-access-token").toAbsolutePath();
         try {
             return Files.readString(file);
         } catch (IOException ioException) {

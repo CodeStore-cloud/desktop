@@ -13,6 +13,7 @@ import org.springframework.context.annotation.*;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * The main class of the {CodeStore} Client.
@@ -25,18 +26,18 @@ import java.nio.file.Path;
                 classes = {UseCase.class, FxController.class, Repository.class}
         )
 )
-public class CodeStoreCore {
+public class CodeStoreClient {
     public static void main(String[] args) {
-        ApplicationContext context = new AnnotationConfigApplicationContext(CodeStoreCore.class);
+        ApplicationContext context = new AnnotationConfigApplicationContext(CodeStoreClient.class);
         FXMLLoaderFactory.setControllerFactory(context::getBean);
         Application.launch(FxApplication.class);
     }
 
     @Bean
     public HttpClient httpClient() {
-        Path binDirectory = getBinDirectory();
-        String apiRootUrl = new RootUrlReader().readApiUrl(binDirectory);
-        String accessToken = new AccessTokenReader().readAccessToken(binDirectory);
+        Path directory = getDataDirectory();
+        String apiRootUrl = new RootUrlReader().readApiUrl(directory);
+        String accessToken = new AccessTokenReader().readAccessToken(directory);
         return new HttpClient(apiRootUrl, accessToken);
     }
 
@@ -45,12 +46,13 @@ public class CodeStoreCore {
         return new EventBus();
     }
 
-    private Path getBinDirectory() {
-        Path devFile = Path.of("bin");
-        if (Files.exists(devFile)) {
-            return devFile;
+    private Path getDataDirectory() {
+        Path devPath = Path.of("data");
+        if (Files.exists(devPath)) {
+            return devPath;
         }
 
-        return Path.of("..");
+        String userHome = System.getProperty("user.home");
+        return Paths.get(userHome, "CodeStore").toAbsolutePath();
     }
 }

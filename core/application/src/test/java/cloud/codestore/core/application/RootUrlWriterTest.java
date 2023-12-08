@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
 @DisplayName("The root-url writer")
 class RootUrlWriterTest {
     @Mock
-    private Directory binDirectory;
+    private Directory directory;
     @Mock
     private File rootUrlFile;
 
@@ -36,15 +36,15 @@ class RootUrlWriterTest {
     }
 
     @Test
-    @DisplayName("writes the API root url to a file in the bin directory")
+    @DisplayName("writes the API root url to a file in the data directory")
     void writeUrlToFile() {
-        when(binDirectory.getFile(anyString())).thenReturn(rootUrlFile);
+        when(directory.getFile(anyString())).thenReturn(rootUrlFile);
         Path filePath = mock(Path.class);
         when(rootUrlFile.path()).thenReturn(filePath);
         java.io.File nativeFile = mock(java.io.File.class);
         when(filePath.toFile()).thenReturn(nativeFile);
 
-        new RootUrlWriter(binDirectory).writeRootUrl();
+        new RootUrlWriter(directory).writeRootUrl();
 
         verify(rootUrlFile).write("http://localhost:8080");
         verify(nativeFile).deleteOnExit();
