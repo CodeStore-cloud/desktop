@@ -9,16 +9,16 @@ public class SnippetDescription {
     @FXML
     private TextArea snippetDescription;
 
+    @FXML
+    private void initialize() {
+        snippetDescription.setEditable(false);
+    }
+
     public String getText() {
         return snippetDescription.getText();
     }
 
     public void setText(String description) {
         snippetDescription.setText(description);
-    }
-
-    @FXML
-    private void initialize() {
-        snippetDescription.setEditable(false);
     }
 }

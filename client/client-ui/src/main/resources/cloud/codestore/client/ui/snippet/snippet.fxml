@@ -9,6 +9,6 @@
     <Separator/>
     <fx:include source="./description/description.fxml" fx:id="snippetDescription"/>
     <Separator/>
-    <fx:include source="./code/code.fxml" fx:id="snippetCode"/>
+    <fx:include source="./code/code.fxml" fx:id="snippetCode" VBox.vgrow="ALWAYS"/>
     <fx:include source="./details/details.fxml" fx:id="snippetDetails"/>
 </VBox>

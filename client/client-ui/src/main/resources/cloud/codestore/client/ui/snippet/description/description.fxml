@@ -4,5 +4,5 @@
 <TextArea xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
           fx:controller="cloud.codestore.client.ui.snippet.description.SnippetDescription"
           fx:id="snippetDescription" stylesheets="@description.css"
-          promptText="%snippet.description.placeholder">
+          wrapText="true" promptText="%snippet.description.placeholder">
 </TextArea>
