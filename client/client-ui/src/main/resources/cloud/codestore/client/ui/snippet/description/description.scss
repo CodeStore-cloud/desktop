@@ -1,3 +1,6 @@
-#snippetDescription {
+@use "../../size";
 
+#snippetDescription {
+    -fx-min-height: size.$SecondaryElementSize;
+    -fx-max-height: 120px;
 }
