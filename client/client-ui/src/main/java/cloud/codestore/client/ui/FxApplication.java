@@ -7,15 +7,20 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.awt.*;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.util.Optional;
 
 /**
  * The JavaFX main class to show the GUI.
  */
 public class FxApplication extends Application {
+    private static final Logger LOGGER = LogManager.getLogger(FxApplication.class);
+
     @Override
     public void start(Stage window) {
         window.setTitle("{CodeStore}");
@@ -23,6 +28,7 @@ public class FxApplication extends Application {
         showMainWindow(window);
         hideLoadingScreen();
         DefaultBrowser.init(getHostServices());
+        logStartTime();
     }
 
     private void setCodeStoreIcon(Stage window) {
@@ -46,5 +52,10 @@ public class FxApplication extends Application {
     private void hideLoadingScreen() {
         Optional.ofNullable(SplashScreen.getSplashScreen())
                 .ifPresent(SplashScreen::close);
+    }
+
+    private void logStartTime() {
+        long jvmStart = ManagementFactory.getRuntimeMXBean().getStartTime();
+        LOGGER.info("Application started in " + (System.currentTimeMillis() - jvmStart) + "ms");
     }
 }
