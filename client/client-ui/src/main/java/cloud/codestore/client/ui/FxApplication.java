@@ -23,7 +23,7 @@ public class FxApplication extends Application {
 
     @Override
     public void start(Stage window) {
-        window.setTitle("{CodeStore}");
+        window.setTitle("{CodeStore} " + getVersion());
         setCodeStoreIcon(window);
         showMainWindow(window);
         hideLoadingScreen();
@@ -47,6 +47,10 @@ public class FxApplication extends Application {
             exception.printStackTrace(); //TODO show error dialog
             Platform.exit();
         }
+    }
+
+    private String getVersion() {
+        return new VersionReader().readVersion();
     }
 
     private void hideLoadingScreen() {
