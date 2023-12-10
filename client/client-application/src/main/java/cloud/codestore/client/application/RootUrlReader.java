@@ -10,7 +10,7 @@ import java.nio.file.Path;
  */
 class RootUrlReader {
     String readApiUrl(@Nonnull Path directory) {
-        Path file = directory.resolve("core-api-url").toAbsolutePath();
+        Path file = directory.resolve("core-api-url");
         try {
             return Files.readString(file);
         } catch (IOException ioException) {

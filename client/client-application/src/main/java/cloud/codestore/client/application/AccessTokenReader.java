@@ -10,7 +10,7 @@ import java.nio.file.Path;
  */
 class AccessTokenReader {
     String readAccessToken(@Nonnull Path directory) {
-        Path file = directory.resolve("core-api-access-token").toAbsolutePath();
+        Path file = directory.resolve("core-api-access-token");
         try {
             return Files.readString(file);
         } catch (IOException ioException) {
