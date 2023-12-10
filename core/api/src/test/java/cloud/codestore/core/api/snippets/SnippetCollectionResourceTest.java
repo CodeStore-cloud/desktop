@@ -45,7 +45,7 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
 
     @BeforeEach
     void setUp() {
-        lenient().when(listSnippetsUseCase.list(any(), any())).thenReturn(snippetList());
+        lenient().when(listSnippetsUseCase.list(any(), any(), any())).thenReturn(snippetList());
     }
 
     @Test
@@ -65,7 +65,7 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
     @DisplayName("sorts the code snippets creation time by default")
     void sortByCreationTime() throws Exception {
         GET("/snippets").andExpect(status().isOk());
-        verify(listSnippetsUseCase).list(any(), eq(new SortProperties()));
+        verify(listSnippetsUseCase).list(any(), any(), eq(new SortProperties()));
     }
 
     @Nested
@@ -79,7 +79,7 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
 
             GET("/snippets?filter[language]=10").andExpect(status().isOk());
 
-            verify(listSnippetsUseCase).list(argument.capture(), any());
+            verify(listSnippetsUseCase).list(any(), argument.capture(), any());
             assertThat(argument.getValue().language()).isEqualTo(Language.JAVA);
         }
 
@@ -108,7 +108,7 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
 
             GET("/snippets?filter[tags]=TagA,TagB,TagC").andExpect(status().isOk());
 
-            verify(listSnippetsUseCase).list(argument.capture(), any());
+            verify(listSnippetsUseCase).list(any(), argument.capture(), any());
             assertThat(argument.getValue().tags()).containsExactlyInAnyOrder("TagA", "TagB", "TagC");
         }
 
@@ -127,30 +127,30 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
         @DisplayName("sorts snippets by title")
         void sortByTitle() throws Exception {
             GET("/snippets?sort=title").andExpect(status().isOk());
-            verify(listSnippetsUseCase).list(any(), eq(new SortProperties(SnippetProperty.TITLE, true)));
+            verify(listSnippetsUseCase).list(any(), any(), eq(new SortProperties(SnippetProperty.TITLE, true)));
 
             GET("/snippets?sort=-title").andExpect(status().isOk());
-            verify(listSnippetsUseCase).list(any(), eq(new SortProperties(SnippetProperty.TITLE, false)));
+            verify(listSnippetsUseCase).list(any(), any(), eq(new SortProperties(SnippetProperty.TITLE, false)));
         }
 
         @Test
         @DisplayName("sorts snippets by creation time")
         void sortByCreationTime() throws Exception {
             GET("/snippets?sort=created").andExpect(status().isOk());
-            verify(listSnippetsUseCase).list(any(), eq(new SortProperties(SnippetProperty.CREATED, true)));
+            verify(listSnippetsUseCase).list(any(), any(), eq(new SortProperties(SnippetProperty.CREATED, true)));
 
             GET("/snippets?sort=-created").andExpect(status().isOk());
-            verify(listSnippetsUseCase).list(any(), eq(new SortProperties(SnippetProperty.CREATED, false)));
+            verify(listSnippetsUseCase).list(any(), any(), eq(new SortProperties(SnippetProperty.CREATED, false)));
         }
 
         @Test
         @DisplayName("sorts snippets by modification time")
         void sortByModificationTime() throws Exception {
             GET("/snippets?sort=modified").andExpect(status().isOk());
-            verify(listSnippetsUseCase).list(any(), eq(new SortProperties(SnippetProperty.MODIFIED, true)));
+            verify(listSnippetsUseCase).list(any(), any(), eq(new SortProperties(SnippetProperty.MODIFIED, true)));
 
             GET("/snippets?sort=-modified").andExpect(status().isOk());
-            verify(listSnippetsUseCase).list(any(), eq(new SortProperties(SnippetProperty.MODIFIED, false)));
+            verify(listSnippetsUseCase).list(any(), any(), eq(new SortProperties(SnippetProperty.MODIFIED, false)));
         }
 
         @Test

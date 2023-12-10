@@ -6,5 +6,9 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 public interface ReadSnippetsQuery {
-    List<Snippet> readSnippets(@Nonnull FilterProperties filterProperties, @Nonnull SortProperties sortProperties);
+    List<Snippet> readSnippets(
+            @Nonnull String search,
+            @Nonnull FilterProperties filterProperties,
+            @Nonnull SortProperties sortProperties
+    );
 }

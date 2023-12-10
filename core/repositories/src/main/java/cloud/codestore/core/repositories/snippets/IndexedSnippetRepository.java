@@ -62,6 +62,7 @@ class IndexedSnippetRepository implements CreateSnippetQuery, UpdateSnippetQuery
 
     @Override
     public List<Snippet> readSnippets(
+            @Nonnull String search,
             @Nonnull FilterProperties filterProperties,
             @Nonnull SortProperties sortProperties
     ) {
@@ -90,6 +91,7 @@ class IndexedSnippetRepository implements CreateSnippetQuery, UpdateSnippetQuery
     private SortField toSortFields(SortProperties sortProperties) {
         return switch(sortProperties.property())
         {
+            case RELEVANCE -> null;
             case TITLE -> new SortField(SnippetField.TITLE, SortField.Type.STRING, sortProperties.desc());
             case CREATED -> new SortField(SnippetField.CREATED, SortField.Type.LONG, sortProperties.desc());
             case MODIFIED -> new SortField(SnippetField.MODIFIED, SortField.Type.LONG, sortProperties.desc());

@@ -43,6 +43,7 @@ public class ReadSnippetCollectionController {
 
     @GetMapping
     public JsonApiDocument getSnippets(
+            @RequestParam(value = "searchQuery", required = false, defaultValue = "") String search,
             @RequestParam(value = "sort", required = false) String sort,
             @RequestParam(value = "filter[language]", required = false) String languageId,
             @RequestParam(value = "filter[tags]", required = false) String tagCsvList
@@ -52,7 +53,7 @@ public class ReadSnippetCollectionController {
         var filterProperties = new FilterProperties(language, tags);
         var sortProperties = parseSortParameter(sort);
 
-        var snippets = listSnippetsUseCase.list(filterProperties, sortProperties);
+        var snippets = listSnippetsUseCase.list(search, filterProperties, sortProperties);
         return new SnippetCollectionResource(snippets);
     }
 
@@ -78,6 +79,7 @@ public class ReadSnippetCollectionController {
         return readTagsUseCase.readTags(csvString.split(","));
     }
 
+    @Nullable
     private SortProperties parseSortParameter(@Nullable String sortParameter) throws InvalidParameterException {
         if (StringUtils.hasText(sortParameter)) {
             try {
@@ -90,6 +92,6 @@ public class ReadSnippetCollectionController {
             }
         }
 
-        return new SortProperties();
+        return null;
     }
 }

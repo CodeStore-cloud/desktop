@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
  */
 public record SortProperties(@Nonnull SnippetProperty property, boolean asc) {
     public enum SnippetProperty {
-        TITLE, CREATED, MODIFIED
+        RELEVANCE, TITLE, CREATED, MODIFIED
     }
 
     public SortProperties() {
