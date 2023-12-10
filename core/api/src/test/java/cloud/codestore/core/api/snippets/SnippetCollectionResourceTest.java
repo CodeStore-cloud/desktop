@@ -59,13 +59,8 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
                 .andExpect(jsonPath("$.data[*].type", everyItem(is("snippet"))))
                 .andExpect(jsonPath("$.data[*].attributes").exists())
                 .andExpect(jsonPath("$.data[*].links.self").exists());
-    }
 
-    @Test
-    @DisplayName("sorts the code snippets creation time by default")
-    void sortByCreationTime() throws Exception {
-        GET("/snippets").andExpect(status().isOk());
-        verify(listSnippetsUseCase).list(any(), any(), eq(new SortProperties()));
+        verify(listSnippetsUseCase).list(eq(""), eq(new FilterProperties()), isNull());
     }
 
     @Nested
@@ -157,6 +152,17 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
         @DisplayName("fails if the sort parameter is invalid")
         void failForInvalidSortParameter() throws Exception {
             GET("/snippets?sort=unknownProperty").andExpect(status().isBadRequest());
+        }
+    }
+
+    @Nested
+    @DisplayName("with search parameter")
+    class Search {
+        @Test
+        @DisplayName("passes the parameter to the list-snippets use-case")
+        void searchSnippets() throws Exception {
+            GET("/snippets?searchQuery=test").andExpect(status().isOk());
+            verify(listSnippetsUseCase).list(eq("test"), any(), isNull());
         }
     }
 
