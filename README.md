@@ -55,3 +55,13 @@ desktop-app
     |-- repositories         -> access file system and public server
     `-- application          -> main module and dependency injection
 ```
+
+## Starting the Application
+
+To start the entire application, first start the {CodeStore} Core and then the client.
+Don't forget to set the Spring profile to "dev" in each case
+(e.g. by using the "spring.profiles.active" environment variable).
+Otherwise, there is a risk to compromise your real data!
+
+The {CodeStore} Core API expects an access-token for security reasons. If you want to play around with the API in
+the browser, you have to disable the "server.authentication.required" flag in the Core's application-dev.properties.
