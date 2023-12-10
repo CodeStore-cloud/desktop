@@ -19,7 +19,7 @@ public enum Language {
     SCALA(12, "Scala"),
     LUA(13, "Lua"),
     LATEX(14, "LaTeX"),
-    CLISP(15, "Common Lisp"),
+    LISP(15, "Lisp"),
     GROOVY(16, "Groovy"),
     PERL(17, "Perl"),
     PYTHON(18, "Python"),

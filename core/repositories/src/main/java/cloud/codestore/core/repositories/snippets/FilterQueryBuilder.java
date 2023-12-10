@@ -19,7 +19,7 @@ class FilterQueryBuilder {
         this.filterProperties = filterProperties;
     }
 
-    Query buildFilterQuery() {
+    Query build() {
         if (filterProperties.isEmpty()) {
             return new MatchAllDocsQuery();
         }

@@ -124,9 +124,17 @@ class SnippetIndexTest {
         }
 
         @Test
-        @DisplayName("language")
-        void indexLanguage() {
-            assertThat(index.query(snippetByLanguage(Language.JAVA), defaultOrder)).isNotEmpty();
+        @DisplayName("language id")
+        void indexLanguageId() {
+            String languageId = String.valueOf(Language.JAVA.getId());
+            assertThat(index.query(snippetByLanguage(languageId), defaultOrder)).isNotEmpty();
+        }
+
+        @Test
+        @DisplayName("language name")
+        void indexLanguageName() {
+            String languageName = Language.JAVA.getName().toLowerCase();
+            assertThat(index.query(snippetByLanguage(languageName), defaultOrder)).isNotEmpty();
         }
 
         private Query snippetByTitle(String title) {
@@ -141,8 +149,8 @@ class SnippetIndexTest {
             return new TermQuery(new Term(SnippetField.CODE, code));
         }
 
-        private Query snippetByLanguage(Language language) {
-            return new TermQuery(new Term(SnippetField.LANGUAGE, String.valueOf(language.getId())));
+        private Query snippetByLanguage(String language) {
+            return new TermQuery(new Term(SnippetField.LANGUAGE, language));
         }
 
         private Query snippetByTag(String tag) {

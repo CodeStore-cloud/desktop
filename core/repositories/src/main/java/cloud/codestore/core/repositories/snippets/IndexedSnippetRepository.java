@@ -66,9 +66,9 @@ class IndexedSnippetRepository implements CreateSnippetQuery, UpdateSnippetQuery
             @Nonnull FilterProperties filterProperties,
             @Nonnull SortProperties sortProperties
     ) {
-        Query filterQuery = new FilterQueryBuilder(filterProperties).buildFilterQuery();
+        Query query = new QueryBuilder(search, filterProperties).build();
         SortField sortField = toSortFields(sortProperties);
-        Stream<String> snippetIds = index.query(filterQuery, sortField);
+        Stream<String> snippetIds = index.query(query, sortField);
         return fsRepo.readSnippets(snippetIds).toList();
     }
 
@@ -91,7 +91,7 @@ class IndexedSnippetRepository implements CreateSnippetQuery, UpdateSnippetQuery
     private SortField toSortFields(SortProperties sortProperties) {
         return switch(sortProperties.property())
         {
-            case RELEVANCE -> null;
+            case RELEVANCE -> SortField.FIELD_SCORE;
             case TITLE -> new SortField(SnippetField.TITLE, SortField.Type.STRING, sortProperties.desc());
             case CREATED -> new SortField(SnippetField.CREATED, SortField.Type.LONG, sortProperties.desc());
             case MODIFIED -> new SortField(SnippetField.MODIFIED, SortField.Type.LONG, sortProperties.desc());

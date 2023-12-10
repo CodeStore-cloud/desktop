@@ -87,20 +87,6 @@ class IndexedSnippetRepositoryTest {
         verify(index).remove(SNIPPET_ID);
     }
 
-    @Test
-    @DisplayName("filters the snippets to read from the file system")
-    @SuppressWarnings("unchecked")
-    void filterSnippets() {
-        when(index.query(any(), any())).thenReturn(Stream.of("1", "2", "3"));
-        when(localRepo.readSnippets(any(Stream.class))).thenReturn(
-                Stream.of(snippetWithId("1"), snippetWithId("2"), snippetWithId("3")));
-
-        var snippets = repository.readSnippets(new FilterProperties(), new SortProperties());
-
-        assertThat(snippets).containsExactly(snippetWithId("1"), snippetWithId("2"), snippetWithId("3"));
-        verify(localRepo).readSnippets(any(Stream.class));
-    }
-
     @ParameterizedTest
     @MethodSource("sortParams")
     @DisplayName("sorts the requested snippets")
@@ -108,7 +94,7 @@ class IndexedSnippetRepositoryTest {
         var sortFieldArgument = ArgumentCaptor.forClass(SortField.class);
         when(index.query(any(), any())).thenReturn(Stream.empty());
 
-        repository.readSnippets(new FilterProperties(), sortProperties);
+        repository.readSnippets("", new FilterProperties(), sortProperties);
 
         verify(index).query(any(), sortFieldArgument.capture());
         SortField sortField = sortFieldArgument.getValue();
@@ -118,6 +104,7 @@ class IndexedSnippetRepositoryTest {
 
     private static Stream<Arguments> sortParams() {
         return Stream.of(
+                Arguments.of(new SortProperties(SnippetProperty.RELEVANCE, true), null, true),
                 Arguments.of(new SortProperties(SnippetProperty.TITLE, true), "title", true),
                 Arguments.of(new SortProperties(SnippetProperty.TITLE, false), "title", false),
                 Arguments.of(new SortProperties(SnippetProperty.CREATED, true), "created", true),

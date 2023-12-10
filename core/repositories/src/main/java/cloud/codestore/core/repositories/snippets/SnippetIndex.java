@@ -177,6 +177,13 @@ class SnippetIndex {
         int languageId = snippet.getLanguage().getId();
         document.add(new StringField(SnippetField.LANGUAGE, String.valueOf(languageId), Field.Store.NO));
 
+        String languageName = switch(snippet.getLanguage()) {
+            case SHELL -> "shell";
+            case BATCH -> "batch";
+            default -> snippet.getLanguage().toString().toLowerCase();
+        };
+        document.add(new StringField(SnippetField.LANGUAGE, languageName, Field.Store.NO));
+
         for (String tag : snippet.getTags()) {
             document.add(new StringField(SnippetField.TAG, normalize(tag), Field.Store.NO));
         }

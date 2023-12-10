@@ -15,19 +15,19 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DisplayName("The filter-query builder")
+@DisplayName("The filter-query builder returns a query")
 class FilterQueryBuilderTest {
     @Test
-    @DisplayName("returns a query matching all code snippets if the filter properties are empty")
+    @DisplayName("matching all code snippets if the filter properties are empty")
     void emptyQuery() {
-        assertFilterProducesQuery(new FilterProperties(), "*:*");
+        expectQuery(new FilterProperties(), "*:*");
     }
 
     @ParameterizedTest
     @MethodSource("langToQuery")
-    @DisplayName("returns a query which contains a programming language")
+    @DisplayName("which contains a programming language")
     void filterByLanguage(Language language, String expectedQuery) {
-        assertFilterProducesQuery(new FilterProperties(language, null), expectedQuery);
+        expectQuery(new FilterProperties(language, null), expectedQuery);
     }
 
     private static Stream<Arguments> langToQuery() {
@@ -39,15 +39,15 @@ class FilterQueryBuilderTest {
     }
 
     @Test
-    @DisplayName("returns a query which contains the provided tags")
+    @DisplayName("which contains the provided tags")
     void filterByLanguage() {
         Set<String> tags = Set.of("Tag-A", "Tag_B", "TagC");
         String[] expectedQuery = new String[]{"+tag:taga", "+tag:tagb", "+tag:tagc"};
-        assertFilterProducesQuery(new FilterProperties(null, tags), expectedQuery);
+        expectQuery(new FilterProperties(null, tags), expectedQuery);
     }
 
-    private void assertFilterProducesQuery(FilterProperties filterProperties, String... expectedQueryParts) {
-        Query query = new FilterQueryBuilder(filterProperties).buildFilterQuery();
+    private void expectQuery(FilterProperties filterProperties, String... expectedQueryParts) {
+        Query query = new FilterQueryBuilder(filterProperties).build();
         assertThat(query.toString()).contains(expectedQueryParts);
     }
 }
