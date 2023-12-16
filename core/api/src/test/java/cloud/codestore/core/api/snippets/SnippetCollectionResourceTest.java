@@ -5,6 +5,7 @@ import cloud.codestore.core.Snippet;
 import cloud.codestore.core.TagNotExistsException;
 import cloud.codestore.core.usecases.listsnippets.FilterProperties;
 import cloud.codestore.core.usecases.listsnippets.ListSnippets;
+import cloud.codestore.core.usecases.listsnippets.SnippetListPage;
 import cloud.codestore.core.usecases.listsnippets.SortProperties;
 import cloud.codestore.core.usecases.readlanguage.LanguageNotExistsException;
 import cloud.codestore.core.usecases.readlanguage.ReadLanguage;
@@ -45,7 +46,8 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
 
     @BeforeEach
     void setUp() {
-        lenient().when(listSnippetsUseCase.list(any(), any(), any())).thenReturn(snippetList());
+        var page = new SnippetListPage(1, 1, snippetList());
+        lenient().when(listSnippetsUseCase.list(any(), any(), any())).thenReturn(page);
     }
 
     @Test

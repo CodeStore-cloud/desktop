@@ -39,7 +39,7 @@ class ListSnippetsTest {
 
         var snippets = useCase.list(search, filter, sort);
 
-        assertThat(snippets).isSameAs(expectedResult);
+        assertThat(snippets.snippets()).isSameAs(expectedResult);
         verify(query).readSnippets(search, filter, sort);
     }
 

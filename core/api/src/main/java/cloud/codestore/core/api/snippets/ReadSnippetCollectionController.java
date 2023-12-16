@@ -53,8 +53,8 @@ public class ReadSnippetCollectionController {
         var filterProperties = new FilterProperties(language, tags);
         var sortProperties = parseSortParameter(sort);
 
-        var snippets = listSnippetsUseCase.list(search, filterProperties, sortProperties);
-        return new SnippetCollectionResource(snippets);
+        var page = listSnippetsUseCase.list(search, filterProperties, sortProperties);
+        return new SnippetCollectionResource(page.snippets());
     }
 
     @Nullable

@@ -1,11 +1,9 @@
 package cloud.codestore.core.usecases.listsnippets;
 
-import cloud.codestore.core.Snippet;
 import cloud.codestore.core.UseCase;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.Optional;
 
 import static cloud.codestore.core.usecases.listsnippets.SortProperties.SnippetProperty.RELEVANCE;
@@ -15,6 +13,8 @@ import static cloud.codestore.core.usecases.listsnippets.SortProperties.SnippetP
  */
 @UseCase
 public class ListSnippets {
+    private static final int DEFAULT_PAGE_SIZE = 50;
+
     private final ReadSnippetsQuery query;
 
     public ListSnippets(ReadSnippetsQuery query) {
@@ -22,7 +22,7 @@ public class ListSnippets {
     }
 
     @Nonnull
-    public List<Snippet> list(
+    public SnippetListPage list(
             @Nonnull String search,
             @Nonnull FilterProperties filterProperties,
             @Nullable SortProperties sortProperties
@@ -30,6 +30,7 @@ public class ListSnippets {
         sortProperties = Optional.ofNullable(sortProperties)
                                  .orElseGet(() -> search.isEmpty() ? new SortProperties() : new SortProperties(RELEVANCE, true));
 
-        return query.readSnippets(search, filterProperties, sortProperties);
+        var snippets = query.readSnippets(search, filterProperties, sortProperties);
+        return new SnippetListPage(1, 1, snippets);
     }
 }
