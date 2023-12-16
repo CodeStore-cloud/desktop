@@ -39,6 +39,14 @@ public class SnippetCollectionResource extends ResourceCollectionDocument<Snippe
         return UriFactory.createUri(PATH, Map.of("filter[tags]", tag));
     }
 
+    /**
+     * @param pageNumber a page number.
+     * @return the URI to the corresponding page of the snippet collection resource.
+     */
+    public static String getLink(int pageNumber) {
+        return UriFactory.createUri(PATH, Map.of("page[number]", pageNumber));
+    }
+
     private static SnippetResource[] convertToSnippetResource(List<Snippet> snippets) {
         return snippets.stream()
                        .map(SnippetResource::new)

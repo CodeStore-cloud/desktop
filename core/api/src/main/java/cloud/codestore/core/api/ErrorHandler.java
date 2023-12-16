@@ -3,6 +3,7 @@ package cloud.codestore.core.api;
 import cloud.codestore.core.SnippetNotExistsException;
 import cloud.codestore.core.TagNotExistsException;
 import cloud.codestore.core.usecases.createtag.InvalidTagException;
+import cloud.codestore.core.usecases.listsnippets.PageNotExistsException;
 import cloud.codestore.core.usecases.readlanguage.LanguageNotExistsException;
 import cloud.codestore.core.validation.InvalidSnippetException;
 import cloud.codestore.jsonapi.error.ErrorObject;
@@ -48,6 +49,19 @@ class ErrorHandler extends ErrorResponseBuilder {
         return createResponse(HttpStatus.NOT_FOUND, errorObject);
     }
 
+    @ExceptionHandler(PageNotExistsException.class)
+    public ResponseEntity<Object> pageNotExists(PageNotExistsException exception) {
+        ErrorSource errorSource = new ErrorSource().setParameter("page[number]");
+        ErrorObject errorObject = createError(
+                errorSource,
+                "NOT_FOUND",
+                "notFound.title",
+                "notFound.detail.page",
+                String.valueOf(exception.getPageNumber())
+        );
+        return createResponse(HttpStatus.NOT_FOUND, errorObject);
+    }
+
     @ExceptionHandler(InvalidTagException.class)
     public ResponseEntity<Object> invalidTag(InvalidTagException exception) {
         ErrorSource errorSource = new ErrorSource().setPointer("/data/attributes/name");
@@ -68,10 +82,13 @@ class ErrorHandler extends ErrorResponseBuilder {
     @ExceptionHandler(InvalidParameterException.class)
     public ResponseEntity<Object> invalidParameter(InvalidParameterException exception) {
         ErrorSource errorSource = new ErrorSource().setParameter(exception.getParameterName());
-        ErrorObject errorObject = new ErrorObject().setCode("INVALID_PARAMETER")
-                                                   .setTitle(message("invalidParameter.title"))
-                                                   .setDetail(message("invalidParameter.detail", exception.getParameterName()))
-                                                   .setSource(errorSource);
+        ErrorObject errorObject = createError(
+                errorSource,
+                "INVALID_PARAMETER",
+                "invalidParameter.title",
+                "invalidParameter.detail",
+                exception.getParameterName()
+        );
 
         return createResponse(HttpStatus.BAD_REQUEST, errorObject);
     }

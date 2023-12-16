@@ -3,6 +3,7 @@ package cloud.codestore.core.api;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
 import cloud.codestore.jsonapi.error.ErrorDocument;
 import cloud.codestore.jsonapi.error.ErrorObject;
+import cloud.codestore.jsonapi.error.ErrorSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,9 +29,14 @@ public class ErrorResponseBuilder {
     }
 
     public ErrorObject createError(String code, String title, String detail, String... detailArguments) {
+        return createError(null, code, title, detail, detailArguments);
+    }
+
+    public ErrorObject createError(ErrorSource errorSource, String code, String title, String detail, String... detailArguments) {
         return new ErrorObject().setCode(code)
                                 .setTitle(message(title))
-                                .setDetail(message(detail, detailArguments));
+                                .setDetail(message(detail, detailArguments))
+                                .setSource(errorSource);
     }
 
     public String message(String messageKey, String... messageArguments) {

@@ -5,11 +5,13 @@ import cloud.codestore.core.TagNotExistsException;
 import cloud.codestore.core.api.InvalidParameterException;
 import cloud.codestore.core.usecases.listsnippets.FilterProperties;
 import cloud.codestore.core.usecases.listsnippets.ListSnippets;
+import cloud.codestore.core.usecases.listsnippets.PageNotExistsException;
 import cloud.codestore.core.usecases.listsnippets.SortProperties;
 import cloud.codestore.core.usecases.readlanguage.LanguageNotExistsException;
 import cloud.codestore.core.usecases.readlanguage.ReadLanguage;
 import cloud.codestore.core.usecases.readtags.ReadTags;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
+import cloud.codestore.jsonapi.link.Link;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,10 +23,12 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
 
+import static cloud.codestore.core.api.snippets.SnippetCollectionResource.PATH;
+import static cloud.codestore.core.api.snippets.SnippetCollectionResource.getLink;
 import static cloud.codestore.core.usecases.listsnippets.SortProperties.SnippetProperty;
 
 @RestController
-@RequestMapping(path = SnippetCollectionResource.PATH, produces = JsonApiDocument.MEDIA_TYPE)
+@RequestMapping(path = PATH, produces = JsonApiDocument.MEDIA_TYPE)
 public class ReadSnippetCollectionController {
     private ListSnippets listSnippetsUseCase;
     private ReadLanguage readLanguageUseCase;
@@ -45,16 +49,28 @@ public class ReadSnippetCollectionController {
     public JsonApiDocument getSnippets(
             @RequestParam(value = "searchQuery", required = false, defaultValue = "") String search,
             @RequestParam(value = "sort", required = false) String sort,
+            @RequestParam(value = "page[number]", required = false, defaultValue = "1") String pageParam,
             @RequestParam(value = "filter[language]", required = false) String languageId,
             @RequestParam(value = "filter[tags]", required = false) String tagCsvList
-    ) throws LanguageNotExistsException, TagNotExistsException, InvalidParameterException {
+    ) throws LanguageNotExistsException, TagNotExistsException, InvalidParameterException, PageNotExistsException {
         var language = getLanguageById(languageId);
         var tags = getTagsFromCsv(tagCsvList);
         var filterProperties = new FilterProperties(language, tags);
         var sortProperties = parseSortParameter(sort);
+        var pageNumber = parsePageNumber(pageParam);
 
-        var page = listSnippetsUseCase.list(search, filterProperties, sortProperties);
-        return new SnippetCollectionResource(page.snippets());
+        var page = listSnippetsUseCase.list(search, filterProperties, sortProperties, pageNumber);
+
+        var document = new SnippetCollectionResource(page.snippets())
+                .addLink(new Link(Link.FIRST, getLink(1)))
+                .addLink(new Link(Link.LAST, getLink(page.totalPages())));
+
+        if (pageNumber < page.totalPages())
+            document.addLink(new Link(Link.NEXT, getLink(pageNumber + 1)));
+        if (pageNumber > 1)
+            document.addLink(new Link(Link.PREV, getLink(pageNumber - 1)));
+
+        return document;
     }
 
     @Nullable
@@ -93,5 +109,13 @@ public class ReadSnippetCollectionController {
         }
 
         return null;
+    }
+
+    private int parsePageNumber(@Nonnull String pageNumber) throws InvalidParameterException {
+        try {
+            return Integer.parseInt(pageNumber);
+        } catch (NumberFormatException exception) {
+            throw new InvalidParameterException("page[number]");
+        }
     }
 }

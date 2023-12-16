@@ -3,10 +3,7 @@ package cloud.codestore.core.api.snippets;
 import cloud.codestore.core.Language;
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.TagNotExistsException;
-import cloud.codestore.core.usecases.listsnippets.FilterProperties;
-import cloud.codestore.core.usecases.listsnippets.ListSnippets;
-import cloud.codestore.core.usecases.listsnippets.SnippetListPage;
-import cloud.codestore.core.usecases.listsnippets.SortProperties;
+import cloud.codestore.core.usecases.listsnippets.*;
 import cloud.codestore.core.usecases.readlanguage.LanguageNotExistsException;
 import cloud.codestore.core.usecases.readlanguage.ReadLanguage;
 import cloud.codestore.core.usecases.readtags.ReadTags;
@@ -37,6 +34,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(ReadSnippetCollectionController.class)
 @DisplayName("GET /snippets")
 class SnippetCollectionResourceTest extends SnippetControllerTest {
+    private static final int PAGE_NUMBER = 12;
+    private static final int TOTAL_PAGES = 15;
+
     @MockBean
     private ListSnippets listSnippetsUseCase;
     @MockBean
@@ -45,9 +45,9 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
     private ReadTags readTagsUseCase;
 
     @BeforeEach
-    void setUp() {
-        var page = new SnippetListPage(1, 1, snippetList());
-        lenient().when(listSnippetsUseCase.list(any(), any(), any())).thenReturn(page);
+    void setUp() throws PageNotExistsException {
+        var page = new SnippetListPage(PAGE_NUMBER, TOTAL_PAGES, snippetList());
+        lenient().when(listSnippetsUseCase.list(any(), any(), any(), anyInt())).thenReturn(page);
     }
 
     @Test
@@ -62,7 +62,7 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
                 .andExpect(jsonPath("$.data[*].attributes").exists())
                 .andExpect(jsonPath("$.data[*].links.self").exists());
 
-        verify(listSnippetsUseCase).list(eq(""), eq(new FilterProperties()), isNull());
+        verify(listSnippetsUseCase).list(eq(""), eq(new FilterProperties()), isNull(), eq(1));
     }
 
     @Nested
@@ -76,7 +76,7 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
 
             GET("/snippets?filter[language]=10").andExpect(status().isOk());
 
-            verify(listSnippetsUseCase).list(any(), argument.capture(), any());
+            verify(listSnippetsUseCase).list(any(), argument.capture(), any(), anyInt());
             assertThat(argument.getValue().language()).isEqualTo(Language.JAVA);
         }
 
@@ -105,7 +105,7 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
 
             GET("/snippets?filter[tags]=TagA,TagB,TagC").andExpect(status().isOk());
 
-            verify(listSnippetsUseCase).list(any(), argument.capture(), any());
+            verify(listSnippetsUseCase).list(any(), argument.capture(), any(), anyInt());
             assertThat(argument.getValue().tags()).containsExactlyInAnyOrder("TagA", "TagB", "TagC");
         }
 
@@ -124,30 +124,36 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
         @DisplayName("sorts snippets by title")
         void sortByTitle() throws Exception {
             GET("/snippets?sort=title").andExpect(status().isOk());
-            verify(listSnippetsUseCase).list(any(), any(), eq(new SortProperties(SnippetProperty.TITLE, true)));
+            var expectedSortProperties = new SortProperties(SnippetProperty.TITLE, true);
+            verify(listSnippetsUseCase).list(any(), any(), eq(expectedSortProperties), anyInt());
 
             GET("/snippets?sort=-title").andExpect(status().isOk());
-            verify(listSnippetsUseCase).list(any(), any(), eq(new SortProperties(SnippetProperty.TITLE, false)));
+            expectedSortProperties = new SortProperties(SnippetProperty.TITLE, false);
+            verify(listSnippetsUseCase).list(any(), any(), eq(expectedSortProperties), anyInt());
         }
 
         @Test
         @DisplayName("sorts snippets by creation time")
         void sortByCreationTime() throws Exception {
             GET("/snippets?sort=created").andExpect(status().isOk());
-            verify(listSnippetsUseCase).list(any(), any(), eq(new SortProperties(SnippetProperty.CREATED, true)));
+            SortProperties expectedSortProperties = new SortProperties(SnippetProperty.CREATED, true);
+            verify(listSnippetsUseCase).list(any(), any(), eq(expectedSortProperties), anyInt());
 
             GET("/snippets?sort=-created").andExpect(status().isOk());
-            verify(listSnippetsUseCase).list(any(), any(), eq(new SortProperties(SnippetProperty.CREATED, false)));
+            expectedSortProperties = new SortProperties(SnippetProperty.CREATED, false);
+            verify(listSnippetsUseCase).list(any(), any(), eq(expectedSortProperties), anyInt());
         }
 
         @Test
         @DisplayName("sorts snippets by modification time")
         void sortByModificationTime() throws Exception {
             GET("/snippets?sort=modified").andExpect(status().isOk());
-            verify(listSnippetsUseCase).list(any(), any(), eq(new SortProperties(SnippetProperty.MODIFIED, true)));
+            SortProperties expectedSortProperties = new SortProperties(SnippetProperty.MODIFIED, true);
+            verify(listSnippetsUseCase).list(any(), any(), eq(expectedSortProperties), anyInt());
 
             GET("/snippets?sort=-modified").andExpect(status().isOk());
-            verify(listSnippetsUseCase).list(any(), any(), eq(new SortProperties(SnippetProperty.MODIFIED, false)));
+            expectedSortProperties = new SortProperties(SnippetProperty.MODIFIED, false);
+            verify(listSnippetsUseCase).list(any(), any(), eq(expectedSortProperties), anyInt());
         }
 
         @Test
@@ -164,7 +170,64 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
         @DisplayName("passes the parameter to the list-snippets use-case")
         void searchSnippets() throws Exception {
             GET("/snippets?searchQuery=test").andExpect(status().isOk());
-            verify(listSnippetsUseCase).list(eq("test"), any(), isNull());
+            verify(listSnippetsUseCase).list(eq("test"), any(), isNull(), anyInt());
+        }
+    }
+
+    @Nested
+    @DisplayName("with page[number] parameter")
+    class Pagination {
+        @Test
+        @DisplayName("reads the corresponding page of code snippets")
+        void getPage() throws Exception {
+            GET("/snippets?page[number]=" + PAGE_NUMBER).andExpect(status().isOk());
+            verify(listSnippetsUseCase).list(eq(""), any(), isNull(), eq(PAGE_NUMBER));
+        }
+
+        @Test
+        @DisplayName("returns all pagination links")
+        void paginationLinks() throws Exception {
+            GET("/snippets?page[number]=" + PAGE_NUMBER)
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.links.first", is(url(1))))
+                    .andExpect(jsonPath("$.links.last", is(url(TOTAL_PAGES))))
+                    .andExpect(jsonPath("$.links.prev", is(url(PAGE_NUMBER - 1))))
+                    .andExpect(jsonPath("$.links.next", is(url(PAGE_NUMBER + 1))));
+        }
+
+        @Test
+        @DisplayName("omits the \"prev\" pagination link on the first page")
+        void firstPage() throws Exception {
+            GET("/snippets?page[number]=1")
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.links.prev").doesNotExist())
+                    .andExpect(jsonPath("$.links.next").exists());
+        }
+
+        @Test
+        @DisplayName("omits the \"next\" pagination link on the last page")
+        void lastPage() throws Exception {
+            GET("/snippets?page[number]=" + TOTAL_PAGES)
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.links.prev").exists())
+                    .andExpect(jsonPath("$.links.next").doesNotExist());
+        }
+
+        @Test
+        @DisplayName("returns 404 if the client passes an invalid page number")
+        void pageOutOfBounds() throws Exception {
+            when(listSnippetsUseCase.list(any(), any(), any(), anyInt())).thenThrow(PageNotExistsException.class);
+            GET("/snippets?page[number]=0").andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("returns 400 if the page number is not an integer")
+        void invalidParameter() throws Exception {
+            GET("/snippets?page[number]=notAnInteger").andExpect(status().isBadRequest());
+        }
+
+        private String url(int page) {
+            return "http://localhost:8080/snippets?page%5Bnumber%5D=" + page;
         }
     }
 
