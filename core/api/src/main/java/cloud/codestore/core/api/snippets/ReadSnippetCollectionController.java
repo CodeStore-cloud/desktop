@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import static cloud.codestore.core.api.snippets.SnippetCollectionResource.PATH;
 import static cloud.codestore.core.api.snippets.SnippetCollectionResource.getLink;
@@ -62,14 +64,12 @@ public class ReadSnippetCollectionController {
         var page = listSnippetsUseCase.list(search, filterProperties, sortProperties, pageNumber);
         var document = new SnippetCollectionResource(page.snippets());
 
-        if (page.totalPages() > 1) {
-            document.addLink(new Link(Link.FIRST, getLink(1)));
-            document.addLink(new Link(Link.LAST, getLink(page.totalPages())));
-        }
-        if (pageNumber < page.totalPages())
-            document.addLink(new Link(Link.NEXT, getLink(pageNumber + 1)));
-        if (pageNumber > 1)
-            document.addLink(new Link(Link.PREV, getLink(pageNumber - 1)));
+        var urlParameters = new HashMap<String, Object>(5);
+        urlParameters.put("searchQuery", search.isEmpty() ? null : search);
+        urlParameters.put("sort", sort);
+        urlParameters.put("filter[language]", languageId);
+        urlParameters.put("filter[tags]", tagCsvList);
+        addPaginationLinks(document, urlParameters, pageNumber, page.totalPages());
 
         return document;
     }
@@ -117,6 +117,28 @@ public class ReadSnippetCollectionController {
             return Integer.parseInt(pageNumber);
         } catch (NumberFormatException exception) {
             throw new InvalidParameterException("page[number]");
+        }
+    }
+
+    private void addPaginationLinks(
+            JsonApiDocument document,
+            Map<String, Object> urlParameters,
+            int pageNumber,
+            int totalPages
+    ) {
+        if (totalPages > 1) {
+            urlParameters.put("page[number]", 1);
+            document.addLink(new Link(Link.FIRST, getLink(urlParameters)));
+            urlParameters.put("page[number]", totalPages);
+            document.addLink(new Link(Link.LAST, getLink(urlParameters)));
+        }
+        if (pageNumber < totalPages) {
+            urlParameters.put("page[number]", pageNumber + 1);
+            document.addLink(new Link(Link.NEXT, getLink(urlParameters)));
+        }
+        if (pageNumber > 1) {
+            urlParameters.put("page[number]", pageNumber - 1);
+            document.addLink(new Link(Link.PREV, getLink(urlParameters)));
         }
     }
 }

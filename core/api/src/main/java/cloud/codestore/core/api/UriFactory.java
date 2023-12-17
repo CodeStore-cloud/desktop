@@ -48,6 +48,7 @@ public class UriFactory implements ApplicationListener<ServletWebServerInitializ
             querySegment += "?";
             querySegment += urlParameters.entrySet()
                                          .stream()
+                                         .filter(entry -> entry.getValue() != null)
                                          .map(entry -> "%s=%s".formatted(encode(entry.getKey()), encode(entry.getValue())))
                                          .collect(Collectors.joining("&"));
         }
