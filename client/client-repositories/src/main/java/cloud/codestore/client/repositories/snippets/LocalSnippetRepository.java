@@ -5,10 +5,11 @@ import cloud.codestore.client.repositories.HttpClient;
 import cloud.codestore.client.repositories.Repository;
 import cloud.codestore.client.repositories.tags.LocalTagRepository;
 import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
+import cloud.codestore.client.usecases.listsnippets.SnippetPage;
+import cloud.codestore.jsonapi.link.Link;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * A {@link cloud.codestore.client.SnippetRepository} which saves/loads the code snippets from the local {CodeStore} Core.
@@ -26,11 +27,14 @@ class LocalSnippetRepository implements cloud.codestore.client.SnippetRepository
 
     @Nonnull
     @Override
-    public List<SnippetListItem> get() {
+    public SnippetPage get() {
         var resourceCollection = client.getCollection(client.getSnippetCollectionUrl(), SnippetResource.class);
-        return Arrays.stream(resourceCollection.getData(SnippetResource.class))
-                     .map(resource -> new SnippetListItem(resource.getSelfLink(), resource.getTitle()))
-                     .toList();
+        var items = Arrays.stream(resourceCollection.getData(SnippetResource.class))
+                          .map(resource -> new SnippetListItem(resource.getSelfLink(), resource.getTitle()))
+                          .toList();
+
+        String nextPageLink = resourceCollection.getLinks().getHref(Link.NEXT);
+        return new SnippetPage(items, nextPageLink);
     }
 
     @Nonnull

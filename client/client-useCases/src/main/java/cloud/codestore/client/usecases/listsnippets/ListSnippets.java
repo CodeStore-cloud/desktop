@@ -4,7 +4,6 @@ import cloud.codestore.client.SnippetRepository;
 import cloud.codestore.client.UseCase;
 
 import javax.annotation.Nonnull;
-import java.util.List;
 
 /**
  * Use case: read all code snippets.
@@ -17,13 +16,13 @@ public class ListSnippets {
         this.repository = repository;
     }
 
-    /**
-     * Reads all code snippets.
-     *
-     * @return the code snippets.
-     */
     @Nonnull
-    public List<SnippetListItem> list() {
+    public SnippetPage list() {
+        return repository.get();
+    }
+
+    @Nonnull
+    public SnippetPage list(@Nonnull String url) {
         return repository.get();
     }
 }

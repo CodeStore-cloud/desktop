@@ -1,9 +1,8 @@
 package cloud.codestore.client;
 
-import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
+import cloud.codestore.client.usecases.listsnippets.SnippetPage;
 
 import javax.annotation.Nonnull;
-import java.util.List;
 
 /**
  * A repository for storing and reading code snippets.
@@ -14,7 +13,7 @@ public interface SnippetRepository {
      * @return all code snippets.
      */
     @Nonnull
-    List<SnippetListItem> get();
+    SnippetPage get();
 
     /**
      * Reads the code snippet with the given URI.

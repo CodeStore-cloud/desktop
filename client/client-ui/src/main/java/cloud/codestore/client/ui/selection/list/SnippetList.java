@@ -3,23 +3,28 @@ package cloud.codestore.client.ui.selection.list;
 import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.usecases.listsnippets.ListSnippets;
 import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
+import cloud.codestore.client.usecases.listsnippets.SnippetPage;
 import com.google.common.eventbus.EventBus;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
-
-import java.util.List;
 
 @FxController
 public class SnippetList implements ChangeListener<SnippetListItem> {
     private final ListSnippets listSnippets;
     private final EventBus eventBus;
+    private final StringProperty nextPageUrl = new SimpleStringProperty();
 
     @FXML
     private ListView<SnippetListItem> list;
+    @FXML
+    private Node nextPage;
 
     public SnippetList(ListSnippets listSnippets, EventBus eventBus) {
         this.listSnippets = listSnippets;
@@ -28,8 +33,15 @@ public class SnippetList implements ChangeListener<SnippetListItem> {
 
     @FXML
     public void initialize() {
+        handleNextPageVisibility();
         handleSnippetSelection();
-        loadSnippetList();
+        showSnippets(listSnippets.list());
+    }
+
+    @FXML
+    public void loadNextPage() {
+        SnippetPage page = listSnippets.list(nextPageUrl.get());
+        showSnippets(page);
     }
 
     private void handleSnippetSelection() {
@@ -39,9 +51,9 @@ public class SnippetList implements ChangeListener<SnippetListItem> {
         list.getSelectionModel().selectedItemProperty().addListener(this);
     }
 
-    private void loadSnippetList() {
-        List<SnippetListItem> snippets = listSnippets.list();
-        list.getItems().setAll(snippets);
+    private void showSnippets(SnippetPage page) {
+        list.getItems().addAll(page.getSnippets());
+        nextPageUrl.set(page.getNextPageUri().orElse(""));
     }
 
     @Override
@@ -53,5 +65,10 @@ public class SnippetList implements ChangeListener<SnippetListItem> {
         if (newSelection != null) {
             eventBus.post(new SnippetSelectedEvent(newSelection.uri()));
         }
+    }
+
+    private void handleNextPageVisibility() {
+        nextPage.managedProperty().bind(nextPage.visibleProperty());
+        nextPage.visibleProperty().bind(nextPageUrl.isNotEmpty());
     }
 }

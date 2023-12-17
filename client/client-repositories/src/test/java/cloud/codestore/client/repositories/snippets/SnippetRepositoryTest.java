@@ -45,7 +45,7 @@ class SnippetRepositoryTest {
         when(client.getCollection(SNIPPETS_URL, SnippetResource.class)).thenReturn(resourceCollection);
         when(client.getSnippetCollectionUrl()).thenReturn(SNIPPETS_URL);
 
-        List<SnippetListItem> snippets = repository.get();
+        List<SnippetListItem> snippets = repository.get().getSnippets();
 
         assertThat(snippets).isNotNull().isNotEmpty().hasSameSizeAs(testSnippets);
         for (SnippetListItem snippet : snippets) {

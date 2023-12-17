@@ -17,6 +17,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("The list-snippets use case")
 class ListSnippetsTest {
+    private static final String NEXT_PAGE_URL = "http://localhost:8080/snippets?page[number]=2";
+
     @Mock
     private SnippetRepository repository;
     private ListSnippets useCase;
@@ -29,11 +31,13 @@ class ListSnippetsTest {
     @Test
     @DisplayName("returns all available code snippets")
     void returnAllSnippets() {
-        var expectedResult = allSnippets();
-        when(repository.get()).thenReturn(expectedResult);
+        var expectedSnippets = allSnippets();
+        var testPage = new SnippetPage(expectedSnippets, NEXT_PAGE_URL);
+        when(repository.get()).thenReturn(testPage);
 
-        var snippets = useCase.list();
-        assertThat(snippets).isSameAs(expectedResult);
+        var page = useCase.list();
+        assertThat(page.getSnippets()).isSameAs(expectedSnippets);
+        assertThat(page.getNextPageUri()).isPresent().get().isEqualTo(NEXT_PAGE_URL);
     }
 
     private List<SnippetListItem> allSnippets() {
