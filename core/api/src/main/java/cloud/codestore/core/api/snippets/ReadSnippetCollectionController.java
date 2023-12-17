@@ -60,11 +60,12 @@ public class ReadSnippetCollectionController {
         var pageNumber = parsePageNumber(pageParam);
 
         var page = listSnippetsUseCase.list(search, filterProperties, sortProperties, pageNumber);
+        var document = new SnippetCollectionResource(page.snippets());
 
-        var document = new SnippetCollectionResource(page.snippets())
-                .addLink(new Link(Link.FIRST, getLink(1)))
-                .addLink(new Link(Link.LAST, getLink(page.totalPages())));
-
+        if (page.totalPages() > 1) {
+            document.addLink(new Link(Link.FIRST, getLink(1)));
+            document.addLink(new Link(Link.LAST, getLink(page.totalPages())));
+        }
         if (pageNumber < page.totalPages())
             document.addLink(new Link(Link.NEXT, getLink(pageNumber + 1)));
         if (pageNumber > 1)

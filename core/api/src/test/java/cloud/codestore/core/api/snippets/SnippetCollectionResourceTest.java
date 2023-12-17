@@ -17,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -200,6 +201,8 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
         void firstPage() throws Exception {
             GET("/snippets?page[number]=1")
                     .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.links.first").exists())
+                    .andExpect(jsonPath("$.links.last").exists())
                     .andExpect(jsonPath("$.links.prev").doesNotExist())
                     .andExpect(jsonPath("$.links.next").exists());
         }
@@ -209,7 +212,23 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
         void lastPage() throws Exception {
             GET("/snippets?page[number]=" + TOTAL_PAGES)
                     .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.links.first").exists())
+                    .andExpect(jsonPath("$.links.last").exists())
                     .andExpect(jsonPath("$.links.prev").exists())
+                    .andExpect(jsonPath("$.links.next").doesNotExist());
+        }
+
+        @Test
+        @DisplayName("omits all pagination links if there is only one page")
+        void onlyOnePage() throws Exception {
+            var page = new SnippetListPage(1, 1, Collections.emptyList());
+            lenient().when(listSnippetsUseCase.list(any(), any(), any(), anyInt())).thenReturn(page);
+
+            GET("/snippets?page[number]=1")
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.links.first").doesNotExist())
+                    .andExpect(jsonPath("$.links.last").doesNotExist())
+                    .andExpect(jsonPath("$.links.prev").doesNotExist())
                     .andExpect(jsonPath("$.links.next").doesNotExist());
         }
 
