@@ -19,10 +19,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -57,7 +54,7 @@ class SnippetIndex {
      * @return a potentially empty list containing the IDs of the found code snippets.
      */
     @Nonnull
-    Stream<String> query(Query query, SortField sortField) {
+    List<String> query(Query query, SortField sortField) {
         try {
             if (DirectoryReader.indexExists(index)) {
                 if (reader == null) {
@@ -74,10 +71,11 @@ class SnippetIndex {
 
                 TopDocs searchResults = searcher.search(query, Integer.MAX_VALUE, new Sort(sortField));
                 return Arrays.stream(searchResults.scoreDocs)
-                             .map(scoreDoc -> getId(scoreDoc.doc));
+                             .map(scoreDoc -> getId(scoreDoc.doc))
+                             .toList();
             }
 
-            return Stream.empty();
+            return Collections.emptyList();
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
@@ -177,7 +175,7 @@ class SnippetIndex {
         int languageId = snippet.getLanguage().getId();
         document.add(new StringField(SnippetField.LANGUAGE, String.valueOf(languageId), Field.Store.NO));
 
-        String languageName = switch(snippet.getLanguage()) {
+        String languageName = switch (snippet.getLanguage()) {
             case SHELL -> "shell";
             case BATCH -> "batch";
             default -> snippet.getLanguage().toString().toLowerCase();

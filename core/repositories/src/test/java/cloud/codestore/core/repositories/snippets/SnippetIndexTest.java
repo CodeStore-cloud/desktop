@@ -37,7 +37,7 @@ class SnippetIndexTest {
         Snippet snippet = testSnippet(SNIPPET_ID);
         index.add(snippet);
 
-        List<String> searchResult = index.query(snippetById(), defaultOrder).toList();
+        List<String> searchResult = index.query(snippetById(), defaultOrder);
         assertThat(searchResult).hasSize(1);
         assertThat(searchResult.get(0)).isEqualTo(snippet.getId());
     }
@@ -215,7 +215,7 @@ class SnippetIndexTest {
         }
 
         private ListAssert<String> assertSortingBy(SortField sortField) {
-            return assertThat(index.query(new MatchAllDocsQuery(), sortField).toList());
+            return assertThat(index.query(new MatchAllDocsQuery(), sortField));
         }
     }
 

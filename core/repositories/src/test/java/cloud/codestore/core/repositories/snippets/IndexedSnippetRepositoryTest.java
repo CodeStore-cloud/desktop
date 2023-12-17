@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -92,7 +93,7 @@ class IndexedSnippetRepositoryTest {
     @DisplayName("sorts the requested snippets")
     void sortSnippets(SortProperties sortProperties, String expectedSnippetField, boolean expectedOrder) {
         var sortFieldArgument = ArgumentCaptor.forClass(SortField.class);
-        when(index.query(any(), any())).thenReturn(Stream.empty());
+        when(index.query(any(), any())).thenReturn(Collections.emptyList());
 
         repository.readSnippets("", new FilterProperties(), sortProperties);
 

@@ -10,11 +10,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static cloud.codestore.core.usecases.listsnippets.SortProperties.SnippetProperty.RELEVANCE;
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -26,14 +26,14 @@ class ListSnippetsTest {
 
     @Mock
     private ReadSnippetsQuery readSnippetsQuery;
-    @Mock
-    private CountSnippetsQuery countSnippetsQuery;
     private ListSnippets useCase;
 
     @BeforeEach
     void setUp() {
-        when(countSnippetsQuery.getSnippetCount()).thenReturn(SNIPPET_COUNT);
-        useCase = new ListSnippets(readSnippetsQuery, countSnippetsQuery);
+        useCase = new ListSnippets(readSnippetsQuery);
+
+        var searchResult = new SearchResult(SNIPPET_COUNT, snippets());
+        when(readSnippetsQuery.readSnippets(any(), any(), any())).thenReturn(searchResult);
     }
 
     @Test
@@ -42,12 +42,12 @@ class ListSnippetsTest {
         var search = "dummy search query";
         var filter = new FilterProperties();
         var sort = new SortProperties();
-        var expectedResult = snippets();
-        when(readSnippetsQuery.readSnippets(search, filter, sort)).thenReturn(expectedResult);
 
-        var snippets = useCase.list(search, filter, sort, 1);
+        var page = useCase.list(search, filter, sort, 1);
 
-        assertThat(snippets.snippets()).isSameAs(expectedResult);
+        Snippet[] expectedSnippets = snippets().limit(50).toArray(Snippet[]::new);
+        assertThat(page.snippets()).containsExactly(expectedSnippets);
+        assertThat(page.totalPages()).isEqualTo(3);
         verify(readSnippetsQuery).readSnippets(search, filter, sort);
     }
 
@@ -67,6 +67,15 @@ class ListSnippetsTest {
         var filterProperties = new FilterProperties();
         useCase.list(sortQuery, filterProperties, null, 1);
         verify(readSnippetsQuery).readSnippets(sortQuery, filterProperties, new SortProperties(RELEVANCE, true));
+    }
+
+    @Test
+    @DisplayName("returns the snippets of the corresponding page")
+    void respectPage() throws PageNotExistsException {
+        SnippetListPage page = useCase.list("", new FilterProperties(), null, 3);
+
+        Snippet[] expectedSnippets = snippets().skip(100).limit(50).toArray(Snippet[]::new);
+        assertThat(page.snippets()).containsExactly(expectedSnippets);
     }
 
     @Nested
@@ -93,9 +102,12 @@ class ListSnippetsTest {
         }
     }
 
-    private List<Snippet> snippets() {
-        return Stream.of(1, 2, 3, 4, 5)
-                     .map(id -> Snippet.builder().id(String.valueOf(id)).build())
-                     .toList();
+    private Stream<Snippet> snippets() {
+        String[] snippetIds = new String[SNIPPET_COUNT];
+        for (int i = 0; i < SNIPPET_COUNT; i++)
+            snippetIds[i] = String.valueOf(i + 1);
+
+        return Stream.of(snippetIds)
+                     .map(id -> Snippet.builder().id(String.valueOf(id)).build());
     }
 }

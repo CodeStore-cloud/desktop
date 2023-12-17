@@ -8,6 +8,7 @@ import cloud.codestore.core.usecases.createsnippet.CreateSnippetQuery;
 import cloud.codestore.core.usecases.deletesnippet.DeleteSnippetQuery;
 import cloud.codestore.core.usecases.listsnippets.FilterProperties;
 import cloud.codestore.core.usecases.listsnippets.ReadSnippetsQuery;
+import cloud.codestore.core.usecases.listsnippets.SearchResult;
 import cloud.codestore.core.usecases.listsnippets.SortProperties;
 import cloud.codestore.core.usecases.readsnippet.ReadSnippetQuery;
 import cloud.codestore.core.usecases.updatesnippet.UpdateSnippetQuery;
@@ -61,15 +62,15 @@ class IndexedSnippetRepository implements CreateSnippetQuery, UpdateSnippetQuery
     }
 
     @Override
-    public List<Snippet> readSnippets(
+    public SearchResult readSnippets(
             @Nonnull String search,
             @Nonnull FilterProperties filterProperties,
             @Nonnull SortProperties sortProperties
     ) {
         Query query = new QueryBuilder(search, filterProperties).build();
         SortField sortField = toSortFields(sortProperties);
-        Stream<String> snippetIds = index.query(query, sortField);
-        return fsRepo.readSnippets(snippetIds).toList();
+        List<String> snippetIds = index.query(query, sortField);
+        return new SearchResult(snippetIds.size(), fsRepo.readSnippets(snippetIds.stream()));
     }
 
     @Override

@@ -1,9 +1,11 @@
 package cloud.codestore.core.usecases.listsnippets;
 
+import cloud.codestore.core.Snippet;
 import cloud.codestore.core.UseCase;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Optional;
 
 import static cloud.codestore.core.usecases.listsnippets.SortProperties.SnippetProperty.RELEVANCE;
@@ -16,11 +18,9 @@ public class ListSnippets {
     private static final int PAGE_SIZE = 50;
 
     private final ReadSnippetsQuery readSnippetsQuery;
-    private final CountSnippetsQuery countSnippetsQuery;
 
-    public ListSnippets(ReadSnippetsQuery readSnippetsQuery, CountSnippetsQuery countSnippetsQuery) {
+    public ListSnippets(ReadSnippetsQuery readSnippetsQuery) {
         this.readSnippetsQuery = readSnippetsQuery;
-        this.countSnippetsQuery = countSnippetsQuery;
     }
 
     @Nonnull
@@ -30,16 +30,20 @@ public class ListSnippets {
             @Nullable SortProperties sortProperties,
             int pageNumber
     ) throws PageNotExistsException {
-        int snippetCount = countSnippetsQuery.getSnippetCount();
-        int totalPages = (int) Math.max(1, Math.ceil(snippetCount / (double) PAGE_SIZE));
-
-        if (pageNumber <= 0 || pageNumber > totalPages)
-            throw new PageNotExistsException(pageNumber);
-
         sortProperties = Optional.ofNullable(sortProperties)
                                  .orElseGet(() -> search.isEmpty() ? new SortProperties() : new SortProperties(RELEVANCE, true));
 
-        var snippets = readSnippetsQuery.readSnippets(search, filterProperties, sortProperties);
+        var searchResult = readSnippetsQuery.readSnippets(search, filterProperties, sortProperties);
+
+        int totalPages = (int) Math.max(1, Math.ceil(searchResult.totalCount() / (double) PAGE_SIZE));
+        if (pageNumber <= 0 || pageNumber > totalPages)
+            throw new PageNotExistsException(pageNumber);
+
+        List<Snippet> snippets = searchResult.snippetStream()
+                                             .skip((long) (pageNumber - 1) * PAGE_SIZE)
+                                             .limit(PAGE_SIZE)
+                                             .toList();
+
         return new SnippetListPage(pageNumber, totalPages, snippets);
     }
 }
