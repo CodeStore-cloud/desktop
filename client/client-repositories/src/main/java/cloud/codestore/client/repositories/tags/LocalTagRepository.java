@@ -7,8 +7,11 @@ import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * A repository which saves/loads tags from the local {CodeStore} Core.
+ */
 @Repository
-public class LocalTagRepository implements cloud.codestore.client.TagRepository {
+public class LocalTagRepository {
     private final HttpClient client;
 
     LocalTagRepository(HttpClient client) {
@@ -16,7 +19,6 @@ public class LocalTagRepository implements cloud.codestore.client.TagRepository 
     }
 
     @Nonnull
-    @Override
     public List<String> get(String tagsUri) {
         var resourceCollection = client.getCollection(tagsUri, TagResource.class);
         TagResource[] data = resourceCollection.getData(TagResource.class);

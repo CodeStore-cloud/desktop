@@ -1,6 +1,5 @@
 package cloud.codestore.client.usecases.listsnippets;
 
-import cloud.codestore.client.SnippetRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,29 +14,29 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("The list-snippets use case")
+@DisplayName("The readSnippets-snippets use case")
 class ListSnippetsTest {
     private static final String NEXT_PAGE_URL = "http://localhost:8080/snippets?page[number]=2";
 
     @Mock
-    private SnippetRepository repository;
+    private ReadSnippetPageQuery query;
     private ListSnippets useCase;
 
     @BeforeEach
     void setUp() {
-        useCase = new ListSnippets(repository);
+        useCase = new ListSnippets(query);
     }
 
     @Test
-    @DisplayName("returns all available code snippets")
+    @DisplayName("returns a page of code snippets")
     void returnAllSnippets() {
         var expectedSnippets = allSnippets();
         var testPage = new SnippetPage(expectedSnippets, NEXT_PAGE_URL);
-        when(repository.get()).thenReturn(testPage);
+        when(query.getFirstPage()).thenReturn(testPage);
 
-        var page = useCase.list();
-        assertThat(page.getSnippets()).isSameAs(expectedSnippets);
-        assertThat(page.getNextPageUri()).isPresent().get().isEqualTo(NEXT_PAGE_URL);
+        var page = useCase.readSnippets();
+        assertThat(page.snippets()).isSameAs(expectedSnippets);
+        assertThat(page.nextPageUrl()).isEqualTo(NEXT_PAGE_URL);
     }
 
     private List<SnippetListItem> allSnippets() {

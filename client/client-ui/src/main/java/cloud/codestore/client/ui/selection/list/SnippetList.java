@@ -35,12 +35,12 @@ public class SnippetList implements ChangeListener<SnippetListItem> {
     public void initialize() {
         handleNextPageVisibility();
         handleSnippetSelection();
-        showSnippets(listSnippets.list());
+        showSnippets(listSnippets.readSnippets());
     }
 
     @FXML
     public void loadNextPage() {
-        SnippetPage page = listSnippets.list(nextPageUrl.get());
+        SnippetPage page = listSnippets.readSnippets(nextPageUrl.get());
         showSnippets(page);
     }
 
@@ -52,8 +52,8 @@ public class SnippetList implements ChangeListener<SnippetListItem> {
     }
 
     private void showSnippets(SnippetPage page) {
-        list.getItems().addAll(page.getSnippets());
-        nextPageUrl.set(page.getNextPageUri().orElse(""));
+        list.getItems().addAll(page.snippets());
+        nextPageUrl.set(page.nextPageUrl());
     }
 
     @Override

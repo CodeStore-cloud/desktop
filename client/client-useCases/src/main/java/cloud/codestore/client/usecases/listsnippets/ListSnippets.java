@@ -1,28 +1,38 @@
 package cloud.codestore.client.usecases.listsnippets;
 
-import cloud.codestore.client.SnippetRepository;
 import cloud.codestore.client.UseCase;
 
 import javax.annotation.Nonnull;
 
 /**
- * Use case: read all code snippets.
+ * Use case: read a collection of code snippets.
  */
 @UseCase
 public class ListSnippets {
-    private final SnippetRepository repository;
+    private final ReadSnippetPageQuery pageQuery;
 
-    public ListSnippets(SnippetRepository repository) {
-        this.repository = repository;
+    public ListSnippets(ReadSnippetPageQuery pageQuery) {
+        this.pageQuery = pageQuery;
     }
 
+    /**
+     * Reads the first page of code snippets.
+     *
+     * @return a page containing a list of code snippets.
+     */
     @Nonnull
-    public SnippetPage list() {
-        return repository.get();
+    public SnippetPage readSnippets() {
+        return pageQuery.getFirstPage();
     }
 
+    /**
+     * Reads a specific page of code snippets.
+     *
+     * @param pageUrl the URL of the page to read.
+     * @return a page containing a list of code snippets.
+     */
     @Nonnull
-    public SnippetPage list(@Nonnull String url) {
-        return repository.get();
+    public SnippetPage readSnippets(@Nonnull String pageUrl) {
+        return pageQuery.getPage(pageUrl);
     }
 }

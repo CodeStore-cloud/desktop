@@ -44,7 +44,7 @@ class SnippetListTest {
     private void start(Stage stage) throws Exception {
         var expectedSnippets = testItems();
         var testPage = new SnippetPage(expectedSnippets, NEXT_PAGE_URL);
-        when(listSnippets.list()).thenReturn(testPage);
+        when(listSnippets.readSnippets()).thenReturn(testPage);
 
         snippetList = new SnippetList(listSnippets, eventBus);
 
@@ -80,8 +80,8 @@ class SnippetListTest {
     @Test
     @DisplayName("shows a button when more pages are available")
     void showOrHidePaginationButton(FxRobot robot) {
-        var page2 = new SnippetPage(Collections.emptyList(), null);
-        when(listSnippets.list(NEXT_PAGE_URL)).thenReturn(page2);
+        var page2 = new SnippetPage(Collections.emptyList(), "");
+        when(listSnippets.readSnippets(NEXT_PAGE_URL)).thenReturn(page2);
 
         var showMoreButton = showMoreButton(robot);
         assertThat(showMoreButton.isVisible()).isTrue();
@@ -92,8 +92,8 @@ class SnippetListTest {
     @Test
     @DisplayName("loads the next page of snippets when pressing \"show more\"")
     void loadNextPage(FxRobot robot) {
-        var page2 = new SnippetPage(page2TestItems(), null);
-        when(listSnippets.list(NEXT_PAGE_URL)).thenReturn(page2);
+        var page2 = new SnippetPage(page2TestItems(), "");
+        when(listSnippets.readSnippets(NEXT_PAGE_URL)).thenReturn(page2);
         var listView = listView(robot);
         assertThat(listView.getItems()).hasSize(10);
 
