@@ -22,8 +22,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("The snippet repository")
-class SnippetRepositoryTest {
+@DisplayName("The local snippet repository")
+class LocalSnippetRepositoryTest {
     private static final String SNIPPETS_URL = "http://localhost:8080/snippets";
     private static final String SNIPPET_URI = "http://localhost:8080/snippets/1";
     private static final String TAGS_URI = "http://localhost:8080/tags?filter[snippet]=1";
@@ -37,6 +37,7 @@ class SnippetRepositoryTest {
     @BeforeEach
     void setUp() {
         repository = new LocalSnippetRepository(client, tagRepository);
+        lenient().when(client.getSnippetCollectionUrl()).thenReturn(SNIPPETS_URL);
     }
 
     @Test
@@ -45,10 +46,9 @@ class SnippetRepositoryTest {
         SnippetResource[] testSnippets = testSnippets();
         var resourceCollection = new ResourceCollectionDocument<>(testSnippets);
         resourceCollection.getLinks().add(new Link(Link.NEXT, "/snippets?page[number]=2"));
-        when(client.getSnippetCollectionUrl()).thenReturn(SNIPPETS_URL);
         when(client.getCollection(SNIPPETS_URL, SnippetResource.class)).thenReturn(resourceCollection);
 
-        SnippetPage page = repository.getFirstPage();
+        SnippetPage page = repository.getFirstPage("");
 
         List<SnippetListItem> snippets = page.snippets();
         assertThat(snippets).isNotNull().isNotEmpty().hasSameSizeAs(testSnippets);
@@ -80,6 +80,17 @@ class SnippetRepositoryTest {
         assertThat(snippet.getDescription()).isEqualTo("With a short description");
         assertThat(snippet.getCode()).isEqualTo("System.out.println(\"Hello, World!\");");
         assertThat(snippet.getTags()).containsExactlyInAnyOrder("hello", "world");
+    }
+
+    @Test
+    @DisplayName("passes the provided search query to the core")
+    void searchSnippets() {
+        var resourceCollection = new ResourceCollectionDocument<>(testSnippets());
+        when(client.getCollection(anyString(), eq(SnippetResource.class))).thenReturn(resourceCollection);
+
+        repository.getFirstPage("test");
+
+        verify(client).getCollection(SNIPPETS_URL + "?searchQuery=test", SnippetResource.class);
     }
 
     private SnippetResource[] testSnippets() {

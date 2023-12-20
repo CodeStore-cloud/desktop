@@ -9,6 +9,8 @@ import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
 import cloud.codestore.client.usecases.listsnippets.SnippetPage;
 import cloud.codestore.client.usecases.readsnippet.ReadSnippetUseCase;
 import cloud.codestore.jsonapi.link.Link;
+import org.springframework.util.StringUtils;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
@@ -31,7 +33,14 @@ class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase 
     @Nonnull
     @Override
     public SnippetPage getFirstPage(@Nonnull String searchQuery) {
-        return getPage(client.getSnippetCollectionUrl());
+        String url = client.getSnippetCollectionUrl();
+        if (StringUtils.hasText(searchQuery)) {
+            url = UriComponentsBuilder.fromUriString(url)
+                                      .queryParam("searchQuery", searchQuery)
+                                      .build().toUri().toString();
+        }
+
+        return getPage(url);
     }
 
     @Nonnull
