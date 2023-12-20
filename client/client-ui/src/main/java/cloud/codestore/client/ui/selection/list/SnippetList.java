@@ -1,10 +1,12 @@
 package cloud.codestore.client.ui.selection.list;
 
 import cloud.codestore.client.ui.FxController;
+import cloud.codestore.client.ui.selection.search.FullTextSearchEvent;
 import cloud.codestore.client.usecases.listsnippets.ReadSnippetsUseCase;
 import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
 import cloud.codestore.client.usecases.listsnippets.SnippetPage;
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
@@ -14,6 +16,8 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
+
+import javax.annotation.Nonnull;
 
 @FxController
 public class SnippetList implements ChangeListener<SnippetListItem> {
@@ -26,22 +30,22 @@ public class SnippetList implements ChangeListener<SnippetListItem> {
     @FXML
     private Node nextPage;
 
-    public SnippetList(ReadSnippetsUseCase readSnippetsUseCase, EventBus eventBus) {
+    public SnippetList(@Nonnull ReadSnippetsUseCase readSnippetsUseCase, @Nonnull EventBus eventBus) {
         this.readSnippetsUseCase = readSnippetsUseCase;
         this.eventBus = eventBus;
+        eventBus.register(this);
     }
 
     @FXML
     public void initialize() {
         handleNextPageVisibility();
         handleSnippetSelection();
-        showSnippets(readSnippetsUseCase.getFirstPage());
+        showSnippets(readSnippetsUseCase.getFirstPage(""));
     }
 
-    @FXML
-    public void loadNextPage() {
-        SnippetPage page = readSnippetsUseCase.getPage(nextPageUrl.get());
-        showSnippets(page);
+    private void handleNextPageVisibility() {
+        nextPage.managedProperty().bind(nextPage.visibleProperty());
+        nextPage.visibleProperty().bind(nextPageUrl.isNotEmpty());
     }
 
     private void handleSnippetSelection() {
@@ -56,6 +60,12 @@ public class SnippetList implements ChangeListener<SnippetListItem> {
         nextPageUrl.set(page.nextPageUrl());
     }
 
+    @FXML
+    public void loadNextPage() {
+        SnippetPage page = readSnippetsUseCase.getPage(nextPageUrl.get());
+        showSnippets(page);
+    }
+
     @Override
     public void changed(
             ObservableValue<? extends SnippetListItem> observable,
@@ -67,8 +77,10 @@ public class SnippetList implements ChangeListener<SnippetListItem> {
         }
     }
 
-    private void handleNextPageVisibility() {
-        nextPage.managedProperty().bind(nextPage.visibleProperty());
-        nextPage.visibleProperty().bind(nextPageUrl.isNotEmpty());
+    @Subscribe
+    private void snippetSelected(@Nonnull FullTextSearchEvent event) {
+        list.getItems().clear();
+        SnippetPage page = readSnippetsUseCase.getFirstPage(event.searchQuery());
+        showSnippets(page);
     }
 }

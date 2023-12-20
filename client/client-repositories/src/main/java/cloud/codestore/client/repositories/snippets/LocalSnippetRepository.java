@@ -30,7 +30,7 @@ class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase 
 
     @Nonnull
     @Override
-    public SnippetPage getFirstPage() {
+    public SnippetPage getFirstPage(@Nonnull String searchQuery) {
         return getPage(client.getSnippetCollectionUrl());
     }
 
