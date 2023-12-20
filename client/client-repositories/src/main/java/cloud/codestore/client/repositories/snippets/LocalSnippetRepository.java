@@ -4,10 +4,10 @@ import cloud.codestore.client.Snippet;
 import cloud.codestore.client.repositories.HttpClient;
 import cloud.codestore.client.repositories.Repository;
 import cloud.codestore.client.repositories.tags.LocalTagRepository;
-import cloud.codestore.client.usecases.listsnippets.ReadSnippetPageQuery;
+import cloud.codestore.client.usecases.listsnippets.ReadSnippetsUseCase;
 import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
 import cloud.codestore.client.usecases.listsnippets.SnippetPage;
-import cloud.codestore.client.usecases.readsnippet.ReadSnippetQuery;
+import cloud.codestore.client.usecases.readsnippet.ReadSnippetUseCase;
 import cloud.codestore.jsonapi.link.Link;
 
 import javax.annotation.Nonnull;
@@ -18,7 +18,7 @@ import java.util.Optional;
  * A repository which saves/loads code snippets from the local {CodeStore} Core.
  */
 @Repository
-class LocalSnippetRepository implements ReadSnippetPageQuery, ReadSnippetQuery {
+class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase {
 
     private final HttpClient client;
     private final LocalTagRepository tagRepository;

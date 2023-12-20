@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml">
+    <fx:include source="./search/searchField.fxml"/>
+    <Separator/>
+    <fx:include source="./list/snippetList.fxml" VBox.vgrow="ALWAYS"/>
+</VBox>

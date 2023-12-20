@@ -1,0 +1,5 @@
+@use "../../size";
+
+#inputField {
+    -fx-pref-height: size.$SecondaryElementSize;
+}

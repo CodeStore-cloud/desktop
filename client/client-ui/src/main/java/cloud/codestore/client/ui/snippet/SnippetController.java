@@ -7,7 +7,7 @@ import cloud.codestore.client.ui.snippet.code.SnippetCode;
 import cloud.codestore.client.ui.snippet.description.SnippetDescription;
 import cloud.codestore.client.ui.snippet.details.SnippetDetails;
 import cloud.codestore.client.ui.snippet.title.SnippetTitle;
-import cloud.codestore.client.usecases.readsnippet.ReadSnippet;
+import cloud.codestore.client.usecases.readsnippet.ReadSnippetUseCase;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import javafx.fxml.FXML;
@@ -16,7 +16,7 @@ import javax.annotation.Nonnull;
 
 @FxController
 public class SnippetController {
-    private ReadSnippet readSnippetUseCase;
+    private ReadSnippetUseCase readSnippetUseCase;
 
     @FXML
     private SnippetTitle snippetTitleController;
@@ -27,7 +27,7 @@ public class SnippetController {
     @FXML
     private SnippetDetails snippetDetailsController;
 
-    SnippetController(@Nonnull ReadSnippet readSnippetUseCase, @Nonnull EventBus eventBus) {
+    SnippetController(@Nonnull ReadSnippetUseCase readSnippetUseCase, @Nonnull EventBus eventBus) {
         this.readSnippetUseCase = readSnippetUseCase;
         eventBus.register(this);
     }

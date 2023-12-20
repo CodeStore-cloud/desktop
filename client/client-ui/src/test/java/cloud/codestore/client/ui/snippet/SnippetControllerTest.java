@@ -6,7 +6,7 @@ import cloud.codestore.client.ui.snippet.code.SnippetCode;
 import cloud.codestore.client.ui.snippet.description.SnippetDescription;
 import cloud.codestore.client.ui.snippet.details.SnippetDetails;
 import cloud.codestore.client.ui.snippet.title.SnippetTitle;
-import cloud.codestore.client.usecases.readsnippet.ReadSnippet;
+import cloud.codestore.client.usecases.readsnippet.ReadSnippetUseCase;
 import com.google.common.eventbus.EventBus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,7 +29,7 @@ class SnippetControllerTest {
     private static final String SNIPPET_URI = "http://localhost:8080/snippets/1";
 
     @Mock
-    private ReadSnippet readSnippetUseCase;
+    private ReadSnippetUseCase readSnippetUseCase;
     @Mock
     private SnippetTitle snippetTitleController;
     @Mock

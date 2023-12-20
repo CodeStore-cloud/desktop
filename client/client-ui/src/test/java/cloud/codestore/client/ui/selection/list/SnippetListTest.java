@@ -1,13 +1,11 @@
 package cloud.codestore.client.ui.selection.list;
 
-import cloud.codestore.client.usecases.listsnippets.ListSnippets;
+import cloud.codestore.client.ui.AbstractUiTest;
+import cloud.codestore.client.usecases.listsnippets.ReadSnippetsUseCase;
 import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
 import cloud.codestore.client.usecases.listsnippets.SnippetPage;
 import com.google.common.eventbus.EventBus;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.ListView;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.DisplayName;
@@ -20,10 +18,8 @@ import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
-import java.net.URL;
 import java.util.Collections;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,31 +27,22 @@ import static org.testfx.assertions.api.Assertions.assertThat;
 
 @ExtendWith({MockitoExtension.class, ApplicationExtension.class})
 @DisplayName("The snippet list")
-class SnippetListTest {
+class SnippetListTest extends AbstractUiTest {
     private static final String NEXT_PAGE_URL = "http://localhost:8080/snippets?page[number]=2";
 
     @Mock
-    private ListSnippets listSnippets;
+    private ReadSnippetsUseCase readSnippetsUseCase;
     @Mock
     private EventBus eventBus;
-    private SnippetList snippetList;
 
     @Start
     private void start(Stage stage) throws Exception {
         var expectedSnippets = testItems();
         var testPage = new SnippetPage(expectedSnippets, NEXT_PAGE_URL);
-        when(listSnippets.readSnippets()).thenReturn(testPage);
+        when(readSnippetsUseCase.getFirstPage()).thenReturn(testPage);
 
-        snippetList = new SnippetList(listSnippets, eventBus);
-
-        ResourceBundle resourceBundle = ResourceBundle.getBundle("uiMessages");
-        URL fxmlFile = getClass().getResource("snippetList.fxml");
-        FXMLLoader fxmlLoader = new FXMLLoader(fxmlFile, resourceBundle);
-        fxmlLoader.setControllerFactory(controllerClass -> snippetList);
-        Parent parent = fxmlLoader.load();
-
-        stage.setScene(new Scene(parent));
-        stage.show();
+        SnippetList controller = new SnippetList(readSnippetsUseCase, eventBus);
+        start(stage, "snippetList.fxml", controller);
     }
 
     @Test
@@ -81,7 +68,7 @@ class SnippetListTest {
     @DisplayName("shows a button when more pages are available")
     void showOrHidePaginationButton(FxRobot robot) {
         var page2 = new SnippetPage(Collections.emptyList(), "");
-        when(listSnippets.readSnippets(NEXT_PAGE_URL)).thenReturn(page2);
+        when(readSnippetsUseCase.getPage(NEXT_PAGE_URL)).thenReturn(page2);
 
         var showMoreButton = showMoreButton(robot);
         assertThat(showMoreButton.isVisible()).isTrue();
@@ -93,7 +80,7 @@ class SnippetListTest {
     @DisplayName("loads the next page of snippets when pressing \"show more\"")
     void loadNextPage(FxRobot robot) {
         var page2 = new SnippetPage(page2TestItems(), "");
-        when(listSnippets.readSnippets(NEXT_PAGE_URL)).thenReturn(page2);
+        when(readSnippetsUseCase.getPage(NEXT_PAGE_URL)).thenReturn(page2);
         var listView = listView(robot);
         assertThat(listView.getItems()).hasSize(10);
 

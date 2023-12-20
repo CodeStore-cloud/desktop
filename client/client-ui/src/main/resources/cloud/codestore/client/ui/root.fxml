@@ -7,7 +7,7 @@
     <fx:include source="./header/header.fxml"/>
     <SplitPane dividerPositions="0.4" VBox.vgrow="ALWAYS">
         <AnchorPane styleClass="secondaryBackground,primaryPadding">
-            <fx:include source="./selection/list/snippetList.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+            <fx:include source="./selection/selection.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
         </AnchorPane>
         <AnchorPane styleClass="secondaryBackground,primaryPadding">
             <fx:include source="./snippet/snippet.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>

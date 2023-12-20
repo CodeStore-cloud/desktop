@@ -3,9 +3,9 @@ package cloud.codestore.client.usecases.listsnippets;
 import javax.annotation.Nonnull;
 
 /**
- * A query for reading a list of code snippets.
+ * Use Case: read a list of code snippets.
  */
-public interface ReadSnippetPageQuery {
+public interface ReadSnippetsUseCase {
     /**
      * Reads the first page of code snippets.
      * @return a page containing a list of code snippets.

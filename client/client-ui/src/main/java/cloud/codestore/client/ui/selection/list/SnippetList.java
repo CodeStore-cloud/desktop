@@ -1,7 +1,7 @@
 package cloud.codestore.client.ui.selection.list;
 
 import cloud.codestore.client.ui.FxController;
-import cloud.codestore.client.usecases.listsnippets.ListSnippets;
+import cloud.codestore.client.usecases.listsnippets.ReadSnippetsUseCase;
 import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
 import cloud.codestore.client.usecases.listsnippets.SnippetPage;
 import com.google.common.eventbus.EventBus;
@@ -17,7 +17,7 @@ import javafx.scene.control.SelectionMode;
 
 @FxController
 public class SnippetList implements ChangeListener<SnippetListItem> {
-    private final ListSnippets listSnippets;
+    private final ReadSnippetsUseCase readSnippetsUseCase;
     private final EventBus eventBus;
     private final StringProperty nextPageUrl = new SimpleStringProperty();
 
@@ -26,8 +26,8 @@ public class SnippetList implements ChangeListener<SnippetListItem> {
     @FXML
     private Node nextPage;
 
-    public SnippetList(ListSnippets listSnippets, EventBus eventBus) {
-        this.listSnippets = listSnippets;
+    public SnippetList(ReadSnippetsUseCase readSnippetsUseCase, EventBus eventBus) {
+        this.readSnippetsUseCase = readSnippetsUseCase;
         this.eventBus = eventBus;
     }
 
@@ -35,12 +35,12 @@ public class SnippetList implements ChangeListener<SnippetListItem> {
     public void initialize() {
         handleNextPageVisibility();
         handleSnippetSelection();
-        showSnippets(listSnippets.readSnippets());
+        showSnippets(readSnippetsUseCase.getFirstPage());
     }
 
     @FXML
     public void loadNextPage() {
-        SnippetPage page = listSnippets.readSnippets(nextPageUrl.get());
+        SnippetPage page = readSnippetsUseCase.getPage(nextPageUrl.get());
         showSnippets(page);
     }
 

@@ -5,9 +5,9 @@ import cloud.codestore.client.Snippet;
 import javax.annotation.Nonnull;
 
 /**
- * A query for reading a single code snippet.
+ * Use Case: read a single code snippet.
  */
-public interface ReadSnippetQuery {
+public interface ReadSnippetUseCase {
     /**
      * Reads the code snippet with the given URI.
      * @param snippetUri the URI of the snippet to read.
