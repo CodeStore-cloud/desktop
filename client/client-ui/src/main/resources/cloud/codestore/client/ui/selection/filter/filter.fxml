@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="cloud.codestore.client.ui.selection.filter.Filter"
+      styleClass="secondarySpacing">
+    <TextField fx:id="tagsInput" promptText="%filter.tags.placeholder" VBox.vgrow="NEVER"/>
+</VBox>

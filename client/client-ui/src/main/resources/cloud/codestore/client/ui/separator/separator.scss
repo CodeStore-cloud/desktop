@@ -5,4 +5,14 @@ Separator {
     -fx-min-height: 1px;
     -fx-max-height: 1px;
     -fx-background-color: colors.$borderColor;
+
+    .vertical {
+        -fx-pref-height: -1;
+        -fx-min-height: -1;
+        -fx-max-height: -1;
+
+        -fx-pref-width: 1px;
+        -fx-min-width: 1px;
+        -fx-max-width: 1px;
+    }
 }

@@ -19,6 +19,10 @@
     -fx-spacing: size.$primaryPadding;
 }
 
+.secondarySpacing {
+    -fx-spacing: size.$secondaryPadding;
+}
+
 .bordered {
     -fx-border-insets: 0;
     -fx-border-radius: 0;

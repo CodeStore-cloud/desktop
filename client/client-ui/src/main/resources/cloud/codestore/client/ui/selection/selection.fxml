@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Separator?>
+<?import cloud.codestore.client.ui.separator.Separator?>
 <?import javafx.scene.layout.VBox?>
-<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml">
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" styleClass="primarySpacing">
     <fx:include source="./search/searchField.fxml"/>
+    <Separator/>
+    <fx:include source="./filter/filter.fxml"/>
     <Separator/>
     <fx:include source="./list/snippetList.fxml" VBox.vgrow="ALWAYS"/>
 </VBox>
