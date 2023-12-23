@@ -8,14 +8,20 @@ import javax.annotation.Nonnull;
 public interface ReadSnippetsUseCase {
     /**
      * Reads the first page of code snippets.
-     * @param searchQuery the full-text-search input. May be empty.
+     *
+     * @param searchQuery      the full-text-search input. May be empty.
+     * @param filterProperties defines how the snippets should be filtered.
      * @return a page containing a list of code snippets.
      */
     @Nonnull
-    SnippetPage getFirstPage(@Nonnull String searchQuery);
+    SnippetPage getFirstPage(
+            @Nonnull String searchQuery,
+            @Nonnull FilterProperties filterProperties
+    );
 
     /**
      * Reads a page of code snippets.
+     *
      * @param pageUrl the URL of a specific page.
      * @return a page containing a list of code snippets.
      */

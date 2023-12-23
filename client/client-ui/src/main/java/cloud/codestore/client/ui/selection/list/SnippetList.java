@@ -1,7 +1,9 @@
 package cloud.codestore.client.ui.selection.list;
 
 import cloud.codestore.client.ui.FxController;
+import cloud.codestore.client.ui.selection.filter.FilterEvent;
 import cloud.codestore.client.ui.selection.search.FullTextSearchEvent;
+import cloud.codestore.client.usecases.listsnippets.FilterProperties;
 import cloud.codestore.client.usecases.listsnippets.ReadSnippetsUseCase;
 import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
 import cloud.codestore.client.usecases.listsnippets.SnippetPage;
@@ -25,6 +27,9 @@ public class SnippetList implements ChangeListener<SnippetListItem> {
     private final EventBus eventBus;
     private final StringProperty nextPageUrl = new SimpleStringProperty();
 
+    private String searchQuery = "";
+    private FilterProperties filterProperties = new FilterProperties();
+
     @FXML
     private ListView<SnippetListItem> list;
     @FXML
@@ -40,7 +45,7 @@ public class SnippetList implements ChangeListener<SnippetListItem> {
     public void initialize() {
         handleNextPageVisibility();
         handleSnippetSelection();
-        showSnippets(readSnippetsUseCase.getFirstPage(""));
+        loadSnippets();
     }
 
     private void handleNextPageVisibility() {
@@ -53,6 +58,12 @@ public class SnippetList implements ChangeListener<SnippetListItem> {
         list.setCellFactory(list -> new SnippetListItemCell());
         list.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         list.getSelectionModel().selectedItemProperty().addListener(this);
+    }
+
+    private void loadSnippets() {
+        list.getItems().clear();
+        SnippetPage page = readSnippetsUseCase.getFirstPage(searchQuery, filterProperties);
+        showSnippets(page);
     }
 
     private void showSnippets(SnippetPage page) {
@@ -78,9 +89,14 @@ public class SnippetList implements ChangeListener<SnippetListItem> {
     }
 
     @Subscribe
-    private void snippetSelected(@Nonnull FullTextSearchEvent event) {
-        list.getItems().clear();
-        SnippetPage page = readSnippetsUseCase.getFirstPage(event.searchQuery());
-        showSnippets(page);
+    private void search(@Nonnull FullTextSearchEvent event) {
+        searchQuery = event.searchQuery();
+        loadSnippets();
+    }
+
+    @Subscribe
+    private void filterChange(@Nonnull FilterEvent event) {
+        filterProperties = event.filterProperties();
+        loadSnippets();
     }
 }

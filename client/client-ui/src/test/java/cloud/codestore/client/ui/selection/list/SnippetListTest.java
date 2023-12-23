@@ -1,7 +1,9 @@
 package cloud.codestore.client.ui.selection.list;
 
 import cloud.codestore.client.ui.AbstractUiTest;
+import cloud.codestore.client.ui.selection.filter.FilterEvent;
 import cloud.codestore.client.ui.selection.search.FullTextSearchEvent;
+import cloud.codestore.client.usecases.listsnippets.FilterProperties;
 import cloud.codestore.client.usecases.listsnippets.ReadSnippetsUseCase;
 import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
 import cloud.codestore.client.usecases.listsnippets.SnippetPage;
@@ -22,7 +24,10 @@ import org.testfx.framework.junit5.Start;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testfx.assertions.api.Assertions.assertThat;
@@ -41,7 +46,7 @@ class SnippetListTest extends AbstractUiTest {
     private void start(Stage stage) throws Exception {
         var expectedSnippets = testItems();
         var testPage = new SnippetPage(expectedSnippets, NEXT_PAGE_URL);
-        when(readSnippetsUseCase.getFirstPage("")).thenReturn(testPage);
+        when(readSnippetsUseCase.getFirstPage(anyString(), any())).thenReturn(testPage);
 
         SnippetList controller = new SnippetList(readSnippetsUseCase, eventBus);
         start(stage, "snippetList.fxml", controller);
@@ -95,20 +100,30 @@ class SnippetListTest extends AbstractUiTest {
     @Test
     @DisplayName("reloads the snippets when a FullTextSearchEvent is triggered")
     void searchSnippets(FxRobot robot) {
-        var snippets = List.of(
-                new SnippetListItem(uri(31), "Snippet test #31"),
-                new SnippetListItem(uri(32), "Snippet test #32"),
-                new SnippetListItem(uri(33), "Snippet test #33")
-        );
-
-        var page = new SnippetPage(snippets, "");
-        when(readSnippetsUseCase.getFirstPage("test")).thenReturn(page);
+        var page = new SnippetPage(reducedSnippetList(), "");
+        when(readSnippetsUseCase.getFirstPage("test", new FilterProperties())).thenReturn(page);
 
         var listView = listView(robot);
         assertThat(listView.getItems()).hasSize(10);
 
         robot.interact(() -> {
             eventBus.post(new FullTextSearchEvent("test"));
+            assertThat(listView.getItems()).hasSize(3);
+        });
+    }
+
+    @Test
+    @DisplayName("reloads the snippets when a FilterEvent is triggered")
+    void filterSnippets(FxRobot robot) {
+        var filterProperties = new FilterProperties(Set.of("hello", "world"));
+        var page = new SnippetPage(reducedSnippetList(), "");
+        when(readSnippetsUseCase.getFirstPage("", filterProperties)).thenReturn(page);
+
+        var listView = listView(robot);
+        assertThat(listView.getItems()).hasSize(10);
+
+        robot.interact(() -> {
+            eventBus.post(new FilterEvent(filterProperties));
             assertThat(listView.getItems()).hasSize(3);
         });
     }
@@ -148,6 +163,14 @@ class SnippetListTest extends AbstractUiTest {
                 new SnippetListItem(uri(18), "Snippet test #18"),
                 new SnippetListItem(uri(19), "Snippet test #19"),
                 new SnippetListItem(uri(20), "Snippet test #20")
+        );
+    }
+
+    private static List<SnippetListItem> reducedSnippetList() {
+        return List.of(
+                new SnippetListItem(uri(31), "Snippet test #31"),
+                new SnippetListItem(uri(32), "Snippet test #32"),
+                new SnippetListItem(uri(33), "Snippet test #33")
         );
     }
 

@@ -4,6 +4,7 @@ import cloud.codestore.client.Snippet;
 import cloud.codestore.client.repositories.HttpClient;
 import cloud.codestore.client.repositories.Repository;
 import cloud.codestore.client.repositories.tags.LocalTagRepository;
+import cloud.codestore.client.usecases.listsnippets.FilterProperties;
 import cloud.codestore.client.usecases.listsnippets.ReadSnippetsUseCase;
 import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
 import cloud.codestore.client.usecases.listsnippets.SnippetPage;
@@ -32,7 +33,10 @@ class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase 
 
     @Nonnull
     @Override
-    public SnippetPage getFirstPage(@Nonnull String searchQuery) {
+    public SnippetPage getFirstPage(
+            @Nonnull String searchQuery,
+            @Nonnull FilterProperties filterProperties
+    ) {
         String url = client.getSnippetCollectionUrl();
         if (StringUtils.hasText(searchQuery)) {
             url = UriComponentsBuilder.fromUriString(url)
