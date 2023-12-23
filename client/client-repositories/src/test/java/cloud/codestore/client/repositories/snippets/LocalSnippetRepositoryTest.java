@@ -3,6 +3,7 @@ package cloud.codestore.client.repositories.snippets;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.repositories.HttpClient;
 import cloud.codestore.client.repositories.tags.LocalTagRepository;
+import cloud.codestore.client.usecases.listsnippets.FilterProperties;
 import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
 import cloud.codestore.client.usecases.listsnippets.SnippetPage;
 import cloud.codestore.jsonapi.document.ResourceCollectionDocument;
@@ -17,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -48,7 +50,7 @@ class LocalSnippetRepositoryTest {
         resourceCollection.getLinks().add(new Link(Link.NEXT, "/snippets?page[number]=2"));
         when(client.getCollection(SNIPPETS_URL, SnippetResource.class)).thenReturn(resourceCollection);
 
-        SnippetPage page = repository.getFirstPage("");
+        SnippetPage page = repository.getFirstPage("", new FilterProperties());
 
         List<SnippetListItem> snippets = page.snippets();
         assertThat(snippets).isNotNull().isNotEmpty().hasSameSizeAs(testSnippets);
@@ -88,9 +90,21 @@ class LocalSnippetRepositoryTest {
         var resourceCollection = new ResourceCollectionDocument<>(testSnippets());
         when(client.getCollection(anyString(), eq(SnippetResource.class))).thenReturn(resourceCollection);
 
-        repository.getFirstPage("test");
+        repository.getFirstPage("test", new FilterProperties());
 
         verify(client).getCollection(SNIPPETS_URL + "?searchQuery=test", SnippetResource.class);
+    }
+
+    @Test
+    @DisplayName("passes the provided filter properties to the core")
+    void filterSnippets() {
+        var resourceCollection = new ResourceCollectionDocument<>(testSnippets());
+        when(client.getCollection(anyString(), eq(SnippetResource.class))).thenReturn(resourceCollection);
+
+        var filterProperties = new FilterProperties(Set.of("hello", "world"));
+        repository.getFirstPage("", filterProperties);
+
+        verify(client).getCollection(SNIPPETS_URL + "?filter[tags]=world,hello", SnippetResource.class);
     }
 
     private SnippetResource[] testSnippets() {

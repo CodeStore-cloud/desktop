@@ -38,12 +38,18 @@ class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase 
             @Nonnull FilterProperties filterProperties
     ) {
         String url = client.getSnippetCollectionUrl();
+        var uriBuilder = UriComponentsBuilder.fromUriString(url);
+
         if (StringUtils.hasText(searchQuery)) {
-            url = UriComponentsBuilder.fromUriString(url)
-                                      .queryParam("searchQuery", searchQuery)
-                                      .build().toUri().toString();
+            uriBuilder.queryParam("searchQuery", searchQuery);
         }
 
+        if (!filterProperties.isEmpty()) {
+            String tagsCsv = String.join(",", filterProperties.tags());
+            uriBuilder.queryParam("filter[tags]", tagsCsv);
+        }
+
+        url = uriBuilder.build().toUri().toString();
         return getPage(url);
     }
 
