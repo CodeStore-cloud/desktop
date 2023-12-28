@@ -1,5 +1,6 @@
 package cloud.codestore.client.repositories;
 
+import cloud.codestore.client.repositories.language.LanguageResource;
 import cloud.codestore.client.repositories.root.RootResource;
 import cloud.codestore.client.repositories.snippets.SnippetResource;
 import cloud.codestore.client.repositories.tags.TagResource;
@@ -27,6 +28,7 @@ public class HttpClient {
     private final WebClient client;
     private final String rootUrl;
     private String snippetCollectionUrl;
+    private String languageCollectionUrl;
 
     public HttpClient(@Nonnull String rootUrl, @Nonnull String accessToken) {
         this.rootUrl = rootUrl;
@@ -34,6 +36,7 @@ public class HttpClient {
         ObjectMapper objectMapper = new JsonApiObjectMapper()
                 .registerResourceType(RootResource.RESOURCE_TYPE, RootResource.class)
                 .registerResourceType(SnippetResource.RESOURCE_TYPE, SnippetResource.class)
+                .registerResourceType(LanguageResource.RESOURCE_TYPE, LanguageResource.class)
                 .registerResourceType(TagResource.RESOURCE_TYPE, TagResource.class);
 
         DefaultUriBuilderFactory uriBuilderFactory = new DefaultUriBuilderFactory();
@@ -56,12 +59,14 @@ public class HttpClient {
 
     @Nonnull
     public String getSnippetCollectionUrl() {
-        if (snippetCollectionUrl == null) {
-            var document = get(rootUrl, RootResource.class);
-            snippetCollectionUrl = document.getData().getSnippetsUrl();
-        }
-
+        getCollectionUrls();
         return snippetCollectionUrl;
+    }
+
+    @Nonnull
+    public String getLanguageCollectionUrl() {
+        getCollectionUrls();
+        return languageCollectionUrl;
     }
 
     public <T extends ResourceObject> SingleResourceDocument<T> get(String url, Class<T> expectedType) {
@@ -90,5 +95,13 @@ public class HttpClient {
                      )
                      .bodyToMono(new ParameterizedTypeReference<ResourceCollectionDocument<T>>() {})
                      .block();
+    }
+
+    private void getCollectionUrls() {
+        if (snippetCollectionUrl == null || languageCollectionUrl == null) {
+            var document = get(rootUrl, RootResource.class);
+            snippetCollectionUrl = document.getData().getSnippetsUrl();
+            languageCollectionUrl = document.getData().getLanguagesUrl();
+        }
     }
 }

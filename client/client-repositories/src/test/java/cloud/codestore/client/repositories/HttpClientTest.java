@@ -34,7 +34,7 @@ class HttpClientTest {
     }
 
     @Test
-    @DisplayName("retrieves the URL of the snippet collection dynamically")
+    @DisplayName("retrieves the URLs of relationships dynamically")
     void retrieveCollectionUrls() {
         setResponse("""
                 {
@@ -46,13 +46,18 @@ class HttpClientTest {
                                 "links": {
                                     "related": "http://localhost:8080/snippets"
                                 }
+                            },
+                            "languages": {
+                                "links": {
+                                    "related": "http://localhost:8080/languages"
+                                }
                             }
                         }
                     }
                 }""");
 
-        String url = client.getSnippetCollectionUrl();
-        assertThat(url).isEqualTo("http://localhost:8080/snippets");
+        assertThat(client.getSnippetCollectionUrl()).isEqualTo("http://localhost:8080/snippets");
+        assertThat(client.getLanguageCollectionUrl()).isEqualTo("http://localhost:8080/languages");
     }
 
     @Test

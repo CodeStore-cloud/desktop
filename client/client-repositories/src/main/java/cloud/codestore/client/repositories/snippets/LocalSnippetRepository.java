@@ -44,12 +44,14 @@ class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase 
             uriBuilder.queryParam("searchQuery", searchQuery);
         }
 
-        if (!filterProperties.isEmpty()) {
-            String tagsCsv = String.join(",", filterProperties.tags());
+        filterProperties.getTags().ifPresent(tags -> {
+            String tagsCsv = String.join(",", tags);
             uriBuilder.queryParam("filter[tags]", tagsCsv);
-        }
+        });
 
-        url = uriBuilder.build().toUri().toString();
+        filterProperties.getLanguage().ifPresent(language -> uriBuilder.queryParam("filter[language]", language.id()));
+
+        url = uriBuilder.build().encode().toUri().toString();
         return getPage(url);
     }
 

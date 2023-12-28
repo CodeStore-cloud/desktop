@@ -1,5 +1,6 @@
 package cloud.codestore.client.repositories.snippets;
 
+import cloud.codestore.client.Language;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.repositories.HttpClient;
 import cloud.codestore.client.repositories.tags.LocalTagRepository;
@@ -14,11 +15,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -34,11 +37,11 @@ class LocalSnippetRepositoryTest {
     private HttpClient client;
     @Mock
     private LocalTagRepository tagRepository;
+    @InjectMocks
     private LocalSnippetRepository repository;
 
     @BeforeEach
     void setUp() {
-        repository = new LocalSnippetRepository(client, tagRepository);
         lenient().when(client.getSnippetCollectionUrl()).thenReturn(SNIPPETS_URL);
     }
 
@@ -101,10 +104,15 @@ class LocalSnippetRepositoryTest {
         var resourceCollection = new ResourceCollectionDocument<>(testSnippets());
         when(client.getCollection(anyString(), eq(SnippetResource.class))).thenReturn(resourceCollection);
 
-        var filterProperties = new FilterProperties(Set.of("hello", "world"));
+        var tags = new TreeSet<>(Set.of("hello", "world"));
+        var language = new Language("Java", "9");
+        var filterProperties = new FilterProperties(tags, language);
         repository.getFirstPage("", filterProperties);
 
-        verify(client).getCollection(SNIPPETS_URL + "?filter[tags]=world,hello", SnippetResource.class);
+        String expectedUrl = SNIPPETS_URL +
+                             "?filter%5Btags%5D=hello,world" +
+                             "&filter%5Blanguage%5D=9";
+        verify(client).getCollection(expectedUrl, SnippetResource.class);
     }
 
     private SnippetResource[] testSnippets() {

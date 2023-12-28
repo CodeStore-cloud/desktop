@@ -1,18 +1,35 @@
 package cloud.codestore.client.usecases.listsnippets;
 
+import cloud.codestore.client.Language;
+
 import javax.annotation.Nonnull;
-import java.util.Collections;
+import javax.annotation.Nullable;
+import java.util.Optional;
 import java.util.Set;
 
 /**
  * Provides information about how to filter the requested code snippets.
  */
-public record FilterProperties(@Nonnull Set<String> tags) {
+public class FilterProperties {
+    private Set<String> tags;
+    private Language language;
+
     public FilterProperties() {
-        this(Collections.emptySet());
+        this(null, null);
     }
 
-    public boolean isEmpty() {
-        return tags.isEmpty();
+    public FilterProperties(@Nullable Set<String> tags, @Nullable Language language) {
+        this.tags = tags;
+        this.language = language;
+    }
+
+    @Nonnull
+    public Optional<Set<String>> getTags() {
+        return tags == null || tags.isEmpty() ? Optional.empty() : Optional.of(tags);
+    }
+
+    @Nonnull
+    public Optional<Language> getLanguage() {
+        return Optional.ofNullable(language);
     }
 }

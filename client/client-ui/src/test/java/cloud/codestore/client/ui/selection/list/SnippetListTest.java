@@ -26,8 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testfx.assertions.api.Assertions.assertThat;
@@ -101,7 +100,7 @@ class SnippetListTest extends AbstractUiTest {
     @DisplayName("reloads the snippets when a FullTextSearchEvent is triggered")
     void searchSnippets(FxRobot robot) {
         var page = new SnippetPage(reducedSnippetList(), "");
-        when(readSnippetsUseCase.getFirstPage("test", new FilterProperties())).thenReturn(page);
+        when(readSnippetsUseCase.getFirstPage(eq("test"), any())).thenReturn(page);
 
         var listView = listView(robot);
         assertThat(listView.getItems()).hasSize(10);
@@ -115,7 +114,7 @@ class SnippetListTest extends AbstractUiTest {
     @Test
     @DisplayName("reloads the snippets when a FilterEvent is triggered")
     void filterSnippets(FxRobot robot) {
-        var filterProperties = new FilterProperties(Set.of("hello", "world"));
+        var filterProperties = new FilterProperties(Set.of("hello", "world"), null);
         var page = new SnippetPage(reducedSnippetList(), "");
         when(readSnippetsUseCase.getFirstPage("", filterProperties)).thenReturn(page);
 
