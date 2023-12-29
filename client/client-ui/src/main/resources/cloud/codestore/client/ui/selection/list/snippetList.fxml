@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns:fx="http://javafx.com/fxml" xmlns="http://javafx.com/javafx"
       fx:controller="cloud.codestore.client.ui.selection.list.SnippetList"
-      stylesheets="@snippetList.css">
+      stylesheets="@snippetList.css" alignment="CENTER">
     <ListView fx:id="list" VBox.vgrow="ALWAYS"/>
-    <Label fx:id="nextPage" text="%snippetList.nextPage" onMouseClicked="#loadNextPage" />
+    <Hyperlink fx:id="nextPage" text="%snippetList.nextPage" onAction="#loadNextPage"/>
 </VBox>
