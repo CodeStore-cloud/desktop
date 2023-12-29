@@ -31,7 +31,7 @@ public enum Language {
     MATHEMATICA(24, "Mathematica"),
     SWIFT(25, "Swift"),
     GO(26, "Go"),
-    SHELL(27, "Unix Shell"),
+    SHELL(27, "Shell Script"),
     DOCKERFILE(28, "Dockerfile"),
     BATCH(29, "Batch Script"),
     TYPESCRIPT(30, "TypeScript"),

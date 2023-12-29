@@ -1,11 +1,9 @@
 package cloud.codestore.core.repositories.snippets;
 
-import cloud.codestore.core.Language;
 import cloud.codestore.core.usecases.listsnippets.FilterProperties;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 
 import static cloud.codestore.core.repositories.snippets.SnippetIndex.SnippetField.LANGUAGE;
@@ -24,22 +22,26 @@ class FilterQueryBuilder {
             return new MatchAllDocsQuery();
         }
 
-        filterByLanguage(filterProperties.language());
+        filterByLanguage(filterProperties.languageName());
         filterByTags(filterProperties.tags());
         return filterQuery.build();
     }
 
-    private void filterByLanguage(@Nullable Language language) {
-        if (language != null) {
-            addFilter(LANGUAGE, String.valueOf(language.getId()));
+    private void filterByLanguage(String languageName) {
+        if (!languageName.isBlank()) {
+            languageName = languageName.toLowerCase();
+            if (languageName.equals("shell script"))
+                languageName = "shell";
+            else if (languageName.equals("batch script"))
+                languageName = "batch";
+
+            addFilter(LANGUAGE, languageName);
         }
     }
 
-    private void filterByTags(@Nullable Collection<String> tags) {
-        if (tags != null) {
-            for (String tag : tags) {
-                addFilter(TAG, SnippetIndex.normalize(tag));
-            }
+    private void filterByTags(Collection<String> tags) {
+        for (String tag : tags) {
+            addFilter(TAG, SnippetIndex.normalize(tag));
         }
     }
 

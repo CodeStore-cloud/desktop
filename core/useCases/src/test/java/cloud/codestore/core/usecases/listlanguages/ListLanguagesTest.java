@@ -50,11 +50,11 @@ class ListLanguagesTest {
                 Language.PYTHON,
                 Language.RUBY,
                 Language.SCALA,
+                Language.SHELL,
                 Language.SQL,
                 Language.SWIFT,
                 Language.TEXT,
                 Language.TYPESCRIPT,
-                Language.SHELL,
                 Language.XML,
                 Language.YAML
         };

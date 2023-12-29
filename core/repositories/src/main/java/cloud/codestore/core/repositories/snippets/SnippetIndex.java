@@ -1,5 +1,6 @@
 package cloud.codestore.core.repositories.snippets;
 
+import cloud.codestore.core.Language;
 import cloud.codestore.core.Snippet;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.KeywordAnalyzer;
@@ -167,26 +168,29 @@ class SnippetIndex {
         document.add(new TextField(SnippetField.CODE, snippet.getCode(), Field.Store.NO));
         document.add(new NumericDocValuesField(SnippetField.CREATED, snippet.getCreated().toEpochSecond()));
         document.add(new NumericDocValuesField(SnippetField.MODIFIED, snippet.getOptionalModified().orElse(snippet.getCreated()).toEpochSecond()));
+        addLanguage(snippet.getLanguage(), document);
 
         String title = snippet.getTitle().toLowerCase();
         document.add(new SortedDocValuesField(SnippetField.TITLE, new BytesRef(title)));
         document.add(new TextField(SnippetField.TITLE, title, Field.Store.NO));
-
-        int languageId = snippet.getLanguage().getId();
-        document.add(new StringField(SnippetField.LANGUAGE, String.valueOf(languageId), Field.Store.NO));
-
-        String languageName = switch (snippet.getLanguage()) {
-            case SHELL -> "shell";
-            case BATCH -> "batch";
-            default -> snippet.getLanguage().toString().toLowerCase();
-        };
-        document.add(new StringField(SnippetField.LANGUAGE, languageName, Field.Store.NO));
 
         for (String tag : snippet.getTags()) {
             document.add(new StringField(SnippetField.TAG, normalize(tag), Field.Store.NO));
         }
 
         return document;
+    }
+
+    private void addLanguage(Language language, Document document) {
+        int languageId = language.getId();
+        String languageName = switch (language) {
+            case SHELL -> "shell";
+            case BATCH -> "batch";
+            default -> language.getName().toLowerCase();
+        };
+
+        document.add(new StringField(SnippetField.LANGUAGE, String.valueOf(languageId), Field.Store.NO));
+        document.add(new StringField(SnippetField.LANGUAGE, languageName, Field.Store.NO));
     }
 
     static String normalize(String tag) {

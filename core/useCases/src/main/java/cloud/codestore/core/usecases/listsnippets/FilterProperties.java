@@ -1,19 +1,18 @@
 package cloud.codestore.core.usecases.listsnippets;
 
-import cloud.codestore.core.Language;
-
-import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Provides information about how to filter the list of code snippets.
  */
-public record FilterProperties(@Nullable Language language, @Nullable Collection<String> tags) {
+public record FilterProperties(@Nonnull String languageName, @Nonnull Collection<String> tags) {
     public FilterProperties() {
-        this(null, null);
+        this("", Collections.emptySet());
     }
 
     public boolean isEmpty() {
-        return language == null && tags == null;
+        return languageName.isEmpty() && tags.isEmpty();
     }
 }

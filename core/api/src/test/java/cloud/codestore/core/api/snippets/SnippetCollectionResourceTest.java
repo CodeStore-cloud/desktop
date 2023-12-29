@@ -1,12 +1,7 @@
 package cloud.codestore.core.api.snippets;
 
-import cloud.codestore.core.Language;
 import cloud.codestore.core.Snippet;
-import cloud.codestore.core.TagNotExistsException;
 import cloud.codestore.core.usecases.listsnippets.*;
-import cloud.codestore.core.usecases.readlanguage.LanguageNotExistsException;
-import cloud.codestore.core.usecases.readlanguage.ReadLanguage;
-import cloud.codestore.core.usecases.readtags.ReadTags;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,7 +14,6 @@ import org.springframework.context.annotation.Import;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import static cloud.codestore.core.usecases.listsnippets.SortProperties.SnippetProperty;
@@ -40,10 +34,6 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
 
     @MockBean
     private ListSnippets listSnippetsUseCase;
-    @MockBean
-    private ReadLanguage readLanguageUseCase;
-    @MockBean
-    private ReadTags readTagsUseCase;
 
     @BeforeEach
     void setUp() throws PageNotExistsException {
@@ -66,56 +56,24 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
         verify(listSnippetsUseCase).list(eq(""), eq(new FilterProperties()), isNull(), eq(1));
     }
 
-    @Nested
-    @DisplayName("with language filter")
-    class FilterByLanguage {
-        @Test
-        @DisplayName("returns all snippets of the specified programming language")
-        void filterByLanguage() throws Exception {
-            when(readLanguageUseCase.read(10)).thenReturn(Language.JAVA);
-            var argument = ArgumentCaptor.forClass(FilterProperties.class);
+    @Test
+    @DisplayName("filters the snippets by programming language")
+    void filterByLanguage() throws Exception {
+        GET("/snippets?filter[language]=Java").andExpect(status().isOk());
 
-            GET("/snippets?filter[language]=10").andExpect(status().isOk());
-
-            verify(listSnippetsUseCase).list(any(), argument.capture(), any(), anyInt());
-            assertThat(argument.getValue().language()).isEqualTo(Language.JAVA);
-        }
-
-        @Test
-        @DisplayName("fails if the referred programming language does not exist")
-        void filterByLanguageInvalidId() throws Exception {
-            when(readLanguageUseCase.read(999)).thenThrow(new LanguageNotExistsException());
-            GET("/snippets?filter[language]=999").andExpect(status().isNotFound());
-        }
-
-        @Test
-        @DisplayName("fails if the provided ID is not an integer")
-        void filterByLanguageNoInteger() throws Exception {
-            GET("/snippets?filter[language]=java").andExpect(status().isNotFound());
-        }
+        var filterProperties = new FilterProperties("Java", null);
+        verify(listSnippetsUseCase).list(any(), eq(filterProperties), any(), anyInt());
     }
 
-    @Nested
-    @DisplayName("with tags filter")
-    class FilterByTags {
-        @Test
-        @DisplayName("returns all snippets with the specified tags")
-        void filterByTags() throws Exception {
-            when(readTagsUseCase.readTags(any(String[].class))).thenReturn(Set.of("TagA", "TagB", "TagC"));
-            var argument = ArgumentCaptor.forClass(FilterProperties.class);
+    @Test
+    @DisplayName("filters the snippets by tags")
+    void filterByTags() throws Exception {
+        var argument = ArgumentCaptor.forClass(FilterProperties.class);
 
-            GET("/snippets?filter[tags]=TagA,TagB,TagC").andExpect(status().isOk());
+        GET("/snippets?filter[tags]=TagA,TagB,TagC").andExpect(status().isOk());
 
-            verify(listSnippetsUseCase).list(any(), argument.capture(), any(), anyInt());
-            assertThat(argument.getValue().tags()).containsExactlyInAnyOrder("TagA", "TagB", "TagC");
-        }
-
-        @Test
-        @DisplayName("fails if one of the referred tags does not exist")
-        void filterByInvalidTag() throws Exception {
-            when(readTagsUseCase.readTags(any(String[].class))).thenThrow(new TagNotExistsException("InvalidTag"));
-            GET("/snippets?filter[tags]=InvalidTag").andExpect(status().isNotFound());
-        }
+        verify(listSnippetsUseCase).list(any(), argument.capture(), any(), anyInt());
+        assertThat(argument.getValue().tags()).containsExactlyInAnyOrder("TagA", "TagB", "TagC");
     }
 
     @Nested
