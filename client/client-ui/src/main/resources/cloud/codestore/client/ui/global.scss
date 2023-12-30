@@ -61,8 +61,8 @@
     -fx-background-color: transparent;
     -fx-background-radius: 0;
     -fx-background-insets: 0;
-    -fx-pref-height: size.$SecondaryElementSize;
-    -fx-max-height: size.$SecondaryElementSize;
+    -fx-pref-height: size.$secondaryElementSize;
+    -fx-max-height: size.$secondaryElementSize;
 
     .arrow-button .arrow {
         -fx-shape: "M 0 7.33l2.829-2.83 9.175 9.339 9.167-9.339 2.829 2.83-11.996 12.17 z";
@@ -74,4 +74,10 @@
     > .list-cell {
         -fx-padding: 0 8 0 8;
     }
+}
+
+.text-field {
+    -fx-pref-height: size.$secondaryElementSize;
+    -fx-max-height: size.$secondaryElementSize;
+    -fx-padding: 0;
 }

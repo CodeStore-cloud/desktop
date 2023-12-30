@@ -1,0 +1,14 @@
+@use "../size";
+
+Icon {
+    -fx-pref-width: size.$secondaryElementSize;
+    -fx-pref-height: size.$secondaryElementSize;
+    -fx-min-width: size.$secondaryElementSize;
+    -fx-min-height: size.$secondaryElementSize;
+    -fx-max-width: size.$secondaryElementSize;
+    -fx-max-height: size.$secondaryElementSize;
+
+    $backgroundPosition: (size.$secondaryElementSize - size.$secondaryContentSize) / 2;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: $backgroundPosition $backgroundPosition;
+}

@@ -1,7 +1,7 @@
-@use "../../size";
+Icon.tag {
+    -fx-background-image: url("tag.png");
+}
 
-#tagsInput {
-    -fx-pref-height: size.$SecondaryElementSize;
-    -fx-max-height: size.$SecondaryElementSize;
-    -fx-padding: 0 8 0 8;
+Icon.language {
+    -fx-background-image: url("language.png");
 }

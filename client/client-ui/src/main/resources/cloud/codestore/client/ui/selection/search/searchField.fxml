@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import cloud.codestore.client.ui.icon.Icon?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <HBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
       fx:controller="cloud.codestore.client.ui.selection.search.FullTextSearch"
       stylesheets="@searchField.css">
+    <Icon styleClass="search" />
     <TextField fx:id="inputField" promptText="%search.placeholder" HBox.hgrow="ALWAYS"/>
 </HBox>
