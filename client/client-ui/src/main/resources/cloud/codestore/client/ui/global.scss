@@ -26,9 +26,13 @@
 .bordered {
     -fx-border-insets: 0;
     -fx-border-radius: 0;
-    -fx-border-width: 1px;
+    -fx-border-width: size.$borderSize;
     -fx-border-style: solid;
     -fx-border-color: colors.$borderColor;
+
+    &.selectable:hover {
+        -fx-border-color: colors.$borderColorSelection;
+    }
 }
 
 // remove border, shadow and focus-shadow of inputs
@@ -47,4 +51,27 @@
 .text-area,
 .list-view, .list-view .list-cell {
     -fx-background-insets: 0;
+}
+
+// Dropdown menu
+.combo-box {
+    @extend .bordered;
+    @extend .selectable;
+
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-pref-height: size.$SecondaryElementSize;
+    -fx-max-height: size.$SecondaryElementSize;
+
+    .arrow-button .arrow {
+        -fx-shape: "M 0 7.33l2.829-2.83 9.175 9.339 9.167-9.339 2.829 2.83-11.996 12.17 z";
+        -fx-scale-x: 1.5;
+        -fx-scale-y: 1.5;
+        -fx-background-color: colors.$secondaryTextColor;
+    }
+
+    > .list-cell {
+        -fx-padding: 0 8 0 8;
+    }
 }
