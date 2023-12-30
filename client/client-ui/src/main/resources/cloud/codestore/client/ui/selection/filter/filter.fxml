@@ -6,8 +6,10 @@
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
       fx:controller="cloud.codestore.client.ui.selection.filter.Filter"
-      styleClass="secondarySpacing">
+      stylesheets="@filter.css" styleClass="secondarySpacing">
+    <Separator/>
     <TextField fx:id="tagsInput" promptText="%filter.tags.placeholder" VBox.vgrow="NEVER"/>
     <Separator/>
     <ComboBox fx:id="languageSelection" onAction="#triggerEvent" VBox.vgrow="NEVER"/>
+    <Separator/>
 </VBox>
