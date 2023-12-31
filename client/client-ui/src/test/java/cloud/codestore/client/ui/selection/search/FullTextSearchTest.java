@@ -2,6 +2,7 @@ package cloud.codestore.client.ui.selection.search;
 
 import cloud.codestore.client.ui.AbstractUiTest;
 import com.google.common.eventbus.EventBus;
+import javafx.scene.control.Labeled;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
@@ -44,7 +45,7 @@ class FullTextSearchTest extends AbstractUiTest {
 
     @Test
     @DisplayName("is cleared when pressing ESC")
-    void clearInput(FxRobot robot) {
+    void clearInputOnESC(FxRobot robot) {
         var inputField = inputField(robot);
         inputField.setText("test");
         assertThat(inputField.getText()).isNotEmpty();
@@ -55,7 +56,25 @@ class FullTextSearchTest extends AbstractUiTest {
         assertThat(inputField.getText()).isNotNull().isEmpty();
     }
 
+    @Test
+    @DisplayName("is cleared when pressing the search-icon")
+    void clearInputIcon(FxRobot robot) {
+        var inputField = inputField(robot);
+        inputField.setText("test");
+        assertThat(inputField.getText()).isNotEmpty();
+
+        Labeled icon = icon(robot);
+        icon.setPrefWidth(30);
+        robot.clickOn(icon);
+
+        assertThat(inputField.getText()).isNotNull().isEmpty();
+    }
+
     private TextInputControl inputField(FxRobot robot) {
         return robot.lookup("#inputField").queryTextInputControl();
+    }
+
+    private Labeled icon(FxRobot robot) {
+        return robot.lookup(".search.clearable").queryLabeled();
     }
 }

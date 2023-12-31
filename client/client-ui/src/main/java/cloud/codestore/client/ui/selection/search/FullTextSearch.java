@@ -24,12 +24,17 @@ public class FullTextSearch {
         inputField.textProperty().addListener((textField, oldValue, newValue) -> search(newValue));
         inputField.setOnKeyPressed(event -> {
             if (Objects.requireNonNull(event.getCode()) == KeyCode.ESCAPE) {
-                inputField.clear();
+                clearInput();
                 //                case TAB -> showFilter();
                 //                case DOWN -> selectNext();
                 //                case UP -> selectPrevious();
             }
         });
+    }
+
+    @FXML
+    void clearInput() {
+        inputField.clear();
     }
 
     private void search(String input) {

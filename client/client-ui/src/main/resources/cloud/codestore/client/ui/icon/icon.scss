@@ -11,4 +11,8 @@ Icon {
     $backgroundPosition: (size.$secondaryElementSize - size.$secondaryContentSize) / 2;
     -fx-background-repeat: no-repeat;
     -fx-background-position: $backgroundPosition $backgroundPosition;
+
+    &.clearable:hover {
+        -fx-background-image: url("clear.png");
+    }
 }

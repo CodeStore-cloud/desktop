@@ -2,10 +2,15 @@
 
 <?import cloud.codestore.client.ui.icon.Icon?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <HBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
       fx:controller="cloud.codestore.client.ui.selection.search.FullTextSearch"
       stylesheets="@searchField.css">
-    <Icon styleClass="search" />
+    <Icon styleClass="search,clearable" onMouseClicked="#clearInput">
+        <tooltip>
+            <Tooltip text="%search.clear" />
+        </tooltip>
+    </Icon>
     <TextField fx:id="inputField" promptText="%search.placeholder" HBox.hgrow="ALWAYS"/>
 </HBox>
