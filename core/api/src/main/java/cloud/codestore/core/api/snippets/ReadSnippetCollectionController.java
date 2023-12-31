@@ -35,7 +35,7 @@ public class ReadSnippetCollectionController {
     @GetMapping
     public JsonApiDocument getSnippets(
             @RequestParam(value = "searchQuery", required = false, defaultValue = "") String search,
-            @RequestParam(value = "sort", required = false) String sort,
+            @RequestParam(value = "sort", required = false, defaultValue = "") String sort,
             @RequestParam(value = "page[number]", required = false, defaultValue = "1") String pageParam,
             @RequestParam(value = "filter[language]", required = false, defaultValue = "") String languageName,
             @RequestParam(value = "filter[tags]", required = false, defaultValue = "") String tagCsvList
@@ -49,7 +49,7 @@ public class ReadSnippetCollectionController {
         var document = new SnippetCollectionResource(page.snippets());
 
         var urlParameters = new HashMap<String, Object>(5);
-        urlParameters.put("searchQuery", search.isEmpty() ? null : search);
+        urlParameters.put("searchQuery", search);
         urlParameters.put("sort", sort);
         urlParameters.put("filter[language]", languageName);
         urlParameters.put("filter[tags]", tagCsvList);
@@ -59,12 +59,12 @@ public class ReadSnippetCollectionController {
     }
 
     @Nonnull
-    private Collection<String> getTagsFromCsv(@Nonnull String csvString) {
-        return csvString.isEmpty() ? Collections.emptySet() : Set.of(csvString.split(","));
+    private Collection<String> getTagsFromCsv(String csvString) {
+        return StringUtils.hasText(csvString) ? Set.of(csvString.split(",")) : Collections.emptySet();
     }
 
     @Nullable
-    private SortProperties parseSortParameter(@Nullable String sortParameter) throws InvalidParameterException {
+    private SortProperties parseSortParameter(String sortParameter) throws InvalidParameterException {
         if (StringUtils.hasText(sortParameter)) {
             try {
                 sortParameter = sortParameter.toUpperCase();
@@ -79,7 +79,7 @@ public class ReadSnippetCollectionController {
         return null;
     }
 
-    private int parsePageNumber(@Nonnull String pageNumber) throws InvalidParameterException {
+    private int parsePageNumber(String pageNumber) throws InvalidParameterException {
         try {
             return Integer.parseInt(pageNumber);
         } catch (NumberFormatException exception) {

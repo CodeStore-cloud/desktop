@@ -20,11 +20,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(ReadSnippetController.class)
 @DisplayName("GET /snippets/{snippetId}")
 class ReadSnippetResourceTest extends SnippetControllerTest {
+    private static final String SNIPPET_URL = "http://localhost:8080" + SnippetControllerTest.SNIPPET_URL;
+
     @MockBean
     private ReadSnippet readSnippetUseCase;
 
     @Test
-    @DisplayName("returns a single programming languages")
+    @DisplayName("returns a single code snippet")
     void returnLanguage() throws Exception {
         var snippet = testSnippet();
         var languagePath = "/languages/" + snippet.getLanguage().getId();
@@ -41,16 +43,20 @@ class ReadSnippetResourceTest extends SnippetControllerTest {
                         .andExpect(jsonPath("$.data.attributes.modified").doesNotExist())
                         .andExpect(jsonPath("$.data.relationships.language").exists())
                         .andExpect(jsonPath("$.data.relationships.language.links.related", endsWith(languagePath)))
-                        .andExpect(jsonPath("$.data.links.self").exists());
+                        .andExpect(jsonPath("$.data.links.self", is(SNIPPET_URL)))
+                        .andExpect(jsonPath("$.data.meta.operations").isArray())
+                        .andExpect(jsonPath("$.data.meta.operations[0].operation", is("deleteSnippet")))
+                        .andExpect(jsonPath("$.data.meta.operations[0].method", is("DELETE")))
+                        .andExpect(jsonPath("$.data.meta.operations[0].href", is(SNIPPET_URL)));
     }
 
     private Snippet testSnippet() {
         return Snippet.builder()
-                .id(SNIPPET_ID)
-                .title("A simple test snippet")
-                .description("A snippet solely for this unit test.")
-                .code("System.out.println(\"Hello, World!\");")
-                .language(Language.JAVA)
-                .build();
+                      .id(SNIPPET_ID)
+                      .title("A simple test snippet")
+                      .description("A snippet solely for this unit test.")
+                      .code("System.out.println(\"Hello, World!\");")
+                      .language(Language.JAVA)
+                      .build();
     }
 }

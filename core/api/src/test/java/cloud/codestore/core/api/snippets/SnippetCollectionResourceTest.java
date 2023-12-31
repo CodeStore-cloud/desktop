@@ -61,7 +61,7 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
     void filterByLanguage() throws Exception {
         GET("/snippets?filter[language]=Java").andExpect(status().isOk());
 
-        var filterProperties = new FilterProperties("Java", null);
+        var filterProperties = new FilterProperties("Java", Collections.emptySet());
         verify(listSnippetsUseCase).list(any(), eq(filterProperties), any(), anyInt());
     }
 

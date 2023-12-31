@@ -8,6 +8,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Represents a code snippet.
@@ -91,6 +92,11 @@ public class Snippet {
     @Nonnull
     public Optional<OffsetDateTime> getOptionalModified() {
         return Optional.ofNullable(modified);
+    }
+
+    @Nonnull
+    public Set<Permission> getPermissions() {
+        return Set.of(Permission.DELETE);
     }
 
     @Override
