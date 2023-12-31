@@ -1,10 +1,9 @@
 @use "../../colors";
-@use "sass:color";
 
 #list {
     .list-cell {
         &:filled:selected {
-            -fx-background-color: color.change(colors.$codeStoreBlue, $alpha: 0.1)
+            -fx-background-color: colors.$selectionColor;
         }
 
         &:filled:selected {

@@ -1,3 +1,5 @@
+@use "sass:color";
+
 $codeStoreBlue: #00BFFF;
 
 $primaryBackgroundColor: $codeStoreBlue;
@@ -8,3 +10,5 @@ $secondaryTextColor: #323232;
 
 $borderColor: #CCC;
 $borderColorSelection: $codeStoreBlue;
+
+$selectionColor: color.change($codeStoreBlue, $alpha: 0.2);

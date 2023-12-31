@@ -74,6 +74,12 @@
     > .list-cell {
         -fx-padding: 0 8 0 8;
     }
+
+    .list-view .list-cell:hover,
+    .list-view .list-cell:filled:selected {
+        -fx-background-color: colors.$selectionColor;
+        -fx-text-fill: colors.$secondaryTextColor;
+    }
 }
 
 .text-field {
