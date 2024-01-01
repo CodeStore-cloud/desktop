@@ -1,5 +1,6 @@
 package cloud.codestore.client.repositories.snippets;
 
+import cloud.codestore.client.repositories.ResourceMetaInfo;
 import cloud.codestore.jsonapi.relationship.Relationship;
 import cloud.codestore.jsonapi.resource.ResourceObject;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -64,5 +65,10 @@ public class SnippetResource extends ResourceObject {
 
     public Relationship getTags() {
         return tags;
+    }
+
+    @Override
+    public ResourceMetaInfo getMeta() {
+        return (ResourceMetaInfo) super.getMeta();
     }
 }

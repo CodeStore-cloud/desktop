@@ -6,6 +6,7 @@ import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Represents a code snippet.
@@ -19,6 +20,7 @@ public class Snippet {
     private final List<String> tags;
     private final OffsetDateTime created;
     private final OffsetDateTime modified;
+    private final Set<Permission> permissions;
 
     Snippet(
             @Nonnull String uri,
@@ -28,16 +30,18 @@ public class Snippet {
             @Nullable Language language,
             @Nullable List<String> tags,
             @Nullable OffsetDateTime created,
-            @Nullable OffsetDateTime modified
+            @Nullable OffsetDateTime modified,
+            @Nullable Set<Permission> permissions
     ) {
         this.uri = uri;
         this.title = title;
         this.description = description;
         this.code = code;
         this.language = language;
-        this.tags = tags == null ? Collections.emptyList() : tags;
+        this.tags = Objects.requireNonNullElseGet(tags, Collections::emptyList);
         this.created = created;
         this.modified = modified;
+        this.permissions = Objects.requireNonNullElseGet(permissions, Collections::emptySet);
     }
 
     public static SnippetBuilder builder() {
@@ -82,6 +86,11 @@ public class Snippet {
     @Nullable
     public OffsetDateTime getModified() {
         return modified;
+    }
+
+    @Nonnull
+    public Set<Permission> getPermissions() {
+        return permissions;
     }
 
     @Override

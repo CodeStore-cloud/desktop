@@ -1,7 +1,9 @@
 package cloud.codestore.client;
 
+import javax.annotation.Nonnull;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A builder for dynamically creating {@link Snippet code snippets}.
@@ -15,6 +17,7 @@ public class SnippetBuilder {
     private List<String> tags;
     private OffsetDateTime created;
     private OffsetDateTime modified;
+    private Set<Permission> permissions;
 
     public SnippetBuilder uri(String uri) {
         this.uri = uri;
@@ -56,7 +59,12 @@ public class SnippetBuilder {
         return this;
     }
 
+    public SnippetBuilder permissions(@Nonnull Set<Permission> permissions) {
+        this.permissions = permissions;
+        return this;
+    }
+
     public Snippet build() {
-        return new Snippet(uri, title, description, code, language, tags, created, modified);
+        return new Snippet(uri, title, description, code, language, tags, created, modified, permissions);
     }
 }

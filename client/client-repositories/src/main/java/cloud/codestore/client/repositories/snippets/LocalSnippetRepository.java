@@ -1,9 +1,12 @@
 package cloud.codestore.client.repositories.snippets;
 
+import cloud.codestore.client.Permission;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.repositories.HttpClient;
 import cloud.codestore.client.repositories.Repository;
+import cloud.codestore.client.repositories.ResourceMetaInfo;
 import cloud.codestore.client.repositories.tags.LocalTagRepository;
+import cloud.codestore.client.usecases.deletesnippet.DeleteSnippetUseCase;
 import cloud.codestore.client.usecases.listsnippets.FilterProperties;
 import cloud.codestore.client.usecases.listsnippets.ReadSnippetsUseCase;
 import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
@@ -14,14 +17,15 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.Nonnull;
-import java.util.Arrays;
-import java.util.Optional;
+import javax.annotation.Nullable;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A repository which saves/loads code snippets from the local {CodeStore} Core.
  */
 @Repository
-class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase {
+class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase, DeleteSnippetUseCase {
 
     private final HttpClient client;
     private final LocalTagRepository tagRepository;
@@ -73,6 +77,7 @@ class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase 
     public Snippet readSnippet(String snippetUri) {
         SnippetResource snippetResource = client.get(snippetUri, SnippetResource.class).getData();
         String tagsUri = snippetResource.getTags().getRelatedResourceLink();
+        Set<Permission> permissions = getPermissions(snippetResource.getMeta());
 
         return Snippet.builder()
                       .uri(snippetResource.getSelfLink())
@@ -80,6 +85,29 @@ class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase 
                       .description(snippetResource.getDescription())
                       .code(snippetResource.getCode())
                       .tags(tagRepository.get(tagsUri))
+                      .permissions(permissions)
                       .build();
+    }
+
+    private Set<Permission> getPermissions(@Nullable ResourceMetaInfo meta) {
+        if (meta == null || meta.getOperations() == null) {
+            return Collections.emptySet();
+        }
+
+        return meta.getOperations()
+                   .stream()
+                   .map(operation -> {
+                       if ("deleteSnippet".equals(operation.name())) {
+                           return Permission.DELETE;
+                       }
+                       return null;
+                   })
+                   .filter(Objects::nonNull)
+                   .collect(Collectors.toSet());
+    }
+
+    @Override
+    public void deleteSnippet(@Nonnull String snippetUri) {
+        client.delete(snippetUri);
     }
 }

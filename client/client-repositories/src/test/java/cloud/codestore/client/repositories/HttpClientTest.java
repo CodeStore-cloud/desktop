@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
 @DisplayName("The http client")
 class HttpClientTest {
@@ -31,6 +32,15 @@ class HttpClientTest {
     @AfterAll
     static void afterAll() throws IOException {
         mockBackEnd.shutdown();
+    }
+
+    @Test
+    @DisplayName("sends the access token in the Authorization header")
+    void sendAuthorizationHeader() throws InterruptedException {
+        retrieveCollectionUrls();
+
+        String token = mockBackEnd.takeRequest().getHeader(HttpHeaders.AUTHORIZATION);
+        assertThat(token).isEqualTo("Bearer " + ACCESS_TOKEN);
     }
 
     @Test
@@ -84,6 +94,7 @@ class HttpClientTest {
         assertThat(snippetResource.getId()).isEqualTo("1");
         assertThat(snippetResource.getTitle()).isEqualTo("My first snippet");
         assertThat(snippetResource.getSelfLink()).isEqualTo("http://localhost:8080/snippets/1");
+        assertThat(snippetResource.getMeta()).isNull();
     }
 
     @Test
@@ -128,12 +139,54 @@ class HttpClientTest {
     }
 
     @Test
-    @DisplayName("sends the access token in the Authorization header")
-    void sendAuthorizationHeader() throws InterruptedException {
-        retrieveCollectionUrls();
+    @DisplayName("deserializes the operation meta information")
+    void retrieveOperations() {
+        setResponse("""
+                {
+                    "data": {
+                        "type": "snippet",
+                        "id": "1",
+                        "attributes": {
+                            "title": "My first snippet"
+                        },
+                        "meta": {
+                            "operations": [{
+                                "operation": "deleteSnippet",
+                                "method": "DELETE",
+                                "href": "http://localhost:8080/snippets/1"
+                            }]
+                        }
+                    }
+                }""");
 
-        String token = mockBackEnd.takeRequest().getHeader(HttpHeaders.AUTHORIZATION);
-        assertThat(token).isEqualTo("Bearer " + ACCESS_TOKEN);
+        var document = client.get("http://localhost:8080/snippets/1", SnippetResource.class);
+
+        SnippetResource snippetResource = document.getData();
+        assertThat(snippetResource).isNotNull();
+
+        ResourceMetaInfo meta = snippetResource.getMeta();
+        assertThat(meta).isNotNull();
+        assertThat(meta.getOperations()).containsExactly(new Operation("deleteSnippet"));
+    }
+
+    @Test
+    @DisplayName("deletes a resource")
+    void deleteResource() {
+        setResponse("""
+                {
+                    "data": {
+                        "type": "snippet",
+                        "id": "1",
+                        "attributes": {
+                            "title": "My first snippet"
+                        },
+                        "links": {
+                            "self": "http://localhost:8080/snippets/1"
+                        }
+                    }
+                }""");
+
+        assertThatNoException().isThrownBy(() -> client.delete("http://localhost:8080/snippets/1"));
     }
 
     private void setResponse(String responseBody) {

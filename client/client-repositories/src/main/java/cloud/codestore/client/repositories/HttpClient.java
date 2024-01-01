@@ -33,7 +33,7 @@ public class HttpClient {
     public HttpClient(@Nonnull String rootUrl, @Nonnull String accessToken) {
         this.rootUrl = rootUrl;
 
-        ObjectMapper objectMapper = new JsonApiObjectMapper()
+        ObjectMapper objectMapper = new JsonApiObjectMapper(new ResourceMetaInfo.ResourceMetaInfoDeserializer())
                 .registerResourceType(RootResource.RESOURCE_TYPE, RootResource.class)
                 .registerResourceType(SnippetResource.RESOURCE_TYPE, SnippetResource.class)
                 .registerResourceType(LanguageResource.RESOURCE_TYPE, LanguageResource.class)
@@ -95,6 +95,18 @@ public class HttpClient {
                      )
                      .bodyToMono(new ParameterizedTypeReference<ResourceCollectionDocument<T>>() {})
                      .block();
+    }
+
+    public void delete(String url) {
+        client.delete()
+              .uri(url)
+              .retrieve()
+              .onStatus(
+                      HttpStatusCode::isError,
+                      response -> Mono.error(
+                              new RuntimeException(String.valueOf(response.statusCode().value()))
+                      )
+              );
     }
 
     private void getCollectionUrls() {

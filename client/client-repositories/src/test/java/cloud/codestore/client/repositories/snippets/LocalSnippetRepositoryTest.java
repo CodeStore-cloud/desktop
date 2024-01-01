@@ -1,8 +1,11 @@
 package cloud.codestore.client.repositories.snippets;
 
 import cloud.codestore.client.Language;
+import cloud.codestore.client.Permission;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.repositories.HttpClient;
+import cloud.codestore.client.repositories.Operation;
+import cloud.codestore.client.repositories.ResourceMetaInfo;
 import cloud.codestore.client.repositories.tags.LocalTagRepository;
 import cloud.codestore.client.usecases.listsnippets.FilterProperties;
 import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
@@ -85,6 +88,19 @@ class LocalSnippetRepositoryTest {
         assertThat(snippet.getDescription()).isEqualTo("With a short description");
         assertThat(snippet.getCode()).isEqualTo("System.out.println(\"Hello, World!\");");
         assertThat(snippet.getTags()).containsExactlyInAnyOrder("hello", "world");
+    }
+
+    @Test
+    @DisplayName("reads the permissions from the operations meta-object")
+    void deserializeOperations() {
+        var resource = testSnippet(1, "title", "", "Hello, World!");
+        when(resource.getMeta()).thenReturn(new ResourceMetaInfo(new Operation("deleteSnippet")));
+        var document = new SingleResourceDocument<>(resource);
+        when(client.get(SNIPPET_URI, SnippetResource.class)).thenReturn(document);
+
+        Snippet snippet = repository.readSnippet(SNIPPET_URI);
+
+        assertThat(snippet.getPermissions()).containsExactly(Permission.DELETE);
     }
 
     @Test
