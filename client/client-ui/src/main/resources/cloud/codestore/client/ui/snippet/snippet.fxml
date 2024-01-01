@@ -11,4 +11,5 @@
     <Separator/>
     <fx:include source="./code/code.fxml" fx:id="snippetCode" VBox.vgrow="ALWAYS"/>
     <fx:include source="./details/details.fxml" fx:id="snippetDetails"/>
+    <fx:include source="./footer/footer.fxml" fx:id="snippetFooter"/>
 </VBox>

@@ -35,6 +35,27 @@
     }
 }
 
+.button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-background-repeat: no-repeat;
+
+    &.primary {
+        $backgroundPosition: (size.$primaryElementSize - size.$primaryContentSize) / 2;
+        -fx-background-position: $backgroundPosition $backgroundPosition;
+        -fx-pref-width: size.$primaryElementSize;
+        -fx-pref-height: size.$primaryElementSize;
+    }
+
+    &.secondary {
+        $backgroundPosition: (size.$secondaryElementSize - size.$secondaryContentSize) / 2;
+        -fx-background-position: $backgroundPosition $backgroundPosition;
+        -fx-pref-width: size.$secondaryElementSize;
+        -fx-pref-height: size.$secondaryElementSize;
+    }
+}
+
 // remove border, shadow and focus-shadow of inputs
 .text-field, .text-area, .text-area .content {
     -fx-background-color: -fx-text-box-border, -fx-control-inner-background;
