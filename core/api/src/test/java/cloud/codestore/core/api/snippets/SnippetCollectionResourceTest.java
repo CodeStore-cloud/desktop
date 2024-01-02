@@ -51,7 +51,10 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
                 .andExpect(jsonPath("$.data.length()", is(5)))
                 .andExpect(jsonPath("$.data[*].type", everyItem(is("snippet"))))
                 .andExpect(jsonPath("$.data[*].attributes").exists())
-                .andExpect(jsonPath("$.data[*].links.self").exists());
+                .andExpect(jsonPath("$.data[*].links.self").exists())
+                .andExpect(jsonPath("$.meta.operations[0].operation", is("createSnippet")))
+                .andExpect(jsonPath("$.meta.operations[0].method", is("POST")))
+                .andExpect(jsonPath("$.meta.operations[0].href", is("http://localhost:8080/snippets")));
 
         verify(listSnippetsUseCase).list(eq(""), eq(new FilterProperties()), isNull(), eq(1));
     }

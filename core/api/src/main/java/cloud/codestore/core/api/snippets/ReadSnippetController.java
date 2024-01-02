@@ -34,7 +34,7 @@ public class ReadSnippetController {
         var snippet = readSnippetUseCase.read(snippetId);
         var snippetResource = new SnippetResource(snippet);
         var metaInfo = createMetaInfo(snippet.getPermissions(), snippetResource.getSelfLink());
-        return snippetResource.setMeta(metaInfo).asDocument();
+        return snippetResource.asDocument().setMeta(metaInfo);
     }
 
     @Nullable

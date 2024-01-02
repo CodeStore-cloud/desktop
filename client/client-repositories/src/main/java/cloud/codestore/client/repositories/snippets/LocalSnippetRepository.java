@@ -12,6 +12,7 @@ import cloud.codestore.client.usecases.listsnippets.ReadSnippetsUseCase;
 import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
 import cloud.codestore.client.usecases.listsnippets.SnippetPage;
 import cloud.codestore.client.usecases.readsnippet.ReadSnippetUseCase;
+import cloud.codestore.jsonapi.document.SingleResourceDocument;
 import cloud.codestore.jsonapi.link.Link;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -75,9 +76,10 @@ class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase,
     @Nonnull
     @Override
     public Snippet readSnippet(String snippetUri) {
-        SnippetResource snippetResource = client.get(snippetUri, SnippetResource.class).getData();
+        SingleResourceDocument<SnippetResource> document = client.get(snippetUri, SnippetResource.class);
+        SnippetResource snippetResource = document.getData();
         String tagsUri = snippetResource.getTags().getRelatedResourceLink();
-        Set<Permission> permissions = getPermissions(snippetResource.getMeta());
+        Set<Permission> permissions = getPermissions((ResourceMetaInfo) document.getMeta());
 
         return Snippet.builder()
                       .uri(snippetResource.getSelfLink())

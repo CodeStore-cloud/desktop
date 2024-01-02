@@ -1,6 +1,8 @@
 package cloud.codestore.core.api.snippets;
 
 import cloud.codestore.core.api.InvalidParameterException;
+import cloud.codestore.core.api.Operation;
+import cloud.codestore.core.api.ResourceMetaInfo;
 import cloud.codestore.core.usecases.listsnippets.FilterProperties;
 import cloud.codestore.core.usecases.listsnippets.ListSnippets;
 import cloud.codestore.core.usecases.listsnippets.PageNotExistsException;
@@ -8,6 +10,7 @@ import cloud.codestore.core.usecases.listsnippets.SortProperties;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
 import cloud.codestore.jsonapi.link.Link;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,7 +49,7 @@ public class ReadSnippetCollectionController {
         var pageNumber = parsePageNumber(pageParam);
 
         var page = listSnippetsUseCase.list(search, filterProperties, sortProperties, pageNumber);
-        var document = new SnippetCollectionResource(page.snippets());
+        var document = new SnippetCollectionResource(page.snippets()).setMeta(createMetaInfo());
 
         var urlParameters = new HashMap<String, Object>(5);
         urlParameters.put("searchQuery", search);
@@ -107,5 +110,10 @@ public class ReadSnippetCollectionController {
             urlParameters.put("page[number]", pageNumber - 1);
             document.addLink(new Link(Link.PREV, getLink(urlParameters)));
         }
+    }
+
+    private ResourceMetaInfo createMetaInfo() {
+        Operation createSnippetOperation = new Operation("createSnippet", HttpMethod.POST.name(), getLink());
+        return new ResourceMetaInfo(List.of(createSnippetOperation));
     }
 }

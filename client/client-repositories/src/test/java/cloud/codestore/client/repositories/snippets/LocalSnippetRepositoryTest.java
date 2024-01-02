@@ -94,8 +94,8 @@ class LocalSnippetRepositoryTest {
     @DisplayName("reads the permissions from the operations meta-object")
     void deserializeOperations() {
         var resource = testSnippet(1, "title", "", "Hello, World!");
-        when(resource.getMeta()).thenReturn(new ResourceMetaInfo(new Operation("deleteSnippet")));
         var document = new SingleResourceDocument<>(resource);
+        document.setMeta(new ResourceMetaInfo(new Operation("deleteSnippet")));
         when(client.get(SNIPPET_URI, SnippetResource.class)).thenReturn(document);
 
         Snippet snippet = repository.readSnippet(SNIPPET_URI);

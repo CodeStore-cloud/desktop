@@ -148,14 +148,14 @@ class HttpClientTest {
                         "id": "1",
                         "attributes": {
                             "title": "My first snippet"
-                        },
-                        "meta": {
-                            "operations": [{
-                                "operation": "deleteSnippet",
-                                "method": "DELETE",
-                                "href": "http://localhost:8080/snippets/1"
-                            }]
                         }
+                    },
+                    "meta": {
+                        "operations": [{
+                            "operation": "deleteSnippet",
+                            "method": "DELETE",
+                            "href": "http://localhost:8080/snippets/1"
+                        }]
                     }
                 }""");
 
@@ -164,7 +164,7 @@ class HttpClientTest {
         SnippetResource snippetResource = document.getData();
         assertThat(snippetResource).isNotNull();
 
-        ResourceMetaInfo meta = snippetResource.getMeta();
+        ResourceMetaInfo meta = (ResourceMetaInfo) document.getMeta();
         assertThat(meta).isNotNull();
         assertThat(meta.getOperations()).containsExactly(new Operation("deleteSnippet"));
     }
