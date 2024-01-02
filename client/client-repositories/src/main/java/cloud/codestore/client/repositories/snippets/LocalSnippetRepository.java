@@ -38,7 +38,7 @@ class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase,
 
     @Nonnull
     @Override
-    public SnippetPage getFirstPage(
+    public SnippetPage getPage(
             @Nonnull String searchQuery,
             @Nonnull FilterProperties filterProperties
     ) {
@@ -63,14 +63,15 @@ class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase,
     @Nonnull
     @Override
     public SnippetPage getPage(@Nonnull String pageUrl) {
-        var resourceCollection = client.getCollection(pageUrl, SnippetResource.class);
-        var items = Arrays.stream(resourceCollection.getData(SnippetResource.class))
+        var document = client.getCollection(pageUrl, SnippetResource.class);
+        Set<Permission> permissions = getPermissions((ResourceMetaInfo) document.getMeta());
+        var items = Arrays.stream(document.getData(SnippetResource.class))
                           .map(resource -> new SnippetListItem(resource.getSelfLink(), resource.getTitle()))
                           .toList();
 
-        String nextPageLink = resourceCollection.getLinks().getHref(Link.NEXT);
+        String nextPageLink = document.getLinks().getHref(Link.NEXT);
         String nextPageUrl = Optional.ofNullable(nextPageLink).orElse("");
-        return new SnippetPage(items, nextPageUrl);
+        return new SnippetPage(items, nextPageUrl, permissions);
     }
 
     @Nonnull
@@ -98,11 +99,10 @@ class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase,
 
         return meta.getOperations()
                    .stream()
-                   .map(operation -> {
-                       if ("deleteSnippet".equals(operation.name())) {
-                           return Permission.DELETE;
-                       }
-                       return null;
+                   .map(operation -> switch (operation.name()) {
+                       case "deleteSnippet" -> Permission.DELETE;
+                       case "createSnippet" -> Permission.CREATE;
+                       default -> null;
                    })
                    .filter(Objects::nonNull)
                    .collect(Collectors.toSet());

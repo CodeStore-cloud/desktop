@@ -14,7 +14,7 @@ public interface ReadSnippetsUseCase {
      * @return a page containing a list of code snippets.
      */
     @Nonnull
-    SnippetPage getFirstPage(
+    SnippetPage getPage(
             @Nonnull String searchQuery,
             @Nonnull FilterProperties filterProperties
     );

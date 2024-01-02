@@ -1,5 +1,6 @@
 package cloud.codestore.client.ui.selection.list;
 
+import cloud.codestore.client.Permission;
 import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.selection.filter.FilterEvent;
 import cloud.codestore.client.ui.selection.search.FullTextSearchEvent;
@@ -16,6 +17,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 
@@ -31,6 +33,8 @@ public class SnippetList implements ChangeListener<SnippetListItem> {
     private FilterProperties filterProperties = new FilterProperties();
 
     @FXML
+    private Button createSnippet;
+    @FXML
     private ListView<SnippetListItem> list;
     @FXML
     private Node nextPage;
@@ -43,6 +47,7 @@ public class SnippetList implements ChangeListener<SnippetListItem> {
 
     @FXML
     public void initialize() {
+        createSnippet.managedProperty().bind(createSnippet.visibleProperty());
         handleNextPageVisibility();
         handleSnippetSelection();
         loadSnippets();
@@ -62,7 +67,8 @@ public class SnippetList implements ChangeListener<SnippetListItem> {
 
     private void loadSnippets() {
         list.getItems().clear();
-        SnippetPage page = readSnippetsUseCase.getFirstPage(searchQuery, filterProperties);
+        SnippetPage page = readSnippetsUseCase.getPage(searchQuery, filterProperties);
+        createSnippet.setVisible(page.permissions().contains(Permission.CREATE));
         showSnippets(page);
     }
 
@@ -86,6 +92,11 @@ public class SnippetList implements ChangeListener<SnippetListItem> {
         if (newSelection != null) {
             eventBus.post(new SnippetSelectedEvent(newSelection.uri()));
         }
+    }
+
+    @FXML
+    public void createNewSnippet() {
+        eventBus.post(new CreateSnippetEvent());
     }
 
     @Subscribe

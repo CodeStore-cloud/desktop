@@ -1,5 +1,9 @@
 @use "../../colors";
 
+#createSnippetButton {
+    -fx-background-image: url("addSnippet.png");
+}
+
 #list {
     .list-cell {
         &:filled:selected {

@@ -56,7 +56,7 @@ class LocalSnippetRepositoryTest {
         resourceCollection.getLinks().add(new Link(Link.NEXT, "/snippets?page[number]=2"));
         when(client.getCollection(SNIPPETS_URL, SnippetResource.class)).thenReturn(resourceCollection);
 
-        SnippetPage page = repository.getFirstPage("", new FilterProperties());
+        SnippetPage page = repository.getPage("", new FilterProperties());
 
         List<SnippetListItem> snippets = page.snippets();
         assertThat(snippets).isNotNull().isNotEmpty().hasSameSizeAs(testSnippets);
@@ -91,8 +91,21 @@ class LocalSnippetRepositoryTest {
     }
 
     @Test
-    @DisplayName("reads the permissions from the operations meta-object")
-    void deserializeOperations() {
+    @DisplayName("reads the permissions of a single code snippet")
+    void snippetPermissions() {
+        SnippetResource[] testSnippets = testSnippets();
+        var document = new ResourceCollectionDocument<>(testSnippets);
+        document.setMeta(new ResourceMetaInfo(new Operation("createSnippet")));
+        when(client.getCollection(SNIPPETS_URL, SnippetResource.class)).thenReturn(document);
+
+        SnippetPage page = repository.getPage("", new FilterProperties());
+
+        assertThat(page.permissions()).containsExactly(Permission.CREATE);
+    }
+
+    @Test
+    @DisplayName("reads the permissions of the snippet collection")
+    void collectionPermissions() {
         var resource = testSnippet(1, "title", "", "Hello, World!");
         var document = new SingleResourceDocument<>(resource);
         document.setMeta(new ResourceMetaInfo(new Operation("deleteSnippet")));
@@ -109,7 +122,7 @@ class LocalSnippetRepositoryTest {
         var resourceCollection = new ResourceCollectionDocument<>(testSnippets());
         when(client.getCollection(anyString(), eq(SnippetResource.class))).thenReturn(resourceCollection);
 
-        repository.getFirstPage("test", new FilterProperties());
+        repository.getPage("test", new FilterProperties());
 
         verify(client).getCollection(SNIPPETS_URL + "?searchQuery=test", SnippetResource.class);
     }
@@ -123,7 +136,7 @@ class LocalSnippetRepositoryTest {
         var tags = new TreeSet<>(Set.of("hello", "world"));
         var language = new Language("Java", "9");
         var filterProperties = new FilterProperties(tags, language);
-        repository.getFirstPage("", filterProperties);
+        repository.getPage("", filterProperties);
 
         String expectedUrl = SNIPPETS_URL +
                              "?filter%5Btags%5D=hello,world" +
