@@ -2,6 +2,7 @@ package cloud.codestore.client.ui.snippet;
 
 import cloud.codestore.client.Permission;
 import cloud.codestore.client.Snippet;
+import cloud.codestore.client.ui.selection.list.CreateSnippetEvent;
 import cloud.codestore.client.ui.selection.list.SnippetSelectedEvent;
 import cloud.codestore.client.ui.snippet.code.SnippetCode;
 import cloud.codestore.client.ui.snippet.description.SnippetDescription;
@@ -21,8 +22,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -83,10 +86,31 @@ class SnippetControllerTest {
     }
 
     @Test
-    @DisplayName("registers a callback for the delete-button")
+    @DisplayName("clears all values when a CreateSnippetEvent is triggered")
+    void newSnippet() {
+        eventBus.post(new CreateSnippetEvent());
+
+        verify(snippetTitleController).setText("");
+        verify(snippetDescriptionController).setText("");
+        verify(snippetCodeController).setText("");
+        verify(snippetDetailsController).setTags(Collections.emptyList());
+        verify(snippetFooterController).setPermissions(Collections.emptySet());
+    }
+
+    @Test
+    @DisplayName("deletes the current snippet when the delete-button is pressed")
     void deleteSnippet() throws Exception {
+        AtomicReference<Runnable> callback = new AtomicReference<>(() -> {});
+        doAnswer(invocationOnMock -> {
+            callback.set(invocationOnMock.getArgument(0, Runnable.class));
+            return null;
+        }).when(snippetFooterController).onDelete(any(Runnable.class));
+
         callInitialize();
-        verify(snippetFooterController).onDelete(any(Runnable.class));
+        eventBus.post(new SnippetSelectedEvent(SNIPPET_URI));
+
+        callback.get().run();
+        verify(deleteSnippetUseCase).deleteSnippet(SNIPPET_URI);
     }
 
     private Snippet testSnippet() {

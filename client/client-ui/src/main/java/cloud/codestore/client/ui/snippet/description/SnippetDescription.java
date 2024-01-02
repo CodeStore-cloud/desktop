@@ -2,6 +2,7 @@ package cloud.codestore.client.ui.snippet.description;
 
 import cloud.codestore.client.ui.FxController;
 import com.sun.javafx.scene.control.skin.Utils;
+import javafx.beans.property.BooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.scene.text.TextBoundsType;
@@ -23,6 +24,10 @@ public class SnippetDescription {
     public void setText(String description) {
         snippetDescription.setText(description);
         updateHeight();
+    }
+
+    public void bindEditing(BooleanProperty editingProperty) {
+        snippetDescription.editableProperty().bind(editingProperty);
     }
 
     private void updateHeight() {

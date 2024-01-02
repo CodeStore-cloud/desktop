@@ -1,6 +1,7 @@
 package cloud.codestore.client.ui.snippet.title;
 
 import cloud.codestore.client.ui.FxController;
+import javafx.beans.property.BooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 
@@ -15,6 +16,10 @@ public class SnippetTitle {
 
     public String getText() {
         return snippetTitle.getText();
+    }
+
+    public void bindEditing(BooleanProperty editingProperty) {
+        snippetTitle.editableProperty().bind(editingProperty);
     }
 
     @FXML

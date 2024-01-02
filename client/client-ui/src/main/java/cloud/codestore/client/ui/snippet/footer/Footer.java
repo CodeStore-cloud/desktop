@@ -2,6 +2,7 @@ package cloud.codestore.client.ui.snippet.footer;
 
 import cloud.codestore.client.Permission;
 import cloud.codestore.client.ui.FxController;
+import javafx.beans.property.BooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 
@@ -24,5 +25,9 @@ public class Footer {
 
     public void setPermissions(@Nonnull Set<Permission> permissions) {
         deleteButton.setVisible(permissions.contains(Permission.DELETE));
+    }
+
+    public void bindEditing(BooleanProperty editingProperty) {
+        editingProperty.addListener((o, wasEditing, isEditing) -> deleteButton.setVisible(!isEditing));
     }
 }

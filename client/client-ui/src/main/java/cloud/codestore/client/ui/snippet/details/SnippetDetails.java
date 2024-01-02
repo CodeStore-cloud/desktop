@@ -1,6 +1,7 @@
 package cloud.codestore.client.ui.snippet.details;
 
 import cloud.codestore.client.ui.FxController;
+import javafx.beans.property.BooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
@@ -12,6 +13,10 @@ import java.util.List;
 public class SnippetDetails {
     @FXML
     private FlowPane tagPane;
+
+    public void bindEditing(BooleanProperty editingProperty) {
+        // TODO tag editing
+    }
 
     public void setTags(@Nonnull List<String> tags) {
         var tagNodes = tags.stream().map(Label::new).toList();
