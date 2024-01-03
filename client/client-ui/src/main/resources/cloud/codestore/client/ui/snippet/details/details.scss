@@ -5,7 +5,7 @@
     -fx-max-height: 150px;
     -fx-pref-height: 150px;
 
-    #tagPane {
-        -fx-hgap: size.$primaryPadding;
+    Icon.tag {
+        -fx-background-image: url("tag.png");
     }
 }

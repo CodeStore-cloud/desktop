@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import cloud.codestore.client.ui.icon.Icon?>
 <?import cloud.codestore.client.ui.separator.Separator?>
-<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
@@ -9,6 +10,7 @@
       fx:id="details" stylesheets="@details.css" styleClass="primarySpacing">
     <Separator/>
     <HBox>
-        <FlowPane fx:id="tagPane" />
+        <Icon styleClass="tag"/>
+        <TextField fx:id="tagsInput" promptText="%snippet.details.tags.placeholder"/>
     </HBox>
 </VBox>
