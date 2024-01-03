@@ -1,11 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.HBox?>
 <HBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
       fx:controller="cloud.codestore.client.ui.snippet.footer.Footer"
       stylesheets="@footer.css" styleClass="primarySpacing">
+
+    <Button fx:id="saveButton" styleClass="primary">
+        <tooltip>
+            <Tooltip text="%snippet.footer.save.tooltip"/>
+        </tooltip>
+    </Button>
+    <Button fx:id="cancelButton" styleClass="primary">
+        <tooltip>
+            <Tooltip text="%snippet.footer.cancel.tooltip"/>
+        </tooltip>
+    </Button>
+
     <Button fx:id="deleteButton" styleClass="primary">
         <tooltip>
             <Tooltip text="%snippet.footer.delete.tooltip"/>

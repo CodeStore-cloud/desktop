@@ -42,7 +42,7 @@ class FooterTest {
         @Start
         private void start(Stage stage) throws Exception {
             start(stage, "footer.fxml", controller);
-            button = deleteButton();
+            button = getButton("#deleteButton", robot);
         }
 
         @Test
@@ -69,20 +69,59 @@ class FooterTest {
         @Test
         @DisplayName("calls the corresponding callback when clicked")
         void deleteCallback() {
-            verifyCallbackCalled(button, robot);
-        }
-
-        private Button deleteButton() {
-            var deleteButton = robot.lookup("#deleteButton").queryButton();
-            deleteButton.setPrefSize(30, 30);
-            return deleteButton;
+            verifyCallbackCalled(button, controller::onDelete, robot);
         }
     }
 
-    private void verifyCallbackCalled(Button button, FxRobot robot) {
+    @Nested
+    @ExtendWith(ApplicationExtension.class)
+    @DisplayName("save and cancel button")
+    class SaveButtonTest extends AbstractUiTest {
+        private FxRobot robot;
+        private Button saveButton;
+        private Button cancelButton;
+
+        @Start
+        private void start(Stage stage) throws Exception {
+            start(stage, "footer.fxml", controller);
+            saveButton = getButton("#saveButton", robot);
+            cancelButton = getButton("#cancelButton", robot);
+        }
+
+        @Test
+        @DisplayName("are only visible if editing")
+        void visibleIfNotEditing() {
+            editingProperty.set(false);
+            assertThat(saveButton.isVisible()).isFalse();
+            assertThat(cancelButton.isVisible()).isFalse();
+
+            editingProperty.set(true);
+            assertThat(saveButton.isVisible()).isTrue();
+            assertThat(cancelButton.isVisible()).isTrue();
+        }
+
+        @Test
+        @DisplayName("calls the corresponding callback when clicked")
+        void callCallback() {
+            verifyCallbackCalled(saveButton, controller::onSave, robot);
+            verifyCallbackCalled(cancelButton, controller::onDelete, robot);
+        }
+    }
+
+    private interface CallbackRegistration {
+        void register(Runnable callback);
+    }
+
+    private void verifyCallbackCalled(Button button, CallbackRegistration callbackRegistration, FxRobot robot) {
         var callback = mock(Runnable.class);
-        controller.onDelete(callback);
+        callbackRegistration.register(callback);
         robot.clickOn(button);
         verify(callback).run();
+    }
+
+    private Button getButton(String buttonId, FxRobot robot) {
+        var button = robot.lookup(buttonId).queryButton();
+        button.setPrefSize(30, 30);
+        return button;
     }
 }
