@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("The snippet footer's")
 class FooterTest {
-    private Footer controller = new Footer();
+    private SnippetFooter controller = new SnippetFooter();
     private BooleanProperty editingProperty = new SimpleBooleanProperty(false);
 
     @BeforeEach

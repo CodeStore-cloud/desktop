@@ -3,7 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.HBox?>
 <HBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="cloud.codestore.client.ui.snippet.footer.Footer"
+      fx:controller="cloud.codestore.client.ui.snippet.footer.SnippetFooter"
       stylesheets="@footer.css" styleClass="primarySpacing">
 
     <Button fx:id="saveButton" styleClass="primary">

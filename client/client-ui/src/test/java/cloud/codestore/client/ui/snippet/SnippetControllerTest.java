@@ -8,7 +8,7 @@ import cloud.codestore.client.ui.selection.list.SnippetSelectedEvent;
 import cloud.codestore.client.ui.snippet.code.SnippetCode;
 import cloud.codestore.client.ui.snippet.description.SnippetDescription;
 import cloud.codestore.client.ui.snippet.details.SnippetDetails;
-import cloud.codestore.client.ui.snippet.footer.Footer;
+import cloud.codestore.client.ui.snippet.footer.SnippetFooter;
 import cloud.codestore.client.ui.snippet.title.SnippetTitle;
 import cloud.codestore.client.usecases.deletesnippet.DeleteSnippetUseCase;
 import cloud.codestore.client.usecases.readsnippet.ReadSnippetUseCase;
@@ -51,7 +51,7 @@ class SnippetControllerTest {
     @Mock
     private SnippetDetails snippetDetailsController;
     @Mock
-    private Footer snippetFooterController;
+    private SnippetFooter snippetFooterController;
 
     @InjectMocks
     private SnippetController snippetController = new SnippetController(readSnippetUseCase, deleteSnippetUseCase, eventBus);

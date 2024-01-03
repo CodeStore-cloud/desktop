@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
 import java.util.Set;
 
 @FxController
-public class Footer {
+public class SnippetFooter {
     @FXML
     private Button saveButton;
     @FXML

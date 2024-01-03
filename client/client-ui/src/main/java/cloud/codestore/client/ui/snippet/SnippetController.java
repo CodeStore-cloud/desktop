@@ -7,7 +7,7 @@ import cloud.codestore.client.ui.selection.list.SnippetSelectedEvent;
 import cloud.codestore.client.ui.snippet.code.SnippetCode;
 import cloud.codestore.client.ui.snippet.description.SnippetDescription;
 import cloud.codestore.client.ui.snippet.details.SnippetDetails;
-import cloud.codestore.client.ui.snippet.footer.Footer;
+import cloud.codestore.client.ui.snippet.footer.SnippetFooter;
 import cloud.codestore.client.ui.snippet.title.SnippetTitle;
 import cloud.codestore.client.usecases.deletesnippet.DeleteSnippetUseCase;
 import cloud.codestore.client.usecases.readsnippet.ReadSnippetUseCase;
@@ -37,7 +37,7 @@ public class SnippetController {
     @FXML
     private SnippetDetails snippetDetailsController;
     @FXML
-    private Footer snippetFooterController;
+    private SnippetFooter snippetFooterController;
 
     SnippetController(
             @Nonnull ReadSnippetUseCase readSnippetUseCase,
