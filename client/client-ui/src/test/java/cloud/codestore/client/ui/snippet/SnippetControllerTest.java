@@ -1,5 +1,6 @@
 package cloud.codestore.client.ui.snippet;
 
+import cloud.codestore.client.Language;
 import cloud.codestore.client.Permission;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.ui.selection.list.CreateSnippetEvent;
@@ -79,6 +80,7 @@ class SnippetControllerTest {
         verify(snippetTitleController).setText("A random title");
         verify(snippetDescriptionController).setText("With a short description");
         verify(snippetCodeController).setText("System.out.println(\"Hello, World!\");");
+        verify(snippetCodeController).setLanguage((new Language("Java", "10")));
         verify(snippetDetailsController).setTags(tagsArgument.capture());
         assertThat(tagsArgument.getValue()).containsExactlyInAnyOrder("hello", "world");
         verify(snippetFooterController).setPermissions(permissionsArgument.capture());
@@ -93,6 +95,7 @@ class SnippetControllerTest {
         verify(snippetTitleController).setText("");
         verify(snippetDescriptionController).setText("");
         verify(snippetCodeController).setText("");
+        verify(snippetCodeController).setLanguage(null);
         verify(snippetDetailsController).setTags(Collections.emptyList());
         verify(snippetFooterController).setPermissions(Collections.emptySet());
     }
@@ -119,6 +122,7 @@ class SnippetControllerTest {
                       .title("A random title")
                       .description("With a short description")
                       .code("System.out.println(\"Hello, World!\");")
+                      .language(new Language("Java", "10"))
                       .tags(List.of("hello", "world"))
                       .permissions(Set.of(Permission.DELETE))
                       .build();

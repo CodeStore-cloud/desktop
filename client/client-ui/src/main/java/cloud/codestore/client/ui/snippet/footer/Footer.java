@@ -24,6 +24,9 @@ public class Footer {
         saveButton.managedProperty().bind(saveButton.visibleProperty());
         cancelButton.managedProperty().bind(cancelButton.visibleProperty());
         deleteButton.managedProperty().bind(deleteButton.visibleProperty());
+
+        saveButton.setVisible(false);
+        cancelButton.setVisible(false);
     }
 
     public void onSave(Runnable callback) {
@@ -43,6 +46,10 @@ public class Footer {
     }
 
     public void bindEditing(BooleanProperty editingProperty) {
-        editingProperty.addListener((o, wasEditing, isEditing) -> deleteButton.setVisible(!isEditing));
+        editingProperty.addListener((o, wasEditing, isEditing) -> {
+            saveButton.setVisible(isEditing);
+            cancelButton.setVisible(isEditing);
+            deleteButton.setVisible(!isEditing);
+        });
     }
 }

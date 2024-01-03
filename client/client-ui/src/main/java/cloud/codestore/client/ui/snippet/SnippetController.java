@@ -56,6 +56,7 @@ public class SnippetController {
         snippetCodeController.bindEditing(editingProperty);
         snippetDetailsController.bindEditing(editingProperty);
         snippetFooterController.bindEditing(editingProperty);
+
         snippetFooterController.onDelete(() -> deleteSnippetUseCase.deleteSnippet(currentSnippet));
     }
 
@@ -63,10 +64,12 @@ public class SnippetController {
     private void snippetSelected(@Nonnull SnippetSelectedEvent event) {
         currentSnippet = event.snippetUri();
         editingProperty.set(false);
+
         Snippet snippet = readSnippetUseCase.readSnippet(currentSnippet);
         snippetTitleController.setText(snippet.getTitle());
         snippetDescriptionController.setText(snippet.getDescription());
         snippetCodeController.setText(snippet.getCode());
+        snippetCodeController.setLanguage(snippet.getLanguage());
         snippetDetailsController.setTags(snippet.getTags());
         snippetFooterController.setPermissions(snippet.getPermissions());
     }
@@ -76,8 +79,10 @@ public class SnippetController {
         snippetTitleController.setText("");
         snippetDescriptionController.setText("");
         snippetCodeController.setText("");
+        snippetCodeController.setLanguage(null);
         snippetDetailsController.setTags(Collections.emptyList());
         snippetFooterController.setPermissions(Collections.emptySet());
+
         editingProperty.set(true);
     }
 }

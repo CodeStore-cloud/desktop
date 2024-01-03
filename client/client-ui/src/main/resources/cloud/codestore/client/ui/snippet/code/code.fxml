@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import cloud.codestore.client.ui.icon.Icon?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.TextArea?>
-<TextArea xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-          fx:controller="cloud.codestore.client.ui.snippet.code.SnippetCode"
-          fx:id="snippetCode"
-          promptText="%snippet.code.placeholder">
-</TextArea>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="cloud.codestore.client.ui.snippet.code.SnippetCode"
+      stylesheets="@code.css">
+    <HBox>
+        <Icon styleClass="language"/>
+        <ComboBox fx:id="languageSelection"/>
+    </HBox>
+    <TextArea fx:id="snippetCode" promptText="%snippet.code.placeholder"/>
+</VBox>
