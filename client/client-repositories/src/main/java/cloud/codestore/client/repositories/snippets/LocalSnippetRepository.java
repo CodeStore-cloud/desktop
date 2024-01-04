@@ -1,11 +1,16 @@
 package cloud.codestore.client.repositories.snippets;
 
+import cloud.codestore.client.Language;
 import cloud.codestore.client.Permission;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.repositories.HttpClient;
 import cloud.codestore.client.repositories.Repository;
 import cloud.codestore.client.repositories.ResourceMetaInfo;
+import cloud.codestore.client.repositories.language.LanguageResource;
 import cloud.codestore.client.repositories.tags.LocalTagRepository;
+import cloud.codestore.client.repositories.tags.TagResource;
+import cloud.codestore.client.usecases.createsnippet.CreateSnippetUseCase;
+import cloud.codestore.client.usecases.createsnippet.NewSnippetDto;
 import cloud.codestore.client.usecases.deletesnippet.DeleteSnippetUseCase;
 import cloud.codestore.client.usecases.listsnippets.FilterProperties;
 import cloud.codestore.client.usecases.listsnippets.ReadSnippetsUseCase;
@@ -14,6 +19,11 @@ import cloud.codestore.client.usecases.listsnippets.SnippetPage;
 import cloud.codestore.client.usecases.readsnippet.ReadSnippetUseCase;
 import cloud.codestore.jsonapi.document.SingleResourceDocument;
 import cloud.codestore.jsonapi.link.Link;
+import cloud.codestore.jsonapi.meta.MetaInformation;
+import cloud.codestore.jsonapi.relationship.ToManyRelationship;
+import cloud.codestore.jsonapi.relationship.ToOneRelationship;
+import cloud.codestore.jsonapi.resource.ResourceIdentifierObject;
+import cloud.codestore.jsonapi.resource.ResourceObject;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -26,7 +36,7 @@ import java.util.stream.Collectors;
  * A repository which saves/loads code snippets from the local {CodeStore} Core.
  */
 @Repository
-class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase, DeleteSnippetUseCase {
+class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase, DeleteSnippetUseCase, CreateSnippetUseCase {
 
     private final HttpClient client;
     private final LocalTagRepository tagRepository;
@@ -78,10 +88,44 @@ class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase,
     @Override
     public Snippet readSnippet(String snippetUri) {
         SingleResourceDocument<SnippetResource> document = client.get(snippetUri, SnippetResource.class);
-        SnippetResource snippetResource = document.getData();
-        String tagsUri = snippetResource.getTags().getRelatedResourceLink();
-        Set<Permission> permissions = getPermissions((ResourceMetaInfo) document.getMeta());
+        return convertToSnippet(document.getData(), document.getMeta());
+    }
 
+    @Override
+    public void deleteSnippet(@Nonnull String snippetUri) {
+        client.delete(snippetUri);
+    }
+
+    @Override
+    public Snippet create(@Nonnull NewSnippetDto snippetDto) {
+        List<String> tags = Objects.requireNonNullElseGet(snippetDto.tags(), Collections::emptyList);
+        List<TagResource> tagResources = createTags(tags);
+
+        SnippetResource resource = new SnippetResource(
+                snippetDto.title(),
+                snippetDto.description(),
+                snippetDto.code(),
+                convert(snippetDto.language()),
+                convert(tagResources)
+        );
+
+        var document = client.post(client.getSnippetCollectionUrl(), resource);
+        return convertToSnippet(document.getData(), document.getMeta());
+    }
+
+    @Nonnull
+    private List<TagResource> createTags(List<String> tags) {
+        String url = client.getTagsCollectionUrl();
+        return tags.stream()
+                   .map(TagResource::new)
+                   .map(resource -> client.post(url, resource))
+                   .map(SingleResourceDocument::getData)
+                   .toList();
+    }
+
+    private Snippet convertToSnippet(SnippetResource snippetResource, MetaInformation meta) {
+        String tagsUri = snippetResource.getTags().getRelatedResourceLink();
+        Set<Permission> permissions = getPermissions((ResourceMetaInfo) meta);
         return Snippet.builder()
                       .uri(snippetResource.getSelfLink())
                       .title(snippetResource.getTitle())
@@ -108,8 +152,24 @@ class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase,
                    .collect(Collectors.toSet());
     }
 
-    @Override
-    public void deleteSnippet(@Nonnull String snippetUri) {
-        client.delete(snippetUri);
+    private ToOneRelationship<LanguageResource> convert(@Nullable Language language) {
+        if (language == null) {
+            return null;
+        }
+
+        var identifier = new ResourceIdentifierObject(LanguageResource.RESOURCE_TYPE, language.id());
+        return new ToOneRelationship<LanguageResource>().setData(identifier);
+    }
+
+    private ToManyRelationship<TagResource> convert(@Nonnull List<TagResource> tagResources) {
+        if (tagResources.isEmpty()) {
+            return null;
+        }
+
+        var identifiers = tagResources.stream()
+                                      .map(ResourceObject::getIdentifier)
+                                      .toArray(ResourceIdentifierObject[]::new);
+
+        return new ToManyRelationship<TagResource>().setData(identifiers);
     }
 }

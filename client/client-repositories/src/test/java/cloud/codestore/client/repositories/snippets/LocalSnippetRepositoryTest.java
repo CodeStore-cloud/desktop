@@ -6,18 +6,23 @@ import cloud.codestore.client.Snippet;
 import cloud.codestore.client.repositories.HttpClient;
 import cloud.codestore.client.repositories.Operation;
 import cloud.codestore.client.repositories.ResourceMetaInfo;
+import cloud.codestore.client.repositories.language.LanguageResource;
 import cloud.codestore.client.repositories.tags.LocalTagRepository;
+import cloud.codestore.client.repositories.tags.TagResource;
+import cloud.codestore.client.usecases.createsnippet.NewSnippetDto;
 import cloud.codestore.client.usecases.listsnippets.FilterProperties;
 import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
 import cloud.codestore.client.usecases.listsnippets.SnippetPage;
 import cloud.codestore.jsonapi.document.ResourceCollectionDocument;
 import cloud.codestore.jsonapi.document.SingleResourceDocument;
 import cloud.codestore.jsonapi.link.Link;
-import cloud.codestore.jsonapi.relationship.Relationship;
+import cloud.codestore.jsonapi.relationship.ToManyRelationship;
+import cloud.codestore.jsonapi.resource.ResourceIdentifierObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -34,7 +39,8 @@ import static org.mockito.Mockito.*;
 class LocalSnippetRepositoryTest {
     private static final String SNIPPETS_URL = "http://localhost:8080/snippets";
     private static final String SNIPPET_URI = "http://localhost:8080/snippets/1";
-    private static final String TAGS_URI = "http://localhost:8080/tags?filter[snippet]=1";
+    private static final String SNIPPET_TAGS_URI = "http://localhost:8080/tags?filter[snippet]=1";
+    private static final String TAGS_URI = "http://localhost:8080/tags";
 
     @Mock
     private HttpClient client;
@@ -79,7 +85,7 @@ class LocalSnippetRepositoryTest {
                 "System.out.println(\"Hello, World!\");"
         ));
         when(client.get(SNIPPET_URI, SnippetResource.class)).thenReturn(document);
-        when(tagRepository.get(TAGS_URI)).thenReturn(List.of("hello", "world"));
+        when(tagRepository.get(SNIPPET_TAGS_URI)).thenReturn(List.of("hello", "world"));
 
         Snippet snippet = repository.readSnippet(SNIPPET_URI);
 
@@ -144,6 +150,49 @@ class LocalSnippetRepositoryTest {
         verify(client).getCollection(expectedUrl, SnippetResource.class);
     }
 
+    @Test
+    @DisplayName("creates a new code snippet in the core")
+    void createSnippet() {
+        TagResource tag1 = mock(TagResource.class);
+        when(tag1.getIdentifier()).thenReturn(new ResourceIdentifierObject(TagResource.RESOURCE_TYPE, "1"));
+        TagResource tag2 = mock(TagResource.class);
+        when(tag2.getIdentifier()).thenReturn(new ResourceIdentifierObject(TagResource.RESOURCE_TYPE, "2"));
+        when(client.getTagsCollectionUrl()).thenReturn(TAGS_URI);
+
+        var doc1 = new SingleResourceDocument<>(tag1);
+        var doc2 = new SingleResourceDocument<>(tag2);
+        when(client.post(eq(TAGS_URI), any(TagResource.class))).thenReturn(doc1).thenReturn(doc2);
+
+        NewSnippetDto dto = new NewSnippetDto(
+                "A hello world example",
+                "With a short description",
+                new Language("Java", "10"),
+                "System.out.println(\"Hello, World!\");",
+                List.of("hello", "world")
+        );
+        var document = new SingleResourceDocument<>(testSnippet(1, "title"));
+        when(client.post(eq(SNIPPETS_URL), any(SnippetResource.class))).thenReturn(document);
+
+        var snippetResourceArgument = ArgumentCaptor.forClass(SnippetResource.class);
+
+
+        repository.create(dto);
+
+        verify(client, times(2)).post(eq(TAGS_URI), any(TagResource.class));
+        verify(client).post(eq(SNIPPETS_URL), snippetResourceArgument.capture());
+
+
+        SnippetResource snippetResource = snippetResourceArgument.getValue();
+        assertThat(snippetResource.getTitle()).isEqualTo(dto.title());
+        assertThat(snippetResource.getDescription()).isEqualTo(dto.description());
+        assertThat(snippetResource.getCode()).isEqualTo(dto.code());
+        assertThat(snippetResource.getLanguage()).isNotNull();
+        assertThat(snippetResource.getLanguage().getData()).isEqualTo(
+                new ResourceIdentifierObject(LanguageResource.RESOURCE_TYPE, "10"));
+        assertThat(snippetResource.getTags()).isNotNull();
+        assertThat(snippetResource.getTags().getData()).hasSize(2);
+    }
+
     private SnippetResource[] testSnippets() {
         return new SnippetResource[]{
                 testSnippet(1, "A hello-world example"),
@@ -162,7 +211,7 @@ class LocalSnippetRepositoryTest {
         lenient().when(snippet.getTitle()).thenReturn(title);
         lenient().when(snippet.getDescription()).thenReturn(description);
         lenient().when(snippet.getCode()).thenReturn(code);
-        lenient().when(snippet.getTags()).thenReturn(new Relationship(TAGS_URI));
+        lenient().when(snippet.getTags()).thenReturn(new ToManyRelationship<>(SNIPPET_TAGS_URI));
         return snippet;
     }
 }

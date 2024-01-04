@@ -13,15 +13,18 @@ public class RootResource extends ResourceObject {
 
     private String snippetsUrl;
     private String languagesUrl;
+    private String tagsUrl;
 
     @JsonCreator
     RootResource(
             @JsonProperty("snippets") Relationship snippetsRelationship,
-            @JsonProperty("languages") Relationship languagesRelationship
+            @JsonProperty("languages") Relationship languagesRelationship,
+            @JsonProperty("tags") Relationship tagsRelationship
     ) {
         super(RESOURCE_TYPE);
         this.snippetsUrl = snippetsRelationship.getRelatedResourceLink();
         this.languagesUrl = languagesRelationship.getRelatedResourceLink();
+        this.tagsUrl = tagsRelationship.getRelatedResourceLink();
     }
 
     public String getSnippetsUrl() {
@@ -30,5 +33,9 @@ public class RootResource extends ResourceObject {
 
     public String getLanguagesUrl() {
         return languagesUrl;
+    }
+
+    public String getTagsUrl() {
+        return tagsUrl;
     }
 }

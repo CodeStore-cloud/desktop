@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.util.MimeType;
@@ -23,12 +24,14 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nonnull;
 
 public class HttpClient {
+    private static final MediaType JSONAPI_MEDIATYPE = MediaType.valueOf(JsonApiDocument.MEDIA_TYPE);
     private static final int MAX_BUFFER_SIZE = 1024 * 1024;
 
     private final WebClient client;
     private final String rootUrl;
     private String snippetCollectionUrl;
     private String languageCollectionUrl;
+    private String tagsCollectionUrl;
 
     public HttpClient(@Nonnull String rootUrl, @Nonnull String accessToken) {
         this.rootUrl = rootUrl;
@@ -69,6 +72,12 @@ public class HttpClient {
         return languageCollectionUrl;
     }
 
+    @Nonnull
+    public String getTagsCollectionUrl() {
+        getCollectionUrls();
+        return tagsCollectionUrl;
+    }
+
     public <T extends ResourceObject> SingleResourceDocument<T> get(String url, Class<T> expectedType) {
         return client.get()
                      .uri(url)
@@ -97,6 +106,22 @@ public class HttpClient {
                      .block();
     }
 
+    public <T extends ResourceObject> SingleResourceDocument<T> post(String url, T resource) {
+        return client.post()
+                     .uri(url)
+                     .contentType(JSONAPI_MEDIATYPE)
+                     .bodyValue(JsonApiDocument.of(resource))
+                     .retrieve()
+                     .onStatus(
+                             HttpStatusCode::isError,
+                             response -> Mono.error(
+                                     new RuntimeException(String.valueOf(response.statusCode().value()))
+                             )
+                     )
+                     .bodyToMono(new ParameterizedTypeReference<SingleResourceDocument<T>>() {})
+                     .block();
+    }
+
     public void delete(String url) {
         client.delete()
               .uri(url)
@@ -110,10 +135,11 @@ public class HttpClient {
     }
 
     private void getCollectionUrls() {
-        if (snippetCollectionUrl == null || languageCollectionUrl == null) {
+        if (snippetCollectionUrl == null || languageCollectionUrl == null || tagsCollectionUrl == null) {
             var document = get(rootUrl, RootResource.class);
             snippetCollectionUrl = document.getData().getSnippetsUrl();
             languageCollectionUrl = document.getData().getLanguagesUrl();
+            tagsCollectionUrl = document.getData().getTagsUrl();
         }
     }
 }

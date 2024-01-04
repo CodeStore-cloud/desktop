@@ -1,9 +1,11 @@
 package cloud.codestore.client.repositories;
 
 import cloud.codestore.client.repositories.snippets.SnippetResource;
+import cloud.codestore.client.repositories.tags.TagResource;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -61,6 +63,11 @@ class HttpClientTest {
                                 "links": {
                                     "related": "http://localhost:8080/languages"
                                 }
+                            },
+                            "tags": {
+                                "links": {
+                                    "related": "http://localhost:8080/tags"
+                                }
                             }
                         }
                     }
@@ -68,6 +75,7 @@ class HttpClientTest {
 
         assertThat(client.getSnippetCollectionUrl()).isEqualTo("http://localhost:8080/snippets");
         assertThat(client.getLanguageCollectionUrl()).isEqualTo("http://localhost:8080/languages");
+        assertThat(client.getTagsCollectionUrl()).isEqualTo("http://localhost:8080/tags");
     }
 
     @Test
@@ -187,6 +195,39 @@ class HttpClientTest {
                 }""");
 
         assertThatNoException().isThrownBy(() -> client.delete("http://localhost:8080/snippets/1"));
+    }
+
+    @Test
+    @DisplayName("creates a resource")
+    void createResource() throws InterruptedException {
+        setResponse("""
+                {
+                    "data": {
+                        "type": "tag",
+                        "id": "1",
+                        "attributes": {
+                            "name": "test"
+                        }
+                    }
+                }""");
+
+        var responseDocument = client.post("http://localhost:8080/tags", new TagResource("test"));
+        var createdTag = responseDocument.getData();
+
+        assertThat(createdTag).isNotNull();
+        assertThat(createdTag.getId()).isEqualTo("1");
+
+        RecordedRequest request = mockBackEnd.takeRequest();
+        assertThat(request.getHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo(JsonApiDocument.MEDIA_TYPE);
+        assertThat(request.getBody().readUtf8()).isEqualToIgnoringWhitespace("""
+                {
+                    "data": {
+                        "type": "tag",
+                        "attributes": {
+                            "name": "test"
+                        }
+                    }
+                }""");
     }
 
     private void setResponse(String responseBody) {
