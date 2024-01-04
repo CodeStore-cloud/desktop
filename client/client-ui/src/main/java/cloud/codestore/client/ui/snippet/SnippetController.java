@@ -9,6 +9,8 @@ import cloud.codestore.client.ui.snippet.description.SnippetDescription;
 import cloud.codestore.client.ui.snippet.details.SnippetDetails;
 import cloud.codestore.client.ui.snippet.footer.SnippetFooter;
 import cloud.codestore.client.ui.snippet.title.SnippetTitle;
+import cloud.codestore.client.usecases.createsnippet.CreateSnippetUseCase;
+import cloud.codestore.client.usecases.createsnippet.NewSnippetDto;
 import cloud.codestore.client.usecases.deletesnippet.DeleteSnippetUseCase;
 import cloud.codestore.client.usecases.readsnippet.ReadSnippetUseCase;
 import com.google.common.eventbus.EventBus;
@@ -23,9 +25,10 @@ import java.util.Collections;
 @FxController
 public class SnippetController {
     private ReadSnippetUseCase readSnippetUseCase;
+    private CreateSnippetUseCase createSnippetUseCase;
     private DeleteSnippetUseCase deleteSnippetUseCase;
-    private String currentSnippet;
 
+    private String currentSnippet;
     private BooleanProperty editingProperty = new SimpleBooleanProperty(false);
 
     @FXML
@@ -41,10 +44,12 @@ public class SnippetController {
 
     SnippetController(
             @Nonnull ReadSnippetUseCase readSnippetUseCase,
+            @Nonnull CreateSnippetUseCase createSnippetUseCase,
             @Nonnull DeleteSnippetUseCase deleteSnippetUseCase,
             @Nonnull EventBus eventBus
     ) {
         this.readSnippetUseCase = readSnippetUseCase;
+        this.createSnippetUseCase = createSnippetUseCase;
         this.deleteSnippetUseCase = deleteSnippetUseCase;
         eventBus.register(this);
     }
@@ -62,10 +67,21 @@ public class SnippetController {
 
     @Subscribe
     private void snippetSelected(@Nonnull SnippetSelectedEvent event) {
-        currentSnippet = event.snippetUri();
-        editingProperty.set(false);
+        show(readSnippetUseCase.readSnippet(event.snippetUri()));
+    }
 
-        Snippet snippet = readSnippetUseCase.readSnippet(currentSnippet);
+    @Subscribe
+    private void createSnippet(@Nonnull CreateSnippetEvent event) {
+        clear();
+        snippetFooterController.onSave(this::saveNewSnippet);
+        snippetFooterController.onCancel(this::clear);
+        editingProperty.set(true);
+    }
+
+    private void show(@Nonnull Snippet snippet) {
+        editingProperty.set(false);
+        currentSnippet = snippet.getUri();
+
         snippetTitleController.setText(snippet.getTitle());
         snippetDescriptionController.setText(snippet.getDescription());
         snippetCodeController.setText(snippet.getCode());
@@ -74,15 +90,28 @@ public class SnippetController {
         snippetFooterController.setPermissions(snippet.getPermissions());
     }
 
-    @Subscribe
-    private void createSnippet(@Nonnull CreateSnippetEvent event) {
+    private void saveNewSnippet() {
+        var dto = new NewSnippetDto(
+                snippetTitleController.getText(),
+                snippetDescriptionController.getText(),
+                snippetCodeController.getLanguage(),
+                snippetCodeController.getText(),
+                snippetDetailsController.getTags()
+        );
+
+        Snippet createdSnippet = createSnippetUseCase.create(dto);
+        show(createdSnippet);
+    }
+
+    private void clear() {
+        editingProperty.set(false);
+        currentSnippet = "";
+
         snippetTitleController.setText("");
         snippetDescriptionController.setText("");
         snippetCodeController.setText("");
         snippetCodeController.setLanguage(null);
         snippetDetailsController.setTags(Collections.emptyList());
         snippetFooterController.setPermissions(Collections.emptySet());
-
-        editingProperty.set(true);
     }
 }
