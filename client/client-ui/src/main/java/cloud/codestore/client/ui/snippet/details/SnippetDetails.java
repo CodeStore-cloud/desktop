@@ -1,34 +1,36 @@
 package cloud.codestore.client.ui.snippet.details;
 
+import cloud.codestore.client.Snippet;
+import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.FxController;
-import javafx.beans.property.BooleanProperty;
+import cloud.codestore.client.ui.snippet.SnippetForm;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 
 import javax.annotation.Nonnull;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 @FxController
-public class SnippetDetails {
+public class SnippetDetails implements SnippetForm {
     @FXML
     private TextField tagsInput;
 
-    public void bindEditing(BooleanProperty editingProperty) {
-        tagsInput.editableProperty().bind(editingProperty);
+    @Override
+    public void setEditable(boolean editable) {
+        tagsInput.setEditable(editable);
     }
 
-    public void setTags(@Nonnull List<String> tags) {
-        tagsInput.setText(String.join(" ", tags));
+    @Override
+    public void visit(@Nonnull Snippet snippet) {
+        String tagsString = String.join(" ", snippet.getTags());
+        tagsInput.setText(tagsString);
     }
 
-    public List<String> getTags() {
+    @Override
+    public void visit(@Nonnull SnippetBuilder builder) {
         String text = tagsInput.getText();
-        if (text.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return Arrays.stream(text.split(" ")).map(String::trim).toList();
+        List<String> tags = text.isEmpty() ? Collections.emptyList() : List.of(text.split(" "));
+        builder.tags(tags);
     }
 }

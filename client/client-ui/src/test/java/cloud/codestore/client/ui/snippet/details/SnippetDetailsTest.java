@@ -1,9 +1,10 @@
 package cloud.codestore.client.ui.snippet.details;
 
+import cloud.codestore.client.Snippet;
+import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.AbstractUiTest;
 import javafx.scene.control.TextInputControl;
 import javafx.stage.Stage;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +14,8 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
 import java.util.List;
+
+import static org.testfx.assertions.api.Assertions.assertThat;
 
 @ExtendWith({MockitoExtension.class, ApplicationExtension.class})
 @DisplayName("The details controller")
@@ -25,17 +28,34 @@ class SnippetDetailsTest extends AbstractUiTest {
     }
 
     @Test
-    @DisplayName("shows the given tags")
-    void showTags(FxRobot robot) {
-        controller.setTags(List.of("A", "B", "C"));
-        Assertions.assertThat(tagsInput(robot).getText()).isEqualTo("A B C");
+    @DisplayName("sets the editability of the details")
+    void setEditable(FxRobot robot) {
+        var tagsInput = tagsInput(robot);
+
+        controller.setEditable(true);
+        assertThat(tagsInput.isEditable()).isTrue();
+
+        controller.setEditable(false);
+        assertThat(tagsInput.isEditable()).isFalse();
     }
 
     @Test
-    @DisplayName("provides a list of tags from the input")
+    @DisplayName("sets the tags of the given snippet")
+    void setTags(FxRobot robot) {
+        Snippet snippet = new SnippetBuilder().uri("").tags(List.of("A", "B", "C")).build();
+        controller.visit(snippet);
+        assertThat(tagsInput(robot)).hasText("A B C");
+    }
+
+    @Test
+    @DisplayName("reads the tags into the given snippet builder")
     void readTags(FxRobot robot) {
         tagsInput(robot).setText("A B C");
-        Assertions.assertThat(controller.getTags()).containsExactly("A", "B", "C");
+
+        SnippetBuilder builder = new SnippetBuilder().uri("");
+        controller.visit(builder);
+
+        assertThat(builder.build().getTags()).containsExactlyInAnyOrder("A", "B", "C");
     }
 
     private TextInputControl tagsInput(FxRobot robot) {

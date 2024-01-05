@@ -1,29 +1,31 @@
 package cloud.codestore.client.ui.snippet.title;
 
+import cloud.codestore.client.Snippet;
+import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.FxController;
-import javafx.beans.property.BooleanProperty;
+import cloud.codestore.client.ui.snippet.SnippetForm;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 
+import javax.annotation.Nonnull;
+
 @FxController
-public class SnippetTitle {
+public class SnippetTitle implements SnippetForm {
     @FXML
     private TextField snippetTitle;
 
-    public void setText(String title) {
-        snippetTitle.setText(title);
+    @Override
+    public void setEditable(boolean editable) {
+        snippetTitle.setEditable(editable);
     }
 
-    public String getText() {
-        return snippetTitle.getText();
+    @Override
+    public void visit(@Nonnull Snippet snippet) {
+        snippetTitle.setText(snippet.getTitle());
     }
 
-    public void bindEditing(BooleanProperty editingProperty) {
-        snippetTitle.editableProperty().bind(editingProperty);
-    }
-
-    @FXML
-    private void initialize() {
-        snippetTitle.setEditable(false);
+    @Override
+    public void visit(@Nonnull SnippetBuilder builder) {
+        builder.title(snippetTitle.getText());
     }
 }

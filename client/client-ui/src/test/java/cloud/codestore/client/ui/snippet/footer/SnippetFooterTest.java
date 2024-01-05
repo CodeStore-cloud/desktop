@@ -1,12 +1,11 @@
 package cloud.codestore.client.ui.snippet.footer;
 
 import cloud.codestore.client.Permission;
+import cloud.codestore.client.Snippet;
+import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.AbstractUiTest;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -15,20 +14,13 @@ import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
-import java.util.Collections;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.testfx.assertions.api.Assertions.assertThat;
 
 @DisplayName("The snippet footer's")
-class FooterTest {
+class SnippetFooterTest {
     private SnippetFooter controller = new SnippetFooter();
-    private BooleanProperty editingProperty = new SimpleBooleanProperty(false);
-
-    @BeforeEach
-    void setUp() {
-        controller.bindEditing(editingProperty);
-    }
 
     @Nested
     @ExtendWith(ApplicationExtension.class)
@@ -46,19 +38,21 @@ class FooterTest {
         @Test
         @DisplayName("is visible if deletion is permitted")
         void visibleIfPermitted() {
-            controller.setPermissions(Set.of(Permission.DELETE));
-            assertThat(button.isVisible()).isTrue();
+            controller.visit(snippet(Permission.DELETE));
+            assertThat(button).isVisible();
 
-            controller.setPermissions(Collections.emptySet());
-            assertThat(button.isVisible()).isFalse();
+            controller.visit(snippet());
+            assertThat(button).isInvisible();
         }
 
         @Test
         @DisplayName("is visible if not editing")
         void visibleIfNotEditing() {
-            assertThat(button.isVisible()).isTrue();
-            editingProperty.set(true);
-            assertThat(button.isVisible()).isFalse();
+            controller.setEditable(true);
+            assertThat(button).isInvisible();
+
+            controller.setEditable(false);
+            assertThat(button).isVisible();
         }
     }
 
@@ -80,12 +74,18 @@ class FooterTest {
         @Test
         @DisplayName("are only visible if editing")
         void visibleIfNotEditing() {
-            assertThat(saveButton.isVisible()).isFalse();
-            assertThat(cancelButton.isVisible()).isFalse();
-            editingProperty.set(true);
+            controller.setEditable(true);
             assertThat(saveButton.isVisible()).isTrue();
             assertThat(cancelButton.isVisible()).isTrue();
+
+            controller.setEditable(false);
+            assertThat(saveButton.isVisible()).isFalse();
+            assertThat(cancelButton.isVisible()).isFalse();
         }
+    }
+
+    private Snippet snippet(Permission... permissions) {
+        return new SnippetBuilder().uri("").permissions(Set.of(permissions)).build();
     }
 
     private Button getButton(String buttonId, FxRobot robot) {

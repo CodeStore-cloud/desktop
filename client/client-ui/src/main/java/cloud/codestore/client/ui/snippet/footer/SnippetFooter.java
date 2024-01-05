@@ -1,8 +1,10 @@
 package cloud.codestore.client.ui.snippet.footer;
 
 import cloud.codestore.client.Permission;
+import cloud.codestore.client.Snippet;
+import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.FxController;
-import javafx.beans.property.BooleanProperty;
+import cloud.codestore.client.ui.snippet.SnippetForm;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 
@@ -10,7 +12,7 @@ import javax.annotation.Nonnull;
 import java.util.Set;
 
 @FxController
-public class SnippetFooter {
+public class SnippetFooter implements SnippetForm {
     @FXML
     private Button saveButton;
     @FXML
@@ -24,10 +26,23 @@ public class SnippetFooter {
         saveButton.managedProperty().bind(saveButton.visibleProperty());
         cancelButton.managedProperty().bind(cancelButton.visibleProperty());
         deleteButton.managedProperty().bind(deleteButton.visibleProperty());
-
-        saveButton.setVisible(false);
-        cancelButton.setVisible(false);
     }
+
+    @Override
+    public void setEditable(boolean editable) {
+        saveButton.setVisible(editable);
+        cancelButton.setVisible(editable);
+        deleteButton.setVisible(!editable);
+    }
+
+    @Override
+    public void visit(@Nonnull Snippet snippet) {
+        Set<Permission> permissions = snippet.getPermissions();
+        deleteButton.setVisible(permissions.contains(Permission.DELETE));
+    }
+
+    @Override
+    public void visit(@Nonnull SnippetBuilder builder) {}
 
     public void onSave(Runnable callback) {
         saveButton.setOnAction(event -> callback.run());
@@ -39,17 +54,5 @@ public class SnippetFooter {
 
     public void onDelete(Runnable callback) {
         deleteButton.setOnAction(event -> callback.run());
-    }
-
-    public void setPermissions(@Nonnull Set<Permission> permissions) {
-        deleteButton.setVisible(permissions.contains(Permission.DELETE));
-    }
-
-    public void bindEditing(BooleanProperty editingProperty) {
-        editingProperty.addListener((o, wasEditing, isEditing) -> {
-            saveButton.setVisible(isEditing);
-            cancelButton.setVisible(isEditing);
-            deleteButton.setVisible(!isEditing);
-        });
     }
 }

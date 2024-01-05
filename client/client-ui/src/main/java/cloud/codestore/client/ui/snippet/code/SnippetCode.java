@@ -1,15 +1,19 @@
 package cloud.codestore.client.ui.snippet.code;
 
 import cloud.codestore.client.Language;
+import cloud.codestore.client.Snippet;
+import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.FxController;
+import cloud.codestore.client.ui.snippet.SnippetForm;
 import cloud.codestore.client.usecases.readlanguages.ReadLanguagesUseCase;
-import javafx.beans.property.BooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;
 
+import javax.annotation.Nonnull;
+
 @FxController
-public class SnippetCode {
+public class SnippetCode implements SnippetForm {
     private ReadLanguagesUseCase readLanguagesUseCase;
 
     @FXML
@@ -24,28 +28,23 @@ public class SnippetCode {
     @FXML
     private void initialize() {
         languageSelection.getItems().addAll(readLanguagesUseCase.readLanguages());
-        languageSelection.setEditable(false);
-        snippetCode.setEditable(false);
     }
 
-    public void setLanguage(Language language) {
-        languageSelection.getSelectionModel().select(language);
+    @Override
+    public void setEditable(boolean editable) {
+        languageSelection.setEditable(editable);
+        snippetCode.setEditable(editable);
     }
 
-    public Language getLanguage() {
-        return languageSelection.getSelectionModel().getSelectedItem();
+    @Override
+    public void visit(@Nonnull Snippet snippet) {
+        languageSelection.getSelectionModel().select(snippet.getLanguage());
+        snippetCode.setText(snippet.getCode());
     }
 
-    public String getText() {
-        return snippetCode.getText();
-    }
-
-    public void setText(String description) {
-        snippetCode.setText(description);
-    }
-
-    public void bindEditing(BooleanProperty editingProperty) {
-        languageSelection.editableProperty().bind(editingProperty);
-        snippetCode.editableProperty().bind(editingProperty);
+    @Override
+    public void visit(@Nonnull SnippetBuilder builder) {
+        builder.language(languageSelection.getSelectionModel().getSelectedItem());
+        builder.code(snippetCode.getText());
     }
 }
