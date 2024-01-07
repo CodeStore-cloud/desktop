@@ -13,6 +13,7 @@ import cloud.codestore.client.usecases.createsnippet.NewSnippetDto;
 import cloud.codestore.client.usecases.listsnippets.FilterProperties;
 import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
 import cloud.codestore.client.usecases.listsnippets.SnippetPage;
+import cloud.codestore.client.usecases.listsnippets.SortProperties;
 import cloud.codestore.jsonapi.document.ResourceCollectionDocument;
 import cloud.codestore.jsonapi.document.SingleResourceDocument;
 import cloud.codestore.jsonapi.link.Link;
@@ -22,6 +23,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -30,7 +34,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 
+import static cloud.codestore.client.usecases.listsnippets.SortProperties.SnippetProperty.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -60,9 +66,9 @@ class LocalSnippetRepositoryTest {
         SnippetResource[] testSnippets = testSnippets();
         var resourceCollection = new ResourceCollectionDocument<>(testSnippets);
         resourceCollection.getLinks().add(new Link(Link.NEXT, "/snippets?page[number]=2"));
-        when(client.getCollection(SNIPPETS_URL, SnippetResource.class)).thenReturn(resourceCollection);
+        when(client.getCollection(anyString(), eq(SnippetResource.class))).thenReturn(resourceCollection);
 
-        SnippetPage page = repository.getPage("", new FilterProperties());
+        SnippetPage page = repository.getPage("", new FilterProperties(), new SortProperties());
 
         List<SnippetListItem> snippets = page.snippets();
         assertThat(snippets).isNotNull().isNotEmpty().hasSameSizeAs(testSnippets);
@@ -72,7 +78,6 @@ class LocalSnippetRepositoryTest {
         }
 
         assertThat(page.nextPageUrl()).isNotEmpty();
-        verify(client).getCollection(SNIPPETS_URL, SnippetResource.class);
     }
 
     @Test
@@ -99,12 +104,11 @@ class LocalSnippetRepositoryTest {
     @Test
     @DisplayName("reads the permissions of a single code snippet")
     void snippetPermissions() {
-        SnippetResource[] testSnippets = testSnippets();
-        var document = new ResourceCollectionDocument<>(testSnippets);
+        var document = new ResourceCollectionDocument<>(testSnippets());
         document.setMeta(new ResourceMetaInfo(new Operation("createSnippet")));
-        when(client.getCollection(SNIPPETS_URL, SnippetResource.class)).thenReturn(document);
+        when(client.getCollection(anyString(), eq(SnippetResource.class))).thenReturn(document);
 
-        SnippetPage page = repository.getPage("", new FilterProperties());
+        SnippetPage page = repository.getPage("", new FilterProperties(), new SortProperties());
 
         assertThat(page.permissions()).containsExactly(Permission.CREATE);
     }
@@ -125,12 +129,8 @@ class LocalSnippetRepositoryTest {
     @Test
     @DisplayName("passes the provided search query to the core")
     void searchSnippets() {
-        var resourceCollection = new ResourceCollectionDocument<>(testSnippets());
-        when(client.getCollection(anyString(), eq(SnippetResource.class))).thenReturn(resourceCollection);
-
-        repository.getPage("test", new FilterProperties());
-
-        verify(client).getCollection(SNIPPETS_URL + "?searchQuery=test", SnippetResource.class);
+        repository.getPage("test", new FilterProperties(), new SortProperties());
+        verify(client).getCollection(argThat(url -> url.contains("searchQuery=test")), any());
     }
 
     @Test
@@ -142,12 +142,36 @@ class LocalSnippetRepositoryTest {
         var tags = new TreeSet<>(Set.of("hello", "world"));
         var language = new Language("Java", "9");
         var filterProperties = new FilterProperties(tags, language);
-        repository.getPage("", filterProperties);
+        repository.getPage("", filterProperties, new SortProperties());
 
-        String expectedUrl = SNIPPETS_URL +
-                             "?filter%5Btags%5D=hello,world" +
-                             "&filter%5Blanguage%5D=9";
-        verify(client).getCollection(expectedUrl, SnippetResource.class);
+        verify(client).getCollection(
+                argThat(url -> url.contains("filter%5Btags%5D=hello,world") && url.contains("filter%5Blanguage%5D=9")),
+                any()
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("sortParamStream")
+    @DisplayName("passes the provided sort properties to the core")
+    void sortSnippets(SortProperties sortProperties, String expectedSortParam) {
+        var document = new ResourceCollectionDocument<>(testSnippets());
+        lenient().when(client.getCollection(anyString(), eq(SnippetResource.class))).thenReturn(document);
+
+        repository.getPage("", new FilterProperties(), sortProperties);
+        verify(client).getCollection(argThat(url -> url.contains("sort=" + expectedSortParam)), any());
+    }
+
+    private static Stream<Arguments> sortParamStream() {
+        return Stream.of(
+                Arguments.of(new SortProperties(RELEVANCE, true), "relevance"),
+                Arguments.of(new SortProperties(RELEVANCE, false), "-relevance"),
+                Arguments.of(new SortProperties(CREATED, true), "created"),
+                Arguments.of(new SortProperties(CREATED, false), "-created"),
+                Arguments.of(new SortProperties(MODIFIED, true), "modified"),
+                Arguments.of(new SortProperties(MODIFIED, false), "-modified"),
+                Arguments.of(new SortProperties(TITLE, true), "title"),
+                Arguments.of(new SortProperties(TITLE, false), "-title")
+        );
     }
 
     @Test
@@ -174,7 +198,6 @@ class LocalSnippetRepositoryTest {
         when(client.post(eq(SNIPPETS_URL), any(SnippetResource.class))).thenReturn(document);
 
         var snippetResourceArgument = ArgumentCaptor.forClass(SnippetResource.class);
-
 
         repository.create(dto);
 

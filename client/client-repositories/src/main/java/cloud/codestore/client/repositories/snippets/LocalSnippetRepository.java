@@ -12,10 +12,7 @@ import cloud.codestore.client.repositories.tags.TagResource;
 import cloud.codestore.client.usecases.createsnippet.CreateSnippetUseCase;
 import cloud.codestore.client.usecases.createsnippet.NewSnippetDto;
 import cloud.codestore.client.usecases.deletesnippet.DeleteSnippetUseCase;
-import cloud.codestore.client.usecases.listsnippets.FilterProperties;
-import cloud.codestore.client.usecases.listsnippets.ReadSnippetsUseCase;
-import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
-import cloud.codestore.client.usecases.listsnippets.SnippetPage;
+import cloud.codestore.client.usecases.listsnippets.*;
 import cloud.codestore.client.usecases.readsnippet.ReadSnippetUseCase;
 import cloud.codestore.jsonapi.document.SingleResourceDocument;
 import cloud.codestore.jsonapi.link.Link;
@@ -38,6 +35,10 @@ import java.util.stream.Collectors;
 @Repository
 class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase, DeleteSnippetUseCase, CreateSnippetUseCase {
 
+    private static final String FILTER_TAGS_PARAM = "filter[tags]";
+    private static final String FILTER_LANGUAGE_PARAM = "filter[language]";
+    private static final String SORT_PARAM = "sort";
+
     private final HttpClient client;
     private final LocalTagRepository tagRepository;
 
@@ -50,7 +51,8 @@ class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase,
     @Override
     public SnippetPage getPage(
             @Nonnull String searchQuery,
-            @Nonnull FilterProperties filterProperties
+            @Nonnull FilterProperties filterProperties,
+            @Nonnull SortProperties sortProperties
     ) {
         String url = client.getSnippetCollectionUrl();
         var uriBuilder = UriComponentsBuilder.fromUriString(url);
@@ -61,10 +63,14 @@ class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase,
 
         filterProperties.getTags().ifPresent(tags -> {
             String tagsCsv = String.join(",", tags);
-            uriBuilder.queryParam("filter[tags]", tagsCsv);
+            uriBuilder.queryParam(FILTER_TAGS_PARAM, tagsCsv);
         });
 
-        filterProperties.getLanguage().ifPresent(language -> uriBuilder.queryParam("filter[language]", language.id()));
+        filterProperties.getLanguage().ifPresent(language -> uriBuilder.queryParam(FILTER_LANGUAGE_PARAM, language.id()));
+
+        String sortValue = sortProperties.desc() ? "-" : "";
+        sortValue += sortProperties.property().name().toLowerCase();
+        uriBuilder.queryParam(SORT_PARAM, sortValue);
 
         url = uriBuilder.build().encode().toUri().toString();
         return getPage(url);
