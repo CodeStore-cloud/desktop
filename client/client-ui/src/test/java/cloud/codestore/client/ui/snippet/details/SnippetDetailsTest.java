@@ -32,10 +32,10 @@ class SnippetDetailsTest extends AbstractUiTest {
     void setEditable(FxRobot robot) {
         var tagsInput = tagsInput(robot);
 
-        controller.setEditable(true);
+        controller.setEditing(true);
         assertThat(tagsInput.isEditable()).isTrue();
 
-        controller.setEditable(false);
+        controller.setEditing(false);
         assertThat(tagsInput.isEditable()).isFalse();
     }
 

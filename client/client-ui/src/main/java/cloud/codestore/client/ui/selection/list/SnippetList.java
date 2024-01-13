@@ -5,6 +5,9 @@ import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.selection.filter.FilterEvent;
 import cloud.codestore.client.ui.selection.search.FullTextSearchEvent;
 import cloud.codestore.client.ui.selection.sort.SortEvent;
+import cloud.codestore.client.ui.snippet.SnippetCreatedEvent;
+import cloud.codestore.client.ui.snippet.SnippetDeletedEvent;
+import cloud.codestore.client.ui.snippet.SnippetUpdatedEvent;
 import cloud.codestore.client.usecases.listsnippets.*;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -113,6 +116,21 @@ public class SnippetList implements ChangeListener<SnippetListItem> {
     @Subscribe
     private void sortChange(@Nonnull SortEvent event) {
         sortProperties = event.sortProperties();
+        loadSnippets();
+    }
+
+    @Subscribe
+    private void snippetCreated(@Nonnull SnippetCreatedEvent event) {
+        loadSnippets();
+    }
+
+    @Subscribe
+    private void snippetUpdated(@Nonnull SnippetUpdatedEvent event) {
+        loadSnippets();
+    }
+
+    @Subscribe
+    private void snippetDeleted(@Nonnull SnippetDeletedEvent event) {
         loadSnippets();
     }
 }

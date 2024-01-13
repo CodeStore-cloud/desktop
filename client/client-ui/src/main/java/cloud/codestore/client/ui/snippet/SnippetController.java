@@ -14,6 +14,8 @@ import cloud.codestore.client.usecases.createsnippet.CreateSnippetUseCase;
 import cloud.codestore.client.usecases.createsnippet.NewSnippetDto;
 import cloud.codestore.client.usecases.deletesnippet.DeleteSnippetUseCase;
 import cloud.codestore.client.usecases.readsnippet.ReadSnippetUseCase;
+import cloud.codestore.client.usecases.updatesnippet.UpdateSnippetUseCase;
+import cloud.codestore.client.usecases.updatesnippet.UpdatedSnippetDto;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import javafx.fxml.FXML;
@@ -26,6 +28,7 @@ public class SnippetController {
 
     private final ReadSnippetUseCase readSnippetUseCase;
     private final CreateSnippetUseCase createSnippetUseCase;
+    private final UpdateSnippetUseCase updateSnippetUseCase;
     private final DeleteSnippetUseCase deleteSnippetUseCase;
     private final EventBus eventBus;
 
@@ -47,11 +50,13 @@ public class SnippetController {
     SnippetController(
             @Nonnull ReadSnippetUseCase readSnippetUseCase,
             @Nonnull CreateSnippetUseCase createSnippetUseCase,
+            UpdateSnippetUseCase updateSnippetUseCase,
             @Nonnull DeleteSnippetUseCase deleteSnippetUseCase,
             @Nonnull EventBus eventBus
     ) {
         this.readSnippetUseCase = readSnippetUseCase;
         this.createSnippetUseCase = createSnippetUseCase;
+        this.updateSnippetUseCase = updateSnippetUseCase;
         this.deleteSnippetUseCase = deleteSnippetUseCase;
         this.eventBus = eventBus;
         eventBus.register(this);
@@ -69,6 +74,7 @@ public class SnippetController {
 
         snippetFooterController.onSave(() -> state.save());
         snippetFooterController.onCancel(() -> state.cancel());
+        snippetFooterController.onEdit(() -> state.edit());
         snippetFooterController.onDelete(() -> state.delete());
 
         state = new DefaultState();
@@ -85,9 +91,9 @@ public class SnippetController {
         state = new NewSnippetState();
     }
 
-    private void setEditable(boolean editable) {
+    private void setEditing(boolean editable) {
         for (SnippetForm form : forms) {
-            form.setEditable(editable);
+            form.setEditing(editable);
         }
     }
 
@@ -122,6 +128,11 @@ public class SnippetController {
          * Called whenever the user wants to delete the current snippet.
          */
         default void delete() {}
+
+        /**
+         * Called whenever the user wants to edit the current snippet.
+         */
+        default void edit() {}
     }
 
     /**
@@ -129,7 +140,7 @@ public class SnippetController {
      */
     private class DefaultState implements ControllerState {
         DefaultState() {
-            setEditable(false);
+            setEditing(false);
             accept(EMPTY_SNIPPET);
         }
     }
@@ -139,8 +150,13 @@ public class SnippetController {
      */
     private class ShowSnippetState implements ControllerState {
         ShowSnippetState(@Nonnull Snippet snippet) {
-            setEditable(false);
+            setEditing(false);
             accept(snippet);
+        }
+
+        @Override
+        public void edit() {
+            state = new EditSnippetState();
         }
 
         @Override
@@ -158,7 +174,7 @@ public class SnippetController {
     private class NewSnippetState implements ControllerState {
         NewSnippetState() {
             accept(EMPTY_SNIPPET);
-            setEditable(true);
+            setEditing(true);
         }
 
         @Override
@@ -186,6 +202,41 @@ public class SnippetController {
         @Override
         public void cancel() {
             state = new DefaultState();
+        }
+    }
+
+    private class EditSnippetState implements ControllerState {
+        EditSnippetState() {
+            setEditing(true);
+        }
+
+        @Override
+        public void save() {
+            Snippet snippet = collectSnippetData();
+            UpdatedSnippetDto dto = new UpdatedSnippetDto(
+                    currentSnippetUri,
+                    snippet.getTitle(),
+                    snippet.getDescription(),
+                    snippet.getLanguage(),
+                    snippet.getCode(),
+                    snippet.getTags()
+            );
+
+            Snippet updatedSnippet = updateSnippetUseCase.update(dto);
+            state = new ShowSnippetState(updatedSnippet);
+            eventBus.post(new SnippetUpdatedEvent(updatedSnippet.getUri()));
+        }
+
+        private Snippet collectSnippetData() {
+            SnippetBuilder builder = new SnippetBuilder().uri(currentSnippetUri);
+            accept(builder);
+            return builder.build();
+        }
+
+        @Override
+        public void cancel() {
+            Snippet snippet = readSnippetUseCase.readSnippet(currentSnippetUri);
+            state = new ShowSnippetState(snippet);
         }
     }
 }

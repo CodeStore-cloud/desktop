@@ -17,7 +17,7 @@ public class SnippetDescription implements SnippetForm {
     private TextArea snippetDescription;
 
     @Override
-    public void setEditable(boolean editable) {
+    public void setEditing(boolean editable) {
         snippetDescription.setEditable(editable);
     }
 

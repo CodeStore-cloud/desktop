@@ -53,11 +53,11 @@ class SnippetCodeTest extends AbstractUiTest {
         var textField = textField(robot);
         var comboBox = languageSelection(robot);
 
-        robot.interact(() -> controller.setEditable(true));
+        robot.interact(() -> controller.setEditing(true));
         assertThat(textField.isEditable()).isTrue();
         assertThat(comboBox.isEditable()).isTrue();
 
-        robot.interact(() -> controller.setEditable(false));
+        robot.interact(() -> controller.setEditing(false));
         assertThat(textField.isEditable()).isFalse();
         assertThat(comboBox.isEditable()).isFalse();
     }

@@ -15,6 +15,8 @@ import cloud.codestore.client.usecases.createsnippet.CreateSnippetUseCase;
 import cloud.codestore.client.usecases.createsnippet.NewSnippetDto;
 import cloud.codestore.client.usecases.deletesnippet.DeleteSnippetUseCase;
 import cloud.codestore.client.usecases.readsnippet.ReadSnippetUseCase;
+import cloud.codestore.client.usecases.updatesnippet.UpdateSnippetUseCase;
+import cloud.codestore.client.usecases.updatesnippet.UpdatedSnippetDto;
 import com.google.common.eventbus.EventBus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -44,6 +46,7 @@ class SnippetControllerTest {
     private ReadSnippetUseCase readSnippetUseCase = mock(ReadSnippetUseCase.class);
     private DeleteSnippetUseCase deleteSnippetUseCase = mock(DeleteSnippetUseCase.class);
     private CreateSnippetUseCase createSnippetUseCase = mock(CreateSnippetUseCase.class);
+    private UpdateSnippetUseCase updateSnippetUseCase = mock(UpdateSnippetUseCase.class);
     private EventBus eventBus = spy(new EventBus());
 
     @Mock
@@ -59,7 +62,7 @@ class SnippetControllerTest {
 
     @InjectMocks
     private SnippetController snippetController = new SnippetController(
-            readSnippetUseCase, createSnippetUseCase, deleteSnippetUseCase, eventBus
+            readSnippetUseCase, createSnippetUseCase, updateSnippetUseCase, deleteSnippetUseCase, eventBus
     );
 
     private Snippet testSnippet;
@@ -88,7 +91,7 @@ class SnippetControllerTest {
         void loadSnippet() {
             clearInvocations();
 
-            eventBus.post(new SnippetSelectedEvent(SNIPPET_URI));
+            selectSnippet();
 
             verifyEditable(false);
             verifyVisit(testSnippet);
@@ -109,7 +112,7 @@ class SnippetControllerTest {
         @Test
         @DisplayName("deletes the current snippet")
         void deleteSnippet() {
-            eventBus.post(new SnippetSelectedEvent(SNIPPET_URI));
+            selectSnippet();
             clearInvocations();
 
             snippetFooterController.clickDeleteButton();
@@ -121,9 +124,13 @@ class SnippetControllerTest {
         }
     }
 
+    private void selectSnippet() {
+        eventBus.post(new SnippetSelectedEvent(SNIPPET_URI));
+    }
+
     @Nested
     @DisplayName("when creating a new snippet")
-    class EditingState {
+    class NewSnippetState {
         @Test
         @DisplayName("clears the input when the edit is canceled")
         void clearInput() {
@@ -146,27 +153,7 @@ class SnippetControllerTest {
             var language = new Language("Python", "1");
             var tags = List.of("python", "test");
 
-            lenient().doAnswer(answer(builder -> builder.title(title)))
-                     .when(snippetTitleController).visit(any(SnippetBuilder.class));
-
-            lenient().doAnswer(answer(builder -> builder.description(description)))
-                     .when(snippetDescriptionController).visit(any(SnippetBuilder.class));
-
-            lenient().doAnswer(answer(builder -> builder.code(code).language(language)))
-                     .when(snippetCodeController).visit(any(SnippetBuilder.class));
-
-            lenient().doAnswer(answer(builder -> builder.tags(tags)))
-                     .when(snippetDetailsController).visit(any(SnippetBuilder.class));
-
-            Snippet createdSnippet = new SnippetBuilder().uri(SNIPPET_URI)
-                                                         .title(title)
-                                                         .description(description)
-                                                         .code(code)
-                                                         .language(language)
-                                                         .tags(tags)
-                                                         .permissions(Set.of(Permission.DELETE))
-                                                         .build();
-
+            Snippet createdSnippet = prepareDataCollection(SNIPPET_URI, title, description, language, code, tags);
             var dtoArgument = ArgumentCaptor.forClass(NewSnippetDto.class);
             when(createSnippetUseCase.create(any(NewSnippetDto.class))).thenReturn(createdSnippet);
 
@@ -185,12 +172,59 @@ class SnippetControllerTest {
         }
     }
 
+    @Nested
+    @DisplayName("when editing a snippet")
+    class EditSnippetState {
+        @Test
+        @DisplayName("resets the input when the edit is canceled")
+        void clearInput() {
+            selectSnippet();
+            snippetFooterController.clickEditButton();
+            verifyEditable(true);
+            clearInvocations();
+
+            snippetFooterController.clickCancelButton();
+
+            verifyVisit(testSnippet);
+            verifyEditable(false);
+        }
+
+        @Test
+        @DisplayName("updates a snippet based on the input")
+        void updateSnippet() {
+            var title = "An updated snippet";
+            var description = "With a new description";
+            var code = "System.out.println(\"Hello, World!\");";
+            var language = new Language("Java", "2");
+            var tags = List.of("java", "hello", "world");
+
+            Snippet updatedSnippet = prepareDataCollection(SNIPPET_URI, title, description, language, code, tags);
+
+            var dtoArgument = ArgumentCaptor.forClass(UpdatedSnippetDto.class);
+            when(updateSnippetUseCase.update(any(UpdatedSnippetDto.class))).thenReturn(updatedSnippet);
+
+            selectSnippet();
+            snippetFooterController.clickEditButton();
+            clearInvocations();
+
+            snippetFooterController.clickSaveButton();
+
+            verify(updateSnippetUseCase).update(dtoArgument.capture());
+            UpdatedSnippetDto expectedDto = new UpdatedSnippetDto(SNIPPET_URI, title, description, language, code, tags);
+            assertThat(dtoArgument.getValue()).isEqualTo(expectedDto);
+
+            verifyEditable(false);
+            verifyVisit(updatedSnippet);
+            verify(eventBus).post(new SnippetUpdatedEvent(SNIPPET_URI));
+        }
+    }
+
     private void verifyEditable(boolean editable) {
-        verify(snippetTitleController).setEditable(editable);
-        verify(snippetDescriptionController).setEditable(editable);
-        verify(snippetCodeController).setEditable(editable);
-        verify(snippetDetailsController).setEditable(editable);
-        verify(snippetFooterController).setEditable(editable);
+        verify(snippetTitleController).setEditing(editable);
+        verify(snippetDescriptionController).setEditing(editable);
+        verify(snippetCodeController).setEditing(editable);
+        verify(snippetDetailsController).setEditing(editable);
+        verify(snippetFooterController).setEditing(editable);
     }
 
     private void verifyVisit(Snippet snippet) {
@@ -236,9 +270,39 @@ class SnippetControllerTest {
         method.invoke(snippetController);
     }
 
+    private Snippet prepareDataCollection(
+            String snippetUri,
+            String title,
+            String description,
+            Language language,
+            String code,
+            List<String> tags
+    ) {
+        lenient().doAnswer(answer(builder -> builder.title(title)))
+                 .when(snippetTitleController).visit(any(SnippetBuilder.class));
+
+        lenient().doAnswer(answer(builder -> builder.description(description)))
+                 .when(snippetDescriptionController).visit(any(SnippetBuilder.class));
+
+        lenient().doAnswer(answer(builder -> builder.code(code).language(language)))
+                 .when(snippetCodeController).visit(any(SnippetBuilder.class));
+
+        lenient().doAnswer(answer(builder -> builder.tags(tags)))
+                 .when(snippetDetailsController).visit(any(SnippetBuilder.class));
+
+        return new SnippetBuilder().uri(snippetUri)
+                                   .title(title)
+                                   .description(description)
+                                   .code(code)
+                                   .language(language)
+                                   .tags(tags)
+                                   .build();
+    }
+
     private static class TestFooter extends SnippetFooter {
         private Runnable onSave;
         private Runnable onCancel;
+        private Runnable onEdit;
         private Runnable onDelete;
 
         @Override
@@ -249,6 +313,11 @@ class SnippetControllerTest {
         @Override
         public void onCancel(Runnable callback) {
             onCancel = callback;
+        }
+
+        @Override
+        public void onEdit(Runnable callback) {
+            onEdit = callback;
         }
 
         @Override
@@ -264,12 +333,16 @@ class SnippetControllerTest {
             onCancel.run();
         }
 
+        void clickEditButton() {
+            onEdit.run();
+        }
+
         void clickDeleteButton() {
             onDelete.run();
         }
 
         @Override
-        public void setEditable(boolean editable) {}
+        public void setEditing(boolean editing) {}
 
         @Override
         public void visit(@Nonnull Snippet snippet) {}

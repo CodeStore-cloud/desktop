@@ -17,6 +17,11 @@
         </tooltip>
     </Button>
 
+    <Button fx:id="editButton" styleClass="primary">
+        <tooltip>
+            <Tooltip text="%snippet.footer.edit.tooltip"/>
+        </tooltip>
+    </Button>
     <Button fx:id="deleteButton" styleClass="primary">
         <tooltip>
             <Tooltip text="%snippet.footer.delete.tooltip"/>

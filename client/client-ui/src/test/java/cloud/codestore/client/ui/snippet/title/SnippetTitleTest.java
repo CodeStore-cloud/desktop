@@ -31,10 +31,10 @@ class SnippetTitleTest extends AbstractUiTest {
     void setEditable(FxRobot robot) {
         var textField = textField(robot);
 
-        controller.setEditable(true);
+        controller.setEditing(true);
         assertThat(textField.isEditable()).isTrue();
 
-        controller.setEditable(false);
+        controller.setEditing(false);
         assertThat(textField.isEditable()).isFalse();
     }
 

@@ -20,25 +20,30 @@ public class SnippetFooter implements SnippetForm {
 
     @FXML
     private Button deleteButton;
+    @FXML
+    private Button editButton;
 
     @FXML
     private void initialize() {
         saveButton.managedProperty().bind(saveButton.visibleProperty());
         cancelButton.managedProperty().bind(cancelButton.visibleProperty());
+        editButton.managedProperty().bind(editButton.visibleProperty());
         deleteButton.managedProperty().bind(deleteButton.visibleProperty());
     }
 
     @Override
-    public void setEditable(boolean editable) {
-        saveButton.setVisible(editable);
-        cancelButton.setVisible(editable);
-        deleteButton.setVisible(!editable);
+    public void setEditing(boolean editing) {
+        saveButton.setVisible(editing);
+        cancelButton.setVisible(editing);
+        editButton.setVisible(!editing);
+        deleteButton.setVisible(!editing);
     }
 
     @Override
     public void visit(@Nonnull Snippet snippet) {
         Set<Permission> permissions = snippet.getPermissions();
         deleteButton.setVisible(permissions.contains(Permission.DELETE));
+        editButton.setVisible(permissions.contains(Permission.UPDATE));
     }
 
     @Override
@@ -50,6 +55,10 @@ public class SnippetFooter implements SnippetForm {
 
     public void onCancel(Runnable callback) {
         cancelButton.setOnAction(event -> callback.run());
+    }
+
+    public void onEdit(Runnable callback) {
+        editButton.setOnAction(event -> callback.run());
     }
 
     public void onDelete(Runnable callback) {

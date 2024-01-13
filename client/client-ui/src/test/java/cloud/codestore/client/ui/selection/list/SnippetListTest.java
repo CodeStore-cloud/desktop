@@ -5,6 +5,9 @@ import cloud.codestore.client.ui.AbstractUiTest;
 import cloud.codestore.client.ui.selection.filter.FilterEvent;
 import cloud.codestore.client.ui.selection.search.FullTextSearchEvent;
 import cloud.codestore.client.ui.selection.sort.SortEvent;
+import cloud.codestore.client.ui.snippet.SnippetCreatedEvent;
+import cloud.codestore.client.ui.snippet.SnippetDeletedEvent;
+import cloud.codestore.client.ui.snippet.SnippetUpdatedEvent;
 import cloud.codestore.client.usecases.listsnippets.*;
 import com.google.common.eventbus.EventBus;
 import javafx.scene.Node;
@@ -27,13 +30,13 @@ import java.util.List;
 import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.testfx.assertions.api.Assertions.assertThat;
 
 @ExtendWith({MockitoExtension.class, ApplicationExtension.class})
 @DisplayName("The snippet list")
 class SnippetListTest extends AbstractUiTest {
+    private static final String SNIPPET_URI = "http://localhost:8080/snippets/1";
     private static final String NEXT_PAGE_URL = "http://localhost:8080/snippets?page[number]=2";
 
     @Mock
@@ -43,8 +46,8 @@ class SnippetListTest extends AbstractUiTest {
 
     @Start
     private void start(Stage stage) throws Exception {
-        var testPage = new SnippetPage(testItems(), NEXT_PAGE_URL, Collections.emptySet());
-        when(readSnippetsUseCase.getPage(anyString(), any(), any())).thenReturn(testPage);
+        var firstPage = new SnippetPage(testItems(), NEXT_PAGE_URL, Collections.emptySet());
+        when(readSnippetsUseCase.getPage(anyString(), any(), any())).thenReturn(firstPage);
 
         SnippetList controller = new SnippetList(readSnippetsUseCase, eventBus);
         start(stage, "snippetList.fxml", controller);
@@ -132,6 +135,30 @@ class SnippetListTest extends AbstractUiTest {
         var sortProperties = new SortProperties(SortProperties.SnippetProperty.TITLE, true);
         robot.interact(() -> eventBus.post(new SortEvent(sortProperties)));
         verify(readSnippetsUseCase).getPage(anyString(), any(), eq(sortProperties));
+    }
+
+    @Test
+    @DisplayName("reloads the snippets when a SippetCreatedEvent is triggered")
+    void snippetCreated(FxRobot robot) {
+        reset(readSnippetsUseCase);
+        robot.interact(() -> eventBus.post(new SnippetCreatedEvent(SNIPPET_URI)));
+        verify(readSnippetsUseCase).getPage(anyString(), any(), any());
+    }
+
+    @Test
+    @DisplayName("reloads the snippets when a SnippetUpdatedEvent is triggered")
+    void snippetUpdated(FxRobot robot) {
+        reset(readSnippetsUseCase);
+        robot.interact(() -> eventBus.post(new SnippetUpdatedEvent(SNIPPET_URI)));
+        verify(readSnippetsUseCase).getPage(anyString(), any(), any());
+    }
+
+    @Test
+    @DisplayName("reloads the snippets when a SnippetDeletedEvent is triggered")
+    void snippetDeleted(FxRobot robot) {
+        reset(readSnippetsUseCase);
+        robot.interact(() -> eventBus.post(new SnippetDeletedEvent(SNIPPET_URI)));
+        verify(readSnippetsUseCase).getPage(anyString(), any(), any());
     }
 
     @Test
