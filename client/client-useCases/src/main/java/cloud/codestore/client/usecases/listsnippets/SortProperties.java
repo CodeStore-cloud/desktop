@@ -13,6 +13,9 @@ public record SortProperties(@Nonnull SnippetProperty property, boolean asc) {
         RELEVANCE, CREATED, MODIFIED, TITLE
     }
 
+    /**
+     * Default sort properties
+     */
     public SortProperties() {
         this(SnippetProperty.CREATED, false);
     }

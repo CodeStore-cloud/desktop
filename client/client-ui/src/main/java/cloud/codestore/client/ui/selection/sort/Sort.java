@@ -17,12 +17,13 @@ import static cloud.codestore.client.usecases.listsnippets.SortProperties.Snippe
 
 @FxController
 public class Sort {
-    private static final SnippetProperty DEFAULT_SORT_PROPERTY = CREATED;
+    private static final SnippetProperty DEFAULT_SORT_PROPERTY = new SortProperties().property();
 
     private final EventBus eventBus;
 
     @FXML
     private ComboBox<SortItem> sortSelection;
+    private SortProperties.SnippetProperty previousSelection = DEFAULT_SORT_PROPERTY;
 
     public Sort(@Nonnull EventBus eventBus) {
         this.eventBus = eventBus;
@@ -37,7 +38,7 @@ public class Sort {
 
     @Subscribe
     private void search(@Nonnull FullTextSearchEvent event) {
-        select(event.searchQuery().isEmpty() ? CREATED : RELEVANCE);
+        select(event.searchQuery().isEmpty() ? previousSelection : RELEVANCE);
         triggerSortEvent();
     }
 
@@ -67,5 +68,9 @@ public class Sort {
         var property = selectedItem.property();
         var sortProperties = new SortProperties(property, property == RELEVANCE || property == TITLE);
         eventBus.post(new SortEvent(sortProperties));
+
+        if (property != RELEVANCE) {
+            previousSelection = property;
+        }
     }
 }

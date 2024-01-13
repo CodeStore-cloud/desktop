@@ -14,6 +14,9 @@ public class FilterProperties {
     private Set<String> tags;
     private Language language;
 
+    /**
+     * Default filter properties
+     */
     public FilterProperties() {
         this(null, null);
     }

@@ -16,7 +16,8 @@ import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
-import static cloud.codestore.client.usecases.listsnippets.SortProperties.SnippetProperty.*;
+import static cloud.codestore.client.usecases.listsnippets.SortProperties.SnippetProperty.RELEVANCE;
+import static cloud.codestore.client.usecases.listsnippets.SortProperties.SnippetProperty.TITLE;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith({MockitoExtension.class, ApplicationExtension.class})
@@ -24,21 +25,20 @@ import static org.mockito.Mockito.verify;
 class SortTest extends AbstractUiTest {
     @Spy
     private EventBus eventBus = new EventBus();
-    private Sort controller;
     private FxRobot robot;
     private ComboBox<SortItem> comboBox;
 
     @Start
     private void start(Stage stage) throws Exception {
-        controller = new Sort(eventBus);
-        start(stage, "sort.fxml", controller);
+        start(stage, "sort.fxml", new Sort(eventBus));
         comboBox = robot.lookup("#sortSelection").queryComboBox();
     }
 
     @Test
-    @DisplayName("selects creation time by default")
+    @DisplayName("selects default option on initialization")
     void defaultSelection() {
-        assertSelected(CREATED);
+        var defaultProperty = new SortProperties().property();
+        assertSelected(defaultProperty);
     }
 
     @Test
@@ -49,13 +49,15 @@ class SortTest extends AbstractUiTest {
     }
 
     @Test
-    @DisplayName("selects creation time when the search is cleared")
+    @DisplayName("selects previous option when the search is cleared")
     void defaultNoSearch() {
         robot.interact(() -> {
+            select(TITLE);
             eventBus.post(new FullTextSearchEvent("test"));
+            assertSelected(RELEVANCE);
             eventBus.post(new FullTextSearchEvent(""));
+            assertSelected(TITLE);
         });
-        assertSelected(CREATED);
     }
 
     @Test
