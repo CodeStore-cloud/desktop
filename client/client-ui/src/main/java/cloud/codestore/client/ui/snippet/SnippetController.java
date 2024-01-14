@@ -205,6 +205,9 @@ public class SnippetController {
         }
     }
 
+    /**
+     * The state for editing a code snippet.
+     */
     private class EditSnippetState implements ControllerState {
         EditSnippetState() {
             setEditing(true);

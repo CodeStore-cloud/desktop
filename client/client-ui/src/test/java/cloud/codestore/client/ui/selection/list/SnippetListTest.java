@@ -73,7 +73,14 @@ class SnippetListTest extends AbstractUiTest {
     }
 
     @Test
-    @DisplayName("shows a button if more pages are available")
+    @DisplayName("triggers a CreateSnippetEvent if the create-snippet button was clicked")
+    void createSnippetEvent(FxRobot robot) {
+        robot.clickOn(createSnippetButton(robot));
+        verify(eventBus).post(new CreateSnippetEvent());
+    }
+
+    @Test
+    @DisplayName("shows a next-page button if more results are available")
     void showOrHidePaginationButton(FxRobot robot) {
         var page2 = page(Collections.emptyList());
         when(readSnippetsUseCase.getPage(NEXT_PAGE_URL)).thenReturn(page2);
