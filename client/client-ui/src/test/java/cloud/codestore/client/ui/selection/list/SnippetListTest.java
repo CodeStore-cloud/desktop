@@ -21,8 +21,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.testfx.api.FxRobot;
-import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
 import java.util.Collections;
@@ -33,7 +31,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.testfx.assertions.api.Assertions.assertThat;
 
-@ExtendWith({MockitoExtension.class, ApplicationExtension.class})
+@ExtendWith(MockitoExtension.class)
 @DisplayName("The snippet list")
 class SnippetListTest extends AbstractUiTest {
     private static final String SNIPPET_URI = "http://localhost:8080/snippets/1";
@@ -45,7 +43,7 @@ class SnippetListTest extends AbstractUiTest {
     private EventBus eventBus = new EventBus();
 
     @Start
-    private void start(Stage stage) throws Exception {
+    public void start(Stage stage) throws Exception {
         var firstPage = new SnippetPage(testItems(), NEXT_PAGE_URL, Collections.emptySet());
         when(readSnippetsUseCase.getPage(anyString(), any(), any())).thenReturn(firstPage);
 
@@ -55,17 +53,17 @@ class SnippetListTest extends AbstractUiTest {
 
     @Test
     @DisplayName("shows items provided by the list-snippets use case")
-    void showSnippets(FxRobot robot) {
-        var items = listView(robot).getItems();
+    void showSnippets() {
+        var items = listView().getItems();
         assertThat(items).containsExactlyInAnyOrder(testItems().toArray(new SnippetListItem[0]));
     }
 
     @Test
     @DisplayName("triggers a SnippetSelectedEvent when a snippet is selected")
-    void selectSnippet(FxRobot robot) {
+    void selectSnippet() {
         var argument = ArgumentCaptor.forClass(SnippetSelectedEvent.class);
 
-        listView(robot).getSelectionModel().select(0);
+        listView().getSelectionModel().select(0);
 
         verify(eventBus).post(argument.capture());
         SnippetSelectedEvent event = argument.getValue();
@@ -74,47 +72,49 @@ class SnippetListTest extends AbstractUiTest {
 
     @Test
     @DisplayName("triggers a CreateSnippetEvent if the create-snippet button was clicked")
-    void createSnippetEvent(FxRobot robot) {
-        robot.clickOn(createSnippetButton(robot));
+    void createSnippetEvent() {
+        Button createSnippetButton = createSnippetButton();
+        createSnippetButton.setVisible(true);
+        clickOn(createSnippetButton);
         verify(eventBus).post(new CreateSnippetEvent());
     }
 
     @Test
     @DisplayName("shows a next-page button if more results are available")
-    void showOrHidePaginationButton(FxRobot robot) {
+    void showOrHidePaginationButton() {
         var page2 = page(Collections.emptyList());
         when(readSnippetsUseCase.getPage(NEXT_PAGE_URL)).thenReturn(page2);
 
-        var showMoreButton = showMoreButton(robot);
+        var showMoreButton = showMoreButton();
         assertThat(showMoreButton.isVisible()).isTrue();
-        robot.clickOn(showMoreButton);
+        clickOn(showMoreButton);
         assertThat(showMoreButton.isVisible()).isFalse();
     }
 
     @Test
     @DisplayName("loads the next page of snippets when pressing \"show more\"")
-    void loadNextPage(FxRobot robot) {
+    void loadNextPage() {
         var page2 = page(page2TestItems());
         when(readSnippetsUseCase.getPage(NEXT_PAGE_URL)).thenReturn(page2);
-        var listView = listView(robot);
+        var listView = listView();
         assertThat(listView.getItems()).hasSize(10);
 
-        var showMoreButton = showMoreButton(robot);
-        robot.clickOn(showMoreButton);
+        var showMoreButton = showMoreButton();
+        clickOn(showMoreButton);
 
         assertThat(listView.getItems()).hasSize(20);
     }
 
     @Test
     @DisplayName("reloads the snippets when a FullTextSearchEvent is triggered")
-    void searchSnippets(FxRobot robot) {
+    void searchSnippets() {
         var page = page(reducedSnippetList());
         when(readSnippetsUseCase.getPage(eq("test"), any(), any())).thenReturn(page);
 
-        var listView = listView(robot);
+        var listView = listView();
         assertThat(listView.getItems()).hasSize(10);
 
-        robot.interact(() -> {
+        interact(() -> {
             eventBus.post(new FullTextSearchEvent("test"));
             assertThat(listView.getItems()).hasSize(3);
         });
@@ -122,15 +122,15 @@ class SnippetListTest extends AbstractUiTest {
 
     @Test
     @DisplayName("reloads the snippets when a FilterEvent is triggered")
-    void filterSnippets(FxRobot robot) {
+    void filterSnippets() {
         var filterProperties = new FilterProperties(Set.of("hello", "world"), null);
         var page = page(reducedSnippetList());
         when(readSnippetsUseCase.getPage(anyString(), eq(filterProperties), any())).thenReturn(page);
 
-        var listView = listView(robot);
+        var listView = listView();
         assertThat(listView.getItems()).hasSize(10);
 
-        robot.interact(() -> {
+        interact(() -> {
             eventBus.post(new FilterEvent(filterProperties));
             assertThat(listView.getItems()).hasSize(3);
         });
@@ -138,61 +138,63 @@ class SnippetListTest extends AbstractUiTest {
 
     @Test
     @DisplayName("reloads the snippets when a SortEvent is triggered")
-    void sortSnippets(FxRobot robot) {
+    void sortSnippets() {
         var sortProperties = new SortProperties(SortProperties.SnippetProperty.TITLE, true);
-        robot.interact(() -> eventBus.post(new SortEvent(sortProperties)));
+        interact(() -> eventBus.post(new SortEvent(sortProperties)));
         verify(readSnippetsUseCase).getPage(anyString(), any(), eq(sortProperties));
     }
 
     @Test
     @DisplayName("reloads the snippets when a SippetCreatedEvent is triggered")
-    void snippetCreated(FxRobot robot) {
+    void snippetCreated() {
         reset(readSnippetsUseCase);
-        robot.interact(() -> eventBus.post(new SnippetCreatedEvent(SNIPPET_URI)));
+        interact(() -> eventBus.post(new SnippetCreatedEvent(SNIPPET_URI)));
         verify(readSnippetsUseCase).getPage(anyString(), any(), any());
     }
 
     @Test
     @DisplayName("reloads the snippets when a SnippetUpdatedEvent is triggered")
-    void snippetUpdated(FxRobot robot) {
+    void snippetUpdated() {
         reset(readSnippetsUseCase);
-        robot.interact(() -> eventBus.post(new SnippetUpdatedEvent(SNIPPET_URI)));
+        interact(() -> eventBus.post(new SnippetUpdatedEvent(SNIPPET_URI)));
         verify(readSnippetsUseCase).getPage(anyString(), any(), any());
     }
 
     @Test
     @DisplayName("reloads the snippets when a SnippetDeletedEvent is triggered")
-    void snippetDeleted(FxRobot robot) {
+    void snippetDeleted() {
         reset(readSnippetsUseCase);
-        robot.interact(() -> eventBus.post(new SnippetDeletedEvent(SNIPPET_URI)));
+        interact(() -> eventBus.post(new SnippetDeletedEvent(SNIPPET_URI)));
         verify(readSnippetsUseCase).getPage(anyString(), any(), any());
     }
 
     @Test
     @DisplayName("shows the create-snippet button if permitted")
-    void createSnippetButtonVisibility(FxRobot robot) {
-        var button = createSnippetButton(robot);
+    void createSnippetButtonVisibility() {
+        var button = createSnippetButton();
         assertThat(button.isVisible()).isFalse();
 
         when(readSnippetsUseCase.getPage(any(), any(), any()))
                 .thenReturn(new SnippetPage(Collections.emptyList(), "", Set.of(Permission.CREATE)));
 
-        robot.interact(() -> {
+        interact(() -> {
             eventBus.post(new FullTextSearchEvent("test"));
             assertThat(button.isVisible()).isTrue();
         });
     }
 
-    private ListView<SnippetListItem> listView(FxRobot robot) {
-        return robot.lookup("#list").queryListView();
+    private ListView<SnippetListItem> listView() {
+        return lookup("#list").queryListView();
     }
 
-    private Node showMoreButton(FxRobot robot) {
-        return robot.lookup("#nextPage").queryLabeled();
+    private Node showMoreButton() {
+        return lookup("#nextPage").queryLabeled();
     }
 
-    private Button createSnippetButton(FxRobot robot) {
-        return robot.lookup("#createSnippet").queryButton();
+    private Button createSnippetButton() {
+        Button button = lookup("#createSnippet").queryButton();
+        button.setPrefSize(32, 32);
+        return button;
     }
 
     private static List<SnippetListItem> testItems() {

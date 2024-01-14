@@ -4,12 +4,13 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.testfx.framework.junit5.ApplicationTest;
 
 import java.net.URL;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-public class AbstractUiTest {
+public class AbstractUiTest extends ApplicationTest {
     static {
         Locale.setDefault(Locale.ENGLISH);
     }

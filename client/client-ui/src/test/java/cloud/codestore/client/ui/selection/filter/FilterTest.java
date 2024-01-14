@@ -14,8 +14,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.testfx.api.FxRobot;
-import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
 import java.util.List;
@@ -23,7 +21,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@ExtendWith({MockitoExtension.class, ApplicationExtension.class})
+@ExtendWith(MockitoExtension.class)
 @DisplayName("The filter controller")
 class FilterTest extends AbstractUiTest {
     @Mock
@@ -34,7 +32,7 @@ class FilterTest extends AbstractUiTest {
     private Filter controller;
 
     @Start
-    private void start(Stage stage) throws Exception {
+    public void start(Stage stage) throws Exception {
         lenient().when(readLanguagesUseCase.readLanguages()).thenReturn(List.of(
                 new Language("Python", "1"),
                 new Language("HTML", "2"),
@@ -47,10 +45,10 @@ class FilterTest extends AbstractUiTest {
 
     @Test
     @DisplayName("triggers a FilterEvent when the tags changed")
-    void tagsChanged(FxRobot robot) {
+    void tagsChanged() {
         var argument = ArgumentCaptor.forClass(FilterEvent.class);
 
-        tagsInput(robot).setText("hello world");
+        tagsInput().setText("hello world");
 
         verify(eventBus).post(argument.capture());
         var filterProperties = argument.getValue().filterProperties();
@@ -60,10 +58,10 @@ class FilterTest extends AbstractUiTest {
 
     @Test
     @DisplayName("triggers a FilterEvent without tags when the tag input is empty")
-    void emptyTagInput(FxRobot robot) {
+    void emptyTagInput() {
         var argument = ArgumentCaptor.forClass(FilterEvent.class);
 
-        TextInputControl inputField = tagsInput(robot);
+        TextInputControl inputField = tagsInput();
         inputField.setText("test");
         inputField.setText("");
 
@@ -74,14 +72,14 @@ class FilterTest extends AbstractUiTest {
 
     @Test
     @DisplayName("triggers a FilterEvent when the programming language changed")
-    void languageChanged(FxRobot robot) {
+    void languageChanged() {
         var argument = ArgumentCaptor.forClass(FilterEvent.class);
 
-        var comboBox = languageSelection(robot);
+        var comboBox = languageSelection();
         assertThat(comboBox.getItems()).hasSize(5);
         assertThat(comboBox.getItems().get(0)).isEqualTo(new LanguageItem(null, "All"));
 
-        robot.interact(() -> comboBox.getSelectionModel().select(3));
+        interact(() -> comboBox.getSelectionModel().select(3));
 
         verify(eventBus).post(argument.capture());
         var filterProperties = argument.getValue().filterProperties();
@@ -89,11 +87,11 @@ class FilterTest extends AbstractUiTest {
         assertThat(filterProperties.getLanguage().get()).isEqualTo(new Language("Java", "3"));
     }
 
-    private TextInputControl tagsInput(FxRobot robot) {
-        return robot.lookup("#tagsInput").queryTextInputControl();
+    private TextInputControl tagsInput() {
+        return lookup("#tagsInput").queryTextInputControl();
     }
 
-    private ComboBox<LanguageItem> languageSelection(FxRobot robot) {
-        return robot.lookup("#languageSelection").queryComboBox();
+    private ComboBox<LanguageItem> languageSelection() {
+        return lookup("#languageSelection").queryComboBox();
     }
 }

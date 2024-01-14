@@ -12,31 +12,29 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.testfx.api.FxRobot;
-import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
-@ExtendWith({MockitoExtension.class, ApplicationExtension.class})
+@ExtendWith(MockitoExtension.class)
 @DisplayName("The full-text-search input field")
 class FullTextSearchTest extends AbstractUiTest {
     @Mock
     private EventBus eventBus;
 
     @Start
-    private void start(Stage stage) throws Exception {
+    public void start(Stage stage) throws Exception {
         FullTextSearch controller = new FullTextSearch(eventBus);
         start(stage, "searchField.fxml", controller);
     }
 
     @Test
     @DisplayName("triggers a FullTextSearchEvent when the input changes")
-    void triggerFullTextSearch(FxRobot robot) {
+    void triggerFullTextSearch() {
         var argument = ArgumentCaptor.forClass(FullTextSearchEvent.class);
 
-        inputField(robot).setText("test");
+        inputField().setText("test");
 
         verify(eventBus).post(argument.capture());
         var event = argument.getValue();
@@ -45,36 +43,36 @@ class FullTextSearchTest extends AbstractUiTest {
 
     @Test
     @DisplayName("is cleared when pressing ESC")
-    void clearInputOnESC(FxRobot robot) {
-        var inputField = inputField(robot);
+    void clearInputOnESC() {
+        var inputField = inputField();
         inputField.setText("test");
         assertThat(inputField.getText()).isNotEmpty();
 
         inputField.requestFocus();
-        robot.press(KeyCode.ESCAPE);
+        press(KeyCode.ESCAPE);
 
         assertThat(inputField.getText()).isNotNull().isEmpty();
     }
 
     @Test
     @DisplayName("is cleared when pressing the search-icon")
-    void clearInputIcon(FxRobot robot) {
-        var inputField = inputField(robot);
+    void clearInputIcon() {
+        var inputField = inputField();
         inputField.setText("test");
         assertThat(inputField.getText()).isNotEmpty();
 
-        Labeled icon = icon(robot);
+        Labeled icon = icon();
         icon.setPrefWidth(30);
-        robot.clickOn(icon);
+        clickOn(icon);
 
         assertThat(inputField.getText()).isNotNull().isEmpty();
     }
 
-    private TextInputControl inputField(FxRobot robot) {
-        return robot.lookup("#inputField").queryTextInputControl();
+    private TextInputControl inputField() {
+        return lookup("#inputField").queryTextInputControl();
     }
 
-    private Labeled icon(FxRobot robot) {
-        return robot.lookup(".search.clearable").queryLabeled();
+    private Labeled icon() {
+        return lookup(".search.clearable").queryLabeled();
     }
 }

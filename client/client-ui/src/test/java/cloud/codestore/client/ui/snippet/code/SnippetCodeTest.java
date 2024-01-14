@@ -13,8 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.testfx.api.FxRobot;
-import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
 import java.util.List;
@@ -22,7 +20,7 @@ import java.util.List;
 import static org.mockito.Mockito.when;
 import static org.testfx.assertions.api.Assertions.assertThat;
 
-@ExtendWith({MockitoExtension.class, ApplicationExtension.class})
+@ExtendWith(MockitoExtension.class)
 @DisplayName("The code controller")
 class SnippetCodeTest extends AbstractUiTest {
     @Mock
@@ -30,7 +28,7 @@ class SnippetCodeTest extends AbstractUiTest {
     private SnippetCode controller;
 
     @Start
-    private void start(Stage stage) throws Exception {
+    public void start(Stage stage) throws Exception {
         var languages = new Language[]{
                 new Language("Python", "1"),
                 new Language("Text", "2"),
@@ -43,48 +41,48 @@ class SnippetCodeTest extends AbstractUiTest {
 
     @Test
     @DisplayName("loads the available programming languages from the core")
-    void loadLanguages(FxRobot robot) {
-        assertThat(languageSelection(robot).getItems()).hasSize(3);
+    void loadLanguages() {
+        assertThat(languageSelection().getItems()).hasSize(3);
     }
 
     @Test
     @DisplayName("sets the editability of the code and language selection")
-    void setCodeEditable(FxRobot robot) {
-        var textField = textField(robot);
-        var comboBox = languageSelection(robot);
+    void setCodeEditable() {
+        var textField = textField();
+        var comboBox = languageSelection();
 
-        robot.interact(() -> controller.setEditing(true));
+        interact(() -> controller.setEditing(true));
         assertThat(textField.isEditable()).isTrue();
         assertThat(comboBox.isEditable()).isTrue();
 
-        robot.interact(() -> controller.setEditing(false));
+        interact(() -> controller.setEditing(false));
         assertThat(textField.isEditable()).isFalse();
         assertThat(comboBox.isEditable()).isFalse();
     }
 
     @Test
     @DisplayName("sets the code and language of the given snippet")
-    void setDescription(FxRobot robot) {
+    void setDescription() {
         Snippet snippet = new SnippetBuilder().uri("")
                                               .code("print(\"Hello, World!\");")
                                               .language(new Language("Python", "1"))
                                               .build();
 
-        robot.interact(() -> controller.visit(snippet));
+        interact(() -> controller.visit(snippet));
 
-        assertThat(textField(robot)).hasText(snippet.getCode());
-        Language selectedLanguage = languageSelection(robot).getSelectionModel().getSelectedItem();
+        assertThat(textField()).hasText(snippet.getCode());
+        Language selectedLanguage = languageSelection().getSelectionModel().getSelectedItem();
         assertThat(selectedLanguage).isEqualTo(snippet.getLanguage());
     }
 
     @Test
     @DisplayName("reads the code and language into the given snippet builder")
-    void readDescription(FxRobot robot) {
+    void readDescription() {
         String code = "print(\"Hello, World!\");";
         Language language = new Language("Python", "1");
-        robot.interact(() -> {
-            textField(robot).setText(code);
-            languageSelection(robot).getSelectionModel().select(language);
+        interact(() -> {
+            textField().setText(code);
+            languageSelection().getSelectionModel().select(language);
         });
 
         SnippetBuilder builder = new SnippetBuilder().uri("");
@@ -95,11 +93,11 @@ class SnippetCodeTest extends AbstractUiTest {
         assertThat(snippet.getLanguage()).isEqualTo(language);
     }
 
-    private ComboBox<Language> languageSelection(FxRobot robot) {
-        return robot.lookup("#languageSelection").queryComboBox();
+    private ComboBox<Language> languageSelection() {
+        return lookup("#languageSelection").queryComboBox();
     }
 
-    private TextInputControl textField(FxRobot robot) {
-        return robot.lookup("#snippetCode").queryTextInputControl();
+    private TextInputControl textField() {
+        return lookup("#snippetCode").queryTextInputControl();
     }
 }

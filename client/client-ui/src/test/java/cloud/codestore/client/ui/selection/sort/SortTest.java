@@ -12,26 +12,23 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.testfx.api.FxRobot;
-import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
 import static cloud.codestore.client.usecases.listsnippets.SortProperties.SnippetProperty.RELEVANCE;
 import static cloud.codestore.client.usecases.listsnippets.SortProperties.SnippetProperty.TITLE;
 import static org.mockito.Mockito.verify;
 
-@ExtendWith({MockitoExtension.class, ApplicationExtension.class})
+@ExtendWith(MockitoExtension.class)
 @DisplayName("The sort controller")
 class SortTest extends AbstractUiTest {
     @Spy
     private EventBus eventBus = new EventBus();
-    private FxRobot robot;
     private ComboBox<SortItem> comboBox;
 
     @Start
-    private void start(Stage stage) throws Exception {
+    public void start(Stage stage) throws Exception {
         start(stage, "sort.fxml", new Sort(eventBus));
-        comboBox = robot.lookup("#sortSelection").queryComboBox();
+        comboBox = lookup("#sortSelection").queryComboBox();
     }
 
     @Test
@@ -44,14 +41,14 @@ class SortTest extends AbstractUiTest {
     @Test
     @DisplayName("selects relevance when a search term is entered")
     void relevanceSelection() {
-        robot.interact(() -> eventBus.post(new FullTextSearchEvent("test")));
+        interact(() -> eventBus.post(new FullTextSearchEvent("test")));
         assertSelected(RELEVANCE);
     }
 
     @Test
     @DisplayName("selects previous option when the search is cleared")
     void defaultNoSearch() {
-        robot.interact(() -> {
+        interact(() -> {
             select(TITLE);
             eventBus.post(new FullTextSearchEvent("test"));
             assertSelected(RELEVANCE);
@@ -63,7 +60,7 @@ class SortTest extends AbstractUiTest {
     @Test
     @DisplayName("triggers a SortEvent if the sort selection was changed")
     void triggerEventOnSelection() {
-        robot.interact(() -> select(TITLE));
+        interact(() -> select(TITLE));
         var expectedEvent = new SortEvent(new SortProperties(TITLE, true));
         verify(eventBus).post(expectedEvent);
     }

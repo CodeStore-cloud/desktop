@@ -9,26 +9,24 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.testfx.api.FxRobot;
-import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
 import static org.testfx.assertions.api.Assertions.assertThat;
 
-@ExtendWith({MockitoExtension.class, ApplicationExtension.class})
+@ExtendWith(MockitoExtension.class)
 @DisplayName("The description controller")
 class SnippetDescriptionTest extends AbstractUiTest {
     private final SnippetDescription controller = new SnippetDescription();
 
     @Start
-    private void start(Stage stage) throws Exception {
+    public void start(Stage stage) throws Exception {
         start(stage, "description.fxml", controller);
     }
 
     @Test
     @DisplayName("sets the editability of the text field")
-    void setEditable(FxRobot robot) {
-        var textField = textField(robot);
+    void setEditable() {
+        var textField = textField();
 
         controller.setEditing(true);
         assertThat(textField.isEditable()).isTrue();
@@ -39,17 +37,17 @@ class SnippetDescriptionTest extends AbstractUiTest {
 
     @Test
     @DisplayName("sets the description of the given snippet")
-    void setDescription(FxRobot robot) {
+    void setDescription() {
         Snippet snippet = new SnippetBuilder().uri("").description("A short description").build();
         controller.visit(snippet);
-        assertThat(textField(robot)).hasText(snippet.getDescription());
+        assertThat(textField()).hasText(snippet.getDescription());
     }
 
     @Test
     @DisplayName("reads the description into the given snippet builder")
-    void readDescription(FxRobot robot) {
+    void readDescription() {
         String description = "A title to test data collection";
-        textField(robot).setText(description);
+        textField().setText(description);
 
         SnippetBuilder builder = new SnippetBuilder().uri("");
         controller.visit(builder);
@@ -57,7 +55,7 @@ class SnippetDescriptionTest extends AbstractUiTest {
         assertThat(builder.build().getDescription()).isEqualTo(description);
     }
 
-    private TextInputControl textField(FxRobot robot) {
-        return robot.lookup("#snippetDescription").queryTextInputControl();
+    private TextInputControl textField() {
+        return lookup("#snippetDescription").queryTextInputControl();
     }
 }
