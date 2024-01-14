@@ -14,6 +14,7 @@ import cloud.codestore.client.usecases.listsnippets.FilterProperties;
 import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
 import cloud.codestore.client.usecases.listsnippets.SnippetPage;
 import cloud.codestore.client.usecases.listsnippets.SortProperties;
+import cloud.codestore.client.usecases.updatesnippet.UpdatedSnippetDto;
 import cloud.codestore.jsonapi.document.ResourceCollectionDocument;
 import cloud.codestore.jsonapi.document.SingleResourceDocument;
 import cloud.codestore.jsonapi.link.Link;
@@ -94,6 +95,7 @@ class LocalSnippetRepositoryTest {
 
         Snippet snippet = repository.readSnippet(SNIPPET_URI);
 
+        assertThat(snippet.getId()).isEqualTo("1");
         assertThat(snippet.getUri()).isEqualTo(SNIPPET_URI);
         assertThat(snippet.getTitle()).isEqualTo("A single snippet");
         assertThat(snippet.getDescription()).isEqualTo("With a short description");
@@ -102,8 +104,8 @@ class LocalSnippetRepositoryTest {
     }
 
     @Test
-    @DisplayName("reads the permissions of a single code snippet")
-    void snippetPermissions() {
+    @DisplayName("reads the permissions of the snippet collection")
+    void collectionPermissions() {
         var document = new ResourceCollectionDocument<>(testSnippets());
         document.setMeta(new ResourceMetaInfo(new Operation("createSnippet")));
         when(client.getCollection(anyString(), eq(SnippetResource.class))).thenReturn(document);
@@ -114,21 +116,27 @@ class LocalSnippetRepositoryTest {
     }
 
     @Test
-    @DisplayName("reads the permissions of the snippet collection")
-    void collectionPermissions() {
+    @DisplayName("reads the permissions of a single code snippet")
+    void snippetPermissions() {
         var resource = testSnippet(1, "title", "", "Hello, World!");
         var document = new SingleResourceDocument<>(resource);
-        document.setMeta(new ResourceMetaInfo(new Operation("deleteSnippet")));
+        document.setMeta(new ResourceMetaInfo(
+                new Operation("deleteSnippet"),
+                new Operation("updateSnippet")
+        ));
         when(client.get(SNIPPET_URI, SnippetResource.class)).thenReturn(document);
 
         Snippet snippet = repository.readSnippet(SNIPPET_URI);
 
-        assertThat(snippet.getPermissions()).containsExactly(Permission.DELETE);
+        assertThat(snippet.getPermissions()).containsExactlyInAnyOrder(Permission.DELETE, Permission.UPDATE);
     }
 
     @Test
     @DisplayName("passes the provided search query to the core")
     void searchSnippets() {
+        var resourceCollection = new ResourceCollectionDocument<>(testSnippets());
+        when(client.getCollection(anyString(), eq(SnippetResource.class))).thenReturn(resourceCollection);
+
         repository.getPage("test", new FilterProperties(), new SortProperties());
         verify(client).getCollection(argThat(url -> url.contains("searchQuery=test")), any());
     }
@@ -204,7 +212,6 @@ class LocalSnippetRepositoryTest {
         verify(client, times(2)).post(eq(TAGS_URI), any(TagResource.class));
         verify(client).post(eq(SNIPPETS_URL), snippetResourceArgument.capture());
 
-
         SnippetResource snippetResource = snippetResourceArgument.getValue();
         assertThat(snippetResource.getTitle()).isEqualTo(dto.title());
         assertThat(snippetResource.getDescription()).isEqualTo(dto.description());
@@ -212,6 +219,50 @@ class LocalSnippetRepositoryTest {
         assertThat(snippetResource.getLanguage()).isNotNull();
         assertThat(snippetResource.getLanguage().getData()).isEqualTo(
                 new ResourceIdentifierObject(LanguageResource.RESOURCE_TYPE, "10"));
+        assertThat(snippetResource.getTags()).isNotNull();
+        assertThat(snippetResource.getTags().getData()).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("updates a code snippet in the core")
+    void updateSnippet() {
+        TagResource tag1 = mock(TagResource.class);
+        when(tag1.getIdentifier()).thenReturn(new ResourceIdentifierObject(TagResource.RESOURCE_TYPE, "1"));
+        TagResource tag2 = mock(TagResource.class);
+        when(tag2.getIdentifier()).thenReturn(new ResourceIdentifierObject(TagResource.RESOURCE_TYPE, "2"));
+        when(client.getTagsCollectionUrl()).thenReturn(TAGS_URI);
+
+        var doc1 = new SingleResourceDocument<>(tag1);
+        var doc2 = new SingleResourceDocument<>(tag2);
+        when(client.post(eq(TAGS_URI), any(TagResource.class))).thenReturn(doc1).thenReturn(doc2);
+
+        UpdatedSnippetDto dto = new UpdatedSnippetDto(
+                "1",
+                SNIPPET_URI,
+                "An updated example",
+                "With another description",
+                new Language("Python", "9"),
+                "print(\"Hello, World!\");",
+                List.of("hello", "world")
+        );
+
+        var document = new SingleResourceDocument<>(testSnippet(1, "title"));
+        when(client.patch(eq(SNIPPET_URI), any(SnippetResource.class))).thenReturn(document);
+
+        var snippetResourceArgument = ArgumentCaptor.forClass(SnippetResource.class);
+
+        repository.update(dto);
+
+        verify(client, times(2)).post(eq(TAGS_URI), any(TagResource.class));
+        verify(client).patch(eq(SNIPPET_URI), snippetResourceArgument.capture());
+
+        SnippetResource snippetResource = snippetResourceArgument.getValue();
+        assertThat(snippetResource.getTitle()).isEqualTo(dto.title());
+        assertThat(snippetResource.getDescription()).isEqualTo(dto.description());
+        assertThat(snippetResource.getCode()).isEqualTo(dto.code());
+        assertThat(snippetResource.getLanguage()).isNotNull();
+        assertThat(snippetResource.getLanguage().getData()).isEqualTo(
+                new ResourceIdentifierObject(LanguageResource.RESOURCE_TYPE, "9"));
         assertThat(snippetResource.getTags()).isNotNull();
         assertThat(snippetResource.getTags().getData()).hasSize(2);
     }
@@ -230,6 +281,7 @@ class LocalSnippetRepositoryTest {
 
     private SnippetResource testSnippet(int id, String title, String description, String code) {
         SnippetResource snippet = mock(SnippetResource.class);
+        lenient().when(snippet.getId()).thenReturn(String.valueOf(id));
         lenient().when(snippet.getSelfLink()).thenReturn(SNIPPETS_URL + "/" + id);
         lenient().when(snippet.getTitle()).thenReturn(title);
         lenient().when(snippet.getDescription()).thenReturn(description);

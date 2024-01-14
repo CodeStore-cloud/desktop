@@ -9,7 +9,8 @@ import java.util.Set;
  * A builder for dynamically creating {@link Snippet code snippets}.
  */
 public class SnippetBuilder {
-    private String uri;
+    private String id = "";
+    private String uri = "";
     private Language language;
     private String title;
     private String description;
@@ -18,6 +19,11 @@ public class SnippetBuilder {
     private OffsetDateTime created;
     private OffsetDateTime modified;
     private Set<Permission> permissions;
+
+    public SnippetBuilder id(String id) {
+        this.id = id;
+        return this;
+    }
 
     public SnippetBuilder uri(String uri) {
         this.uri = uri;
@@ -65,6 +71,6 @@ public class SnippetBuilder {
     }
 
     public Snippet build() {
-        return new Snippet(uri, title, description, code, language, tags, created, modified, permissions);
+        return new Snippet(id, uri, title, description, code, language, tags, created, modified, permissions);
     }
 }

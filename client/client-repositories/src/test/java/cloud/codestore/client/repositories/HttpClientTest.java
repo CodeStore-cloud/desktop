@@ -6,8 +6,8 @@ import cloud.codestore.jsonapi.document.JsonApiDocument;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
@@ -17,22 +17,24 @@ import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @DisplayName("The http client")
 class HttpClientTest {
     private static final String ACCESS_TOKEN = "dummy-token";
 
-    private static MockWebServer mockBackEnd;
+    private MockWebServer mockBackEnd;
     private HttpClient client = new HttpClient("http://localhost:8080", ACCESS_TOKEN);
 
-    @BeforeAll
-    static void beforeAll() throws IOException {
+    @BeforeEach
+    void setUp() throws IOException {
         mockBackEnd = new MockWebServer();
         mockBackEnd.start(8080);
     }
 
-    @AfterAll
-    static void afterAll() throws IOException {
+    @AfterEach
+    void tearDown() throws IOException {
         mockBackEnd.shutdown();
     }
 
@@ -218,6 +220,7 @@ class HttpClientTest {
         assertThat(createdTag.getId()).isEqualTo("1");
 
         RecordedRequest request = mockBackEnd.takeRequest();
+        assertThat(request.getMethod()).isEqualTo("POST");
         assertThat(request.getHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo(JsonApiDocument.MEDIA_TYPE);
         assertThat(request.getBody().readUtf8()).isEqualToIgnoringWhitespace("""
                 {
@@ -225,6 +228,49 @@ class HttpClientTest {
                         "type": "tag",
                         "attributes": {
                             "name": "test"
+                        }
+                    }
+                }""");
+    }
+
+    @Test
+    @DisplayName("updates a resource")
+    void updateResource() throws InterruptedException {
+        setResponse("""
+                {
+                    "data": {
+                        "type": "snippet",
+                        "id": "1",
+                        "attributes": {
+                            "title": "Updated Snippet"
+                        },
+                        "links": {
+                            "self": "http://localhost:8080/snippets/1"
+                        }
+                    }
+                }""");
+
+        var resource = mock(SnippetResource.class);
+        when(resource.getType()).thenReturn(SnippetResource.RESOURCE_TYPE);
+        when(resource.getId()).thenReturn("1");
+        when(resource.getTitle()).thenReturn("Updated Snippet");
+
+        var responseDocument = client.patch("http://localhost:8080/snippets/1", resource);
+        var updatedSnippet = responseDocument.getData();
+
+        assertThat(updatedSnippet).isNotNull();
+        assertThat(updatedSnippet.getId()).isEqualTo("1");
+
+        RecordedRequest request = mockBackEnd.takeRequest();
+        assertThat(request.getMethod()).isEqualTo("PATCH");
+        assertThat(request.getHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo(JsonApiDocument.MEDIA_TYPE);
+        assertThat(request.getBody().readUtf8()).isEqualToIgnoringWhitespace("""
+                {
+                    "data": {
+                        "type": "snippet",
+                        "id": "1",
+                        "attributes": {
+                            "title": "Updated Snippet"
                         }
                     }
                 }""");

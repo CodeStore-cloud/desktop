@@ -57,6 +57,22 @@ public class SnippetResource extends ResourceObject {
         this.tags = tags;
     }
 
+    SnippetResource(
+            String id,
+            String title,
+            String description,
+            String code,
+            ToOneRelationship<LanguageResource> language,
+            ToManyRelationship<TagResource> tags
+    ) {
+        super(RESOURCE_TYPE, id);
+        this.title = title;
+        this.description = description;
+        this.code = code;
+        this.language = language;
+        this.tags = tags;
+    }
+
     @JsonGetter("title")
     public String getTitle() {
         return title;

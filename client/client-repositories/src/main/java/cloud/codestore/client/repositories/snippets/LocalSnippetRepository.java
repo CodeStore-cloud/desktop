@@ -14,6 +14,8 @@ import cloud.codestore.client.usecases.createsnippet.NewSnippetDto;
 import cloud.codestore.client.usecases.deletesnippet.DeleteSnippetUseCase;
 import cloud.codestore.client.usecases.listsnippets.*;
 import cloud.codestore.client.usecases.readsnippet.ReadSnippetUseCase;
+import cloud.codestore.client.usecases.updatesnippet.UpdateSnippetUseCase;
+import cloud.codestore.client.usecases.updatesnippet.UpdatedSnippetDto;
 import cloud.codestore.jsonapi.document.SingleResourceDocument;
 import cloud.codestore.jsonapi.link.Link;
 import cloud.codestore.jsonapi.meta.MetaInformation;
@@ -33,7 +35,7 @@ import java.util.stream.Collectors;
  * A repository which saves/loads code snippets from the local {CodeStore} Core.
  */
 @Repository
-class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase, DeleteSnippetUseCase, CreateSnippetUseCase {
+class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase, CreateSnippetUseCase, UpdateSnippetUseCase, DeleteSnippetUseCase {
 
     private static final String FILTER_TAGS_PARAM = "filter[tags]";
     private static final String FILTER_LANGUAGE_PARAM = "filter[language]";
@@ -119,6 +121,24 @@ class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase,
         return convertToSnippet(document.getData(), document.getMeta());
     }
 
+    @Override
+    public Snippet update(@Nonnull UpdatedSnippetDto snippetDto) {
+        List<String> tags = Objects.requireNonNullElseGet(snippetDto.tags(), Collections::emptyList);
+        List<TagResource> tagResources = createTags(tags);
+
+        SnippetResource resource = new SnippetResource(
+                snippetDto.id(),
+                snippetDto.title(),
+                snippetDto.description(),
+                snippetDto.code(),
+                convert(snippetDto.language()),
+                convert(tagResources)
+        );
+
+        var document = client.patch(snippetDto.uri(), resource);
+        return convertToSnippet(document.getData(), document.getMeta());
+    }
+
     @Nonnull
     private List<TagResource> createTags(List<String> tags) {
         String url = client.getTagsCollectionUrl();
@@ -133,6 +153,7 @@ class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase,
         String tagsUri = snippetResource.getTags().getRelatedResourceLink();
         Set<Permission> permissions = getPermissions((ResourceMetaInfo) meta);
         return Snippet.builder()
+                      .id(snippetResource.getId())
                       .uri(snippetResource.getSelfLink())
                       .title(snippetResource.getTitle())
                       .description(snippetResource.getDescription())
@@ -150,8 +171,9 @@ class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase,
         return meta.getOperations()
                    .stream()
                    .map(operation -> switch (operation.name()) {
-                       case "deleteSnippet" -> Permission.DELETE;
                        case "createSnippet" -> Permission.CREATE;
+                       case "updateSnippet" -> Permission.UPDATE;
+                       case "deleteSnippet" -> Permission.DELETE;
                        default -> null;
                    })
                    .filter(Objects::nonNull)

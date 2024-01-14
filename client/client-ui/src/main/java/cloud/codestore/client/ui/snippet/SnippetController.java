@@ -24,7 +24,7 @@ import javax.annotation.Nonnull;
 
 @FxController
 public class SnippetController {
-    private static final Snippet EMPTY_SNIPPET = new SnippetBuilder().uri("").build();
+    private static final Snippet EMPTY_SNIPPET = new SnippetBuilder().build();
 
     private final ReadSnippetUseCase readSnippetUseCase;
     private final CreateSnippetUseCase createSnippetUseCase;
@@ -32,7 +32,7 @@ public class SnippetController {
     private final DeleteSnippetUseCase deleteSnippetUseCase;
     private final EventBus eventBus;
 
-    private String currentSnippetUri;
+    private Snippet currentSnippet;
     private ControllerState state;
     private SnippetForm[] forms;
 
@@ -98,7 +98,7 @@ public class SnippetController {
     }
 
     private void accept(Snippet snippet) {
-        currentSnippetUri = snippet.getUri();
+        currentSnippet = snippet;
         for (SnippetForm form : forms) {
             form.visit(snippet);
         }
@@ -161,7 +161,7 @@ public class SnippetController {
 
         @Override
         public void delete() {
-            String snippetUri = currentSnippetUri;
+            String snippetUri = currentSnippet.getUri();
             deleteSnippetUseCase.deleteSnippet(snippetUri);
             state = new DefaultState();
             eventBus.post(new SnippetDeletedEvent(snippetUri));
@@ -217,7 +217,8 @@ public class SnippetController {
         public void save() {
             Snippet snippet = collectSnippetData();
             UpdatedSnippetDto dto = new UpdatedSnippetDto(
-                    currentSnippetUri,
+                    currentSnippet.getId(),
+                    currentSnippet.getUri(),
                     snippet.getTitle(),
                     snippet.getDescription(),
                     snippet.getLanguage(),
@@ -231,15 +232,14 @@ public class SnippetController {
         }
 
         private Snippet collectSnippetData() {
-            SnippetBuilder builder = new SnippetBuilder().uri(currentSnippetUri);
+            SnippetBuilder builder = new SnippetBuilder().id(currentSnippet.getId()).uri(currentSnippet.getUri());
             accept(builder);
             return builder.build();
         }
 
         @Override
         public void cancel() {
-            Snippet snippet = readSnippetUseCase.readSnippet(currentSnippetUri);
-            state = new ShowSnippetState(snippet);
+            state = new ShowSnippetState(currentSnippet);
         }
     }
 }

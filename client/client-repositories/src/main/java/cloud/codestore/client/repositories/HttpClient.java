@@ -12,6 +12,7 @@ import cloud.codestore.jsonapi.resource.ResourceObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
@@ -107,7 +108,15 @@ public class HttpClient {
     }
 
     public <T extends ResourceObject> SingleResourceDocument<T> post(String url, T resource) {
-        return client.post()
+        return request(HttpMethod.POST, url, resource);
+    }
+
+    public <T extends ResourceObject> SingleResourceDocument<T> patch(String url, T resource) {
+        return request(HttpMethod.PATCH, url, resource);
+    }
+
+    private <T extends ResourceObject> SingleResourceDocument<T> request(HttpMethod method, String url, T resource) {
+        return client.method(method)
                      .uri(url)
                      .contentType(JSONAPI_MEDIATYPE)
                      .bodyValue(JsonApiDocument.of(resource))

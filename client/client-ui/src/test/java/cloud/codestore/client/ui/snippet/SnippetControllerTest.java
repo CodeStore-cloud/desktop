@@ -40,6 +40,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("The snippet controller")
 class SnippetControllerTest {
+    private static final String SNIPPET_ID = "1";
     private static final String SNIPPET_URI = "http://localhost:8080/snippets/1";
     private static final Snippet EMPTY_SNIPPET = new SnippetBuilder().uri("").build();
 
@@ -70,6 +71,7 @@ class SnippetControllerTest {
     @BeforeEach
     void setUp() throws Exception {
         testSnippet = Snippet.builder()
+                             .id(SNIPPET_ID)
                              .uri(SNIPPET_URI)
                              .title("A random title")
                              .description("With a short description")
@@ -153,7 +155,7 @@ class SnippetControllerTest {
             var language = new Language("Python", "1");
             var tags = List.of("python", "test");
 
-            Snippet createdSnippet = prepareDataCollection(SNIPPET_URI, title, description, language, code, tags);
+            Snippet createdSnippet = prepareDataCollection(title, description, language, code, tags);
             var dtoArgument = ArgumentCaptor.forClass(NewSnippetDto.class);
             when(createSnippetUseCase.create(any(NewSnippetDto.class))).thenReturn(createdSnippet);
 
@@ -198,7 +200,7 @@ class SnippetControllerTest {
             var language = new Language("Java", "2");
             var tags = List.of("java", "hello", "world");
 
-            Snippet updatedSnippet = prepareDataCollection(SNIPPET_URI, title, description, language, code, tags);
+            Snippet updatedSnippet = prepareDataCollection(title, description, language, code, tags);
 
             var dtoArgument = ArgumentCaptor.forClass(UpdatedSnippetDto.class);
             when(updateSnippetUseCase.update(any(UpdatedSnippetDto.class))).thenReturn(updatedSnippet);
@@ -210,7 +212,7 @@ class SnippetControllerTest {
             snippetFooterController.clickSaveButton();
 
             verify(updateSnippetUseCase).update(dtoArgument.capture());
-            UpdatedSnippetDto expectedDto = new UpdatedSnippetDto(SNIPPET_URI, title, description, language, code, tags);
+            UpdatedSnippetDto expectedDto = new UpdatedSnippetDto("", SNIPPET_URI, title, description, language, code, tags);
             assertThat(dtoArgument.getValue()).isEqualTo(expectedDto);
 
             verifyEditable(false);
@@ -271,7 +273,6 @@ class SnippetControllerTest {
     }
 
     private Snippet prepareDataCollection(
-            String snippetUri,
             String title,
             String description,
             Language language,
@@ -290,7 +291,8 @@ class SnippetControllerTest {
         lenient().doAnswer(answer(builder -> builder.tags(tags)))
                  .when(snippetDetailsController).visit(any(SnippetBuilder.class));
 
-        return new SnippetBuilder().uri(snippetUri)
+        return new SnippetBuilder().id(SNIPPET_ID)
+                                   .uri(SNIPPET_URI)
                                    .title(title)
                                    .description(description)
                                    .code(code)

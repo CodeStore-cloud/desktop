@@ -6,6 +6,7 @@ import java.util.List;
 
 public record UpdatedSnippetDto(
         String id,
+        String uri,
         String title,
         String description,
         Language language,

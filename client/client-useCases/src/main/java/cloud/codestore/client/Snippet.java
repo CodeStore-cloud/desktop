@@ -12,6 +12,7 @@ import java.util.Set;
  * Represents a code snippet.
  */
 public class Snippet {
+    private final String id;
     private final String uri;
     private final String title;
     private final String description;
@@ -23,6 +24,7 @@ public class Snippet {
     private final Set<Permission> permissions;
 
     Snippet(
+            @Nonnull String id,
             @Nonnull String uri,
             @Nullable String title,
             @Nullable String description,
@@ -33,6 +35,7 @@ public class Snippet {
             @Nullable OffsetDateTime modified,
             @Nullable Set<Permission> permissions
     ) {
+        this.id = id;
         this.uri = uri;
         this.title = title;
         this.description = description;
@@ -46,6 +49,11 @@ public class Snippet {
 
     public static SnippetBuilder builder() {
         return new SnippetBuilder();
+    }
+
+    @Nonnull
+    public String getId() {
+        return id;
     }
 
     @Nonnull
