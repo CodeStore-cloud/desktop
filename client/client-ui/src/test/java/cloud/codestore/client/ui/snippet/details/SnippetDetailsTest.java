@@ -40,7 +40,7 @@ class SnippetDetailsTest extends AbstractUiTest {
     @Test
     @DisplayName("sets the tags of the given snippet")
     void setTags() {
-        Snippet snippet = new SnippetBuilder().uri("").tags(List.of("A", "B", "C")).build();
+        Snippet snippet = Snippet.builder().tags(List.of("A", "B", "C")).build();
         controller.visit(snippet);
         assertThat(tagsInput()).hasText("A B C");
     }
@@ -50,7 +50,7 @@ class SnippetDetailsTest extends AbstractUiTest {
     void readTags() {
         tagsInput().setText("A B C");
 
-        SnippetBuilder builder = new SnippetBuilder().uri("");
+        SnippetBuilder builder = Snippet.builder();
         controller.visit(builder);
 
         assertThat(builder.build().getTags()).containsExactlyInAnyOrder("A", "B", "C");

@@ -63,11 +63,11 @@ class DeleteSnippetTest extends SnippetControllerTest {
 
     private Snippet testSnippet() {
         return Snippet.builder()
-                .id(SNIPPET_ID)
-                .title("A simple test snippet")
-                .description("A snippet solely for this unit test.")
-                .code("System.out.println(\"Hello, World!\");")
-                .language(Language.JAVA)
-                .build();
+                      .id(SNIPPET_ID)
+                      .title("A simple test snippet")
+                      .description("A snippet solely for this unit test.")
+                      .code("System.out.println(\"Hello, World!\");")
+                      .language(Language.JAVA)
+                      .build();
     }
 }

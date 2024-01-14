@@ -20,6 +20,8 @@ public class SnippetBuilder {
     private OffsetDateTime modified;
     private Set<Permission> permissions;
 
+    SnippetBuilder() {}
+
     public SnippetBuilder id(String id) {
         this.id = id;
         return this;

@@ -49,14 +49,15 @@ class UpdateSnippetTest extends SnippetControllerTest {
     void setUp() throws LanguageNotExistsException, SnippetNotExistsException {
         when(deserializationHelper.getLanguage(any())).thenReturn(Language.JAVA);
 
-        testSnippet = Snippet.builder().id(SNIPPET_ID)
-                                          .language(Language.PYTHON)
-                                          .title("A simple code snippet")
-                                          .description("A short description")
-                                          .code("print('Hello, World!')")
-                                          .created(OffsetDateTime.now().minusHours(2))
-                                          .modified(OffsetDateTime.now())
-                                          .build();
+        testSnippet = Snippet.builder()
+                             .id(SNIPPET_ID)
+                             .language(Language.PYTHON)
+                             .title("A simple code snippet")
+                             .description("A short description")
+                             .code("print('Hello, World!')")
+                             .created(OffsetDateTime.now().minusHours(2))
+                             .modified(OffsetDateTime.now())
+                             .build();
 
         when(readSnippetUseCase.read(SNIPPET_ID)).thenReturn(testSnippet);
         when(deserializationHelper.getLanguage(any())).thenReturn(testSnippet.getLanguage());

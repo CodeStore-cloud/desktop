@@ -24,7 +24,7 @@ import javax.annotation.Nonnull;
 
 @FxController
 public class SnippetController {
-    private static final Snippet EMPTY_SNIPPET = new SnippetBuilder().build();
+    private static final Snippet EMPTY_SNIPPET = Snippet.builder().build();
 
     private final ReadSnippetUseCase readSnippetUseCase;
     private final CreateSnippetUseCase createSnippetUseCase;
@@ -194,7 +194,7 @@ public class SnippetController {
         }
 
         private Snippet collectSnippetData() {
-            SnippetBuilder builder = new SnippetBuilder().uri("");
+            SnippetBuilder builder = Snippet.builder();
             accept(builder);
             return builder.build();
         }
@@ -232,7 +232,7 @@ public class SnippetController {
         }
 
         private Snippet collectSnippetData() {
-            SnippetBuilder builder = new SnippetBuilder().id(currentSnippet.getId()).uri(currentSnippet.getUri());
+            SnippetBuilder builder = Snippet.builder().id(currentSnippet.getId()).uri(currentSnippet.getUri());
             accept(builder);
             return builder.build();
         }

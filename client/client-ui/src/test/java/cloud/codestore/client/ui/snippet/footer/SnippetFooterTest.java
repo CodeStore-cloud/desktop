@@ -2,7 +2,6 @@ package cloud.codestore.client.ui.snippet.footer;
 
 import cloud.codestore.client.Permission;
 import cloud.codestore.client.Snippet;
-import cloud.codestore.client.SnippetBuilder;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -111,7 +110,7 @@ class SnippetFooterTest extends ApplicationTest {
     }
 
     private Snippet snippet(Permission... permissions) {
-        return new SnippetBuilder().uri("").permissions(Set.of(permissions)).build();
+        return Snippet.builder().permissions(Set.of(permissions)).build();
     }
 
     private Button getButton(String buttonId) {

@@ -87,7 +87,8 @@ class SnippetIndexTest {
 
         @BeforeEach
         void setUp() {
-            snippt = Snippet.builder().id(SNIPPET_ID)
+            snippt = Snippet.builder()
+                            .id(SNIPPET_ID)
                             .title("title")
                             .description("description")
                             .code("code")

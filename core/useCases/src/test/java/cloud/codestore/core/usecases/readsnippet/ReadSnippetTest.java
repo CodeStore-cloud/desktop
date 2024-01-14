@@ -40,11 +40,11 @@ class ReadSnippetTest {
 
     private Snippet testSnippet() {
         return Snippet.builder()
-                .id(UUID.randomUUID().toString())
-                .language(Language.TEXT)
-                .title("title")
-                .code("code")
-                .created(OffsetDateTime.now())
-                .build();
+                      .id(UUID.randomUUID().toString())
+                      .language(Language.TEXT)
+                      .title("title")
+                      .code("code")
+                      .created(OffsetDateTime.now())
+                      .build();
     }
 }

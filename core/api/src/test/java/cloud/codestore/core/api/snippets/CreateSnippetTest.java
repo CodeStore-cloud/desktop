@@ -43,12 +43,13 @@ class CreateSnippetTest extends SnippetControllerTest {
 
     @BeforeEach
     void setUp() throws InvalidSnippetException, LanguageNotExistsException {
-        testSnippet = Snippet.builder().id(SNIPPET_ID)
-                                          .language(Language.PYTHON)
-                                          .title("A simple code snippet")
-                                          .description("A short description")
-                                          .code("print('Hello, World!')")
-                                          .build();
+        testSnippet = Snippet.builder()
+                             .id(SNIPPET_ID)
+                             .language(Language.PYTHON)
+                             .title("A simple code snippet")
+                             .description("A short description")
+                             .code("print('Hello, World!')")
+                             .build();
 
         when(createSnippetUseCase.create(any(NewSnippetDto.class))).thenReturn(testSnippet);
         when(deserializationHelper.getLanguage(any())).thenReturn(testSnippet.getLanguage());

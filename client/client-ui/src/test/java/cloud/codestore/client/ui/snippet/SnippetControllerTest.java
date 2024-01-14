@@ -42,7 +42,7 @@ import static org.mockito.Mockito.*;
 class SnippetControllerTest {
     private static final String SNIPPET_ID = "1";
     private static final String SNIPPET_URI = "http://localhost:8080/snippets/1";
-    private static final Snippet EMPTY_SNIPPET = new SnippetBuilder().uri("").build();
+    private static final Snippet EMPTY_SNIPPET = Snippet.builder().build();
 
     private ReadSnippetUseCase readSnippetUseCase = mock(ReadSnippetUseCase.class);
     private DeleteSnippetUseCase deleteSnippetUseCase = mock(DeleteSnippetUseCase.class);
@@ -212,7 +212,7 @@ class SnippetControllerTest {
             snippetFooterController.clickSaveButton();
 
             verify(updateSnippetUseCase).update(dtoArgument.capture());
-            UpdatedSnippetDto expectedDto = new UpdatedSnippetDto("", SNIPPET_URI, title, description, language, code, tags);
+            UpdatedSnippetDto expectedDto = new UpdatedSnippetDto(SNIPPET_ID, SNIPPET_URI, title, description, language, code, tags);
             assertThat(dtoArgument.getValue()).isEqualTo(expectedDto);
 
             verifyEditable(false);
@@ -291,14 +291,15 @@ class SnippetControllerTest {
         lenient().doAnswer(answer(builder -> builder.tags(tags)))
                  .when(snippetDetailsController).visit(any(SnippetBuilder.class));
 
-        return new SnippetBuilder().id(SNIPPET_ID)
-                                   .uri(SNIPPET_URI)
-                                   .title(title)
-                                   .description(description)
-                                   .code(code)
-                                   .language(language)
-                                   .tags(tags)
-                                   .build();
+        return Snippet.builder()
+                      .id(SNIPPET_ID)
+                      .uri(SNIPPET_URI)
+                      .title(title)
+                      .description(description)
+                      .code(code)
+                      .language(language)
+                      .tags(tags)
+                      .build();
     }
 
     private static class TestFooter extends SnippetFooter {

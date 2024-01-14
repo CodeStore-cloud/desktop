@@ -63,10 +63,10 @@ class SnippetCodeTest extends AbstractUiTest {
     @Test
     @DisplayName("sets the code and language of the given snippet")
     void setDescription() {
-        Snippet snippet = new SnippetBuilder().uri("")
-                                              .code("print(\"Hello, World!\");")
-                                              .language(new Language("Python", "1"))
-                                              .build();
+        Snippet snippet = Snippet.builder()
+                                 .code("print(\"Hello, World!\");")
+                                 .language(new Language("Python", "1"))
+                                 .build();
 
         interact(() -> controller.visit(snippet));
 
@@ -85,7 +85,7 @@ class SnippetCodeTest extends AbstractUiTest {
             languageSelection().getSelectionModel().select(language);
         });
 
-        SnippetBuilder builder = new SnippetBuilder().uri("");
+        SnippetBuilder builder = Snippet.builder();
         controller.visit(builder);
 
         Snippet snippet = builder.build();

@@ -118,8 +118,4 @@ class IndexedSnippetRepositoryTest {
     private Snippet testSnippet() {
         return Snippet.builder().id(SNIPPET_ID).build();
     }
-
-    private Snippet snippetWithId(String id) {
-        return Snippet.builder().id(id).build();
-    }
 }

@@ -38,7 +38,7 @@ class SnippetDescriptionTest extends AbstractUiTest {
     @Test
     @DisplayName("sets the description of the given snippet")
     void setDescription() {
-        Snippet snippet = new SnippetBuilder().uri("").description("A short description").build();
+        Snippet snippet = Snippet.builder().description("A short description").build();
         controller.visit(snippet);
         assertThat(textField()).hasText(snippet.getDescription());
     }
@@ -49,7 +49,7 @@ class SnippetDescriptionTest extends AbstractUiTest {
         String description = "A title to test data collection";
         textField().setText(description);
 
-        SnippetBuilder builder = new SnippetBuilder().uri("");
+        SnippetBuilder builder = Snippet.builder();
         controller.visit(builder);
 
         assertThat(builder.build().getDescription()).isEqualTo(description);

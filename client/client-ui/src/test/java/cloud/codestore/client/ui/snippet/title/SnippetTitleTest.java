@@ -39,7 +39,7 @@ class SnippetTitleTest extends AbstractUiTest {
     @Test
     @DisplayName("sets the title of the given snippet")
     void setTitle() {
-        Snippet snippet = new SnippetBuilder().uri("").title("A simple title").build();
+        Snippet snippet = Snippet.builder().title("A simple title").build();
         controller.visit(snippet);
         assertThat(textField()).hasText(snippet.getTitle());
     }
@@ -50,7 +50,7 @@ class SnippetTitleTest extends AbstractUiTest {
         String title = "A title to test data collection";
         textField().setText(title);
 
-        SnippetBuilder builder = new SnippetBuilder().uri("");
+        SnippetBuilder builder = Snippet.builder();
         controller.visit(builder);
 
         assertThat(builder.build().getTitle()).isEqualTo(title);
