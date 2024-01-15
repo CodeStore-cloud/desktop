@@ -37,6 +37,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(UpdateSnippetController.class)
 @DisplayName("PATCH /snippets/{snippetId}")
 class UpdateSnippetTest extends SnippetControllerTest {
+
+
     @MockBean
     private ReadSnippet readSnippetUseCase;
     @MockBean
@@ -66,7 +68,7 @@ class UpdateSnippetTest extends SnippetControllerTest {
     @Test
     @DisplayName("updates the code snippet")
     void updateSnippet() throws Exception {
-        sendRequest().andExpect(status().isOk());
+        sendRequest(SNIPPET_ID).andExpect(status().isOk());
 
         ArgumentCaptor<UpdatedSnippetDto> argument = ArgumentCaptor.forClass(UpdatedSnippetDto.class);
         verify(updateSnippetUseCase).update(argument.capture());
@@ -80,9 +82,24 @@ class UpdateSnippetTest extends SnippetControllerTest {
     }
 
     @Test
+    @DisplayName("returns 400 if the snippet-id in the path does not match the snippet id in the JSON document")
+    void validateSnippetId() throws Exception {
+        sendRequest("another-snippet-id")
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(JsonApiDocument.MEDIA_TYPE))
+                .andExpect(jsonPath("$.errors").isArray())
+                .andExpect(jsonPath("$.errors.length()", is(1)))
+                .andExpect(jsonPath("$.errors[0].code", is("INVALID_SNIPPET")))
+                .andExpect(jsonPath("$.errors[0].title", is("Invalid Code Snippet")))
+                .andExpect(jsonPath("$.errors[0].detail", is("The ID of the snippet does not match the ID in the URI.")))
+                .andExpect(jsonPath("$.errors[0].source.pointer", is("/data/id")));
+    }
+
+    @Test
     @DisplayName("can alternatively be called with POST and X-HTTP-Method-Override")
     void updateSnippetViaPOST() throws Exception {
         ClientSnippet resource = new ClientSnippet(
+                SNIPPET_ID,
                 testSnippet.getLanguage(),
                 testSnippet.getTitle(),
                 testSnippet.getDescription(),
@@ -98,17 +115,18 @@ class UpdateSnippetTest extends SnippetControllerTest {
     @Test
     @DisplayName("returns the updated code snippet")
     void returnCreatedSnippet() throws Exception {
-        sendRequest().andExpect(status().isOk())
-                     .andExpect(content().contentType(JsonApiDocument.MEDIA_TYPE))
-                     .andExpect(jsonPath("$.data.type", is("snippet")))
-                     .andExpect(jsonPath("$.data.id", is(testSnippet.getId())))
-                     .andExpect(jsonPath("$.data.attributes.title", is(testSnippet.getTitle())))
-                     .andExpect(jsonPath("$.data.attributes.description", is(testSnippet.getDescription())))
-                     .andExpect(jsonPath("$.data.attributes.code", is(testSnippet.getCode())))
-                     .andExpect(jsonPath("$.data.attributes.created", is(testSnippet.getCreated().toString())))
-                     .andExpect(jsonPath("$.data.attributes.modified", is(testSnippet.getModified().toString())))
-                     .andExpect(jsonPath("$.data.relationships.language.links.related", is("http://localhost:8080/languages/18")))
-                     .andExpect(jsonPath("$.data.links.self", is("http://localhost:8080/snippets/" + testSnippet.getId())));
+        sendRequest(SNIPPET_ID)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(JsonApiDocument.MEDIA_TYPE))
+                .andExpect(jsonPath("$.data.type", is("snippet")))
+                .andExpect(jsonPath("$.data.id", is(testSnippet.getId())))
+                .andExpect(jsonPath("$.data.attributes.title", is(testSnippet.getTitle())))
+                .andExpect(jsonPath("$.data.attributes.description", is(testSnippet.getDescription())))
+                .andExpect(jsonPath("$.data.attributes.code", is(testSnippet.getCode())))
+                .andExpect(jsonPath("$.data.attributes.created", is(testSnippet.getCreated().toString())))
+                .andExpect(jsonPath("$.data.attributes.modified", is(testSnippet.getModified().toString())))
+                .andExpect(jsonPath("$.data.relationships.language.links.related", is("http://localhost:8080/languages/18")))
+                .andExpect(jsonPath("$.data.links.self", is("http://localhost:8080/snippets/" + testSnippet.getId())));
     }
 
     @Test
@@ -118,25 +136,26 @@ class UpdateSnippetTest extends SnippetControllerTest {
         when(exception.getValidationMessages()).thenReturn(Map.of(SnippetProperty.TITLE, "dummy message"));
         doThrow(exception).when(updateSnippetUseCase).update(any(UpdatedSnippetDto.class));
 
-        sendRequest().andExpect(status().isBadRequest());
+        sendRequest(SNIPPET_ID).andExpect(status().isBadRequest());
     }
 
     @Test
     @DisplayName("returns 404 if the referred code snippet does not exist")
     void snippetNotFound() throws Exception {
         doThrow(SnippetNotExistsException.class).when(updateSnippetUseCase).update(any(UpdatedSnippetDto.class));
-        sendRequest().andExpect(status().isNotFound());
+        sendRequest(SNIPPET_ID).andExpect(status().isNotFound());
     }
 
     @Test
     @DisplayName("returns 404 if the referred programming language does not exist")
     void languageNotFound() throws Exception {
         when(deserializationHelper.getLanguage(any())).thenThrow(LanguageNotExistsException.class);
-        sendRequest().andExpect(status().isNotFound());
+        sendRequest(SNIPPET_ID).andExpect(status().isNotFound());
     }
 
-    private ResultActions sendRequest() throws Exception {
+    private ResultActions sendRequest(String snippetId) throws Exception {
         ClientSnippet resource = new ClientSnippet(
+                snippetId,
                 testSnippet.getLanguage(),
                 testSnippet.getTitle(),
                 testSnippet.getDescription(),
@@ -157,8 +176,8 @@ class UpdateSnippetTest extends SnippetControllerTest {
         @JsonProperty
         final String code;
 
-        ClientSnippet(Language language, String title, String description, String code) {
-            super("snippet");
+        ClientSnippet(String id, Language language, String title, String description, String code) {
+            super("snippet", id);
 
             var languageIdentifier = new ResourceIdentifierObject("language", String.valueOf(language.getId()));
             this.language = new ToOneRelationship<>().setData(languageIdentifier);
