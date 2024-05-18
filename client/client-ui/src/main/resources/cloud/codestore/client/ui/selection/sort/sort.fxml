@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import cloud.codestore.client.ui.separator.Separator?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
-<HBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
       fx:controller="cloud.codestore.client.ui.selection.sort.Sort"
-      styleClass="secondarySpacing" alignment="CENTER_LEFT">
-    <Label text="%sort.label"/>
-    <ComboBox fx:id="sortSelection" onAction="#triggerSortEvent"/>
-</HBox>
+      fx:id="sortPanel" styleClass="secondarySpacing">
+    <Separator/>
+    <HBox styleClass="secondarySpacing" alignment="CENTER_LEFT">
+        <Label text="%sort.label"/>
+        <ComboBox fx:id="sortSelection" onAction="#triggerSortEvent"/>
+    </HBox>
+</VBox>

@@ -4,19 +4,19 @@
 <?import cloud.codestore.client.ui.separator.Separator?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
       fx:controller="cloud.codestore.client.ui.selection.filter.Filter"
-      stylesheets="@filter.css" styleClass="secondarySpacing">
+      fx:id="filterPanel" stylesheets="@filter.css" styleClass="secondarySpacing">
     <Separator/>
     <HBox>
         <Icon styleClass="tag"/>
-        <TextField fx:id="tagsInput" promptText="%filter.tags.placeholder" VBox.vgrow="NEVER"/>
+        <TextField fx:id="tagsInput" promptText="%filter.tags.placeholder"/>
     </HBox>
     <Separator/>
     <HBox>
         <Icon styleClass="language"/>
-        <ComboBox fx:id="languageSelection" onAction="#triggerEvent" VBox.vgrow="NEVER"/>
+        <ComboBox fx:id="languageSelection" onAction="#triggerEvent"/>
     </HBox>
-    <Separator/>
 </VBox>

@@ -3,13 +3,18 @@ package cloud.codestore.client.ui.selection.filter;
 import cloud.codestore.client.Language;
 import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.UiMessages;
+import cloud.codestore.client.ui.selection.ToggleFilterEvent;
+import cloud.codestore.client.ui.selection.ToggleSortEvent;
 import cloud.codestore.client.usecases.listsnippets.FilterProperties;
 import cloud.codestore.client.usecases.readlanguages.ReadLanguagesUseCase;
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Pane;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Set;
 
@@ -21,8 +26,11 @@ public class Filter {
     public Filter(ReadLanguagesUseCase readLanguagesUseCase, EventBus eventBus) {
         this.readLanguagesUseCase = readLanguagesUseCase;
         this.eventBus = eventBus;
+        eventBus.register(this);
     }
 
+    @FXML
+    private Pane filterPanel;
     @FXML
     private TextField tagsInput;
     @FXML
@@ -30,8 +38,21 @@ public class Filter {
 
     @FXML
     private void initialize() {
+        filterPanel.managedProperty().bind(filterPanel.visibleProperty());
+        filterPanel.setVisible(false);
+
         handleTagInput();
         fillLanguageSelection();
+    }
+
+    @Subscribe
+    private void toggle(@Nonnull ToggleFilterEvent event) {
+        filterPanel.setVisible(!filterPanel.isVisible());
+    }
+
+    @Subscribe
+    private void toggle(@Nonnull ToggleSortEvent event) {
+        filterPanel.setVisible(false);
     }
 
     private void handleTagInput() {
