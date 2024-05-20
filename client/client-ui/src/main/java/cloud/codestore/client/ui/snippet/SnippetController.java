@@ -19,6 +19,7 @@ import cloud.codestore.client.usecases.updatesnippet.UpdatedSnippetDto;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import javafx.fxml.FXML;
+import javafx.scene.layout.Pane;
 
 import javax.annotation.Nonnull;
 
@@ -35,6 +36,11 @@ public class SnippetController {
     private Snippet currentSnippet;
     private ControllerState state;
     private SnippetForm[] forms;
+
+    @FXML
+    private Pane snippetPane;
+    @FXML
+    private Pane noSnippetLabel;
 
     @FXML
     private SnippetTitle snippetTitleController;
@@ -142,6 +148,9 @@ public class SnippetController {
         DefaultState() {
             setEditing(false);
             accept(EMPTY_SNIPPET);
+
+            noSnippetLabel.setVisible(true);
+            snippetPane.setVisible(false);
         }
     }
 
@@ -150,6 +159,9 @@ public class SnippetController {
      */
     private class ShowSnippetState implements ControllerState {
         ShowSnippetState(@Nonnull Snippet snippet) {
+            noSnippetLabel.setVisible(false);
+            snippetPane.setVisible(true);
+
             setEditing(false);
             accept(snippet);
         }
