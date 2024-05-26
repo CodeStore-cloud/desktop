@@ -4,7 +4,6 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 <StackPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
            fx:controller="cloud.codestore.client.ui.snippet.SnippetController"
            stylesheets="@snippet.css">
@@ -20,10 +19,6 @@
     </VBox>
 
     <VBox fx:id="noSnippetLabel">
-        <Label text="%snippet.noSelection">
-            <font>
-                <Font name="Arial" size="14.0"/>
-            </font>
-        </Label>
+        <Label text="%snippet.noSelection"/>
     </VBox>
 </StackPane>

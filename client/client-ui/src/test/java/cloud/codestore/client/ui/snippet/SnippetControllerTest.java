@@ -18,6 +18,7 @@ import cloud.codestore.client.usecases.readsnippet.ReadSnippetUseCase;
 import cloud.codestore.client.usecases.updatesnippet.UpdateSnippetUseCase;
 import cloud.codestore.client.usecases.updatesnippet.UpdatedSnippetDto;
 import com.google.common.eventbus.EventBus;
+import javafx.scene.layout.Pane;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -60,6 +61,11 @@ class SnippetControllerTest {
     private SnippetDetails snippetDetailsController;
     @Spy
     private TestFooter snippetFooterController = new TestFooter();
+
+    @Mock
+    private Pane snippetPane;
+    @Mock
+    private Pane noSnippetLabel;
 
     @InjectMocks
     private SnippetController snippetController = new SnippetController(
