@@ -37,9 +37,9 @@
 
 .button {
     -fx-background-color: transparent;
+    -fx-background-repeat: no-repeat;
     -fx-background-radius: 0;
     -fx-background-insets: 0;
-    -fx-background-repeat: no-repeat;
 
     $backgroundPosition: (size.$secondaryElementSize - size.$secondaryContentSize) / 2;
     -fx-background-position: $backgroundPosition $backgroundPosition;

@@ -41,7 +41,7 @@ public class SnippetList implements ChangeListener<SnippetListItem> {
     @FXML
     private Node nextPage;
 
-    public SnippetList(@Nonnull ReadSnippetsUseCase readSnippetsUseCase, @Nonnull EventBus eventBus) {
+    SnippetList(@Nonnull ReadSnippetsUseCase readSnippetsUseCase, @Nonnull EventBus eventBus) {
         this.readSnippetsUseCase = readSnippetsUseCase;
         this.eventBus = eventBus;
         eventBus.register(this);

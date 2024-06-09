@@ -1,3 +1,9 @@
+@use "../../size";
+
+#titleContainer {
+    -fx-pref-height: size.$secondaryElementSize;
+}
+
 #snippetTitle {
     -fx-font-family: Arial Bold;
     -fx-font-size: 18;
