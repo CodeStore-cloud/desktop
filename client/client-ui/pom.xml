@@ -34,6 +34,11 @@
             <artifactId>javafx-fxml</artifactId>
             <version>${javafx.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-web</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
 
         <!-- EventHub -->
         <dependency>
@@ -64,10 +69,10 @@
             <plugin>
                 <groupId>com.github.eirslett</groupId>
                 <artifactId>frontend-maven-plugin</artifactId>
-                <version>1.13.4</version>
+                <version>1.15.0</version>
 
                 <configuration>
-                    <nodeVersion>v18.17.1</nodeVersion>
+                    <nodeVersion>v20.14.0</nodeVersion>
                 </configuration>
 
                 <executions>
@@ -91,12 +96,22 @@
 
                     <execution>
                         <!-- https://www.npmjs.com/package/sass -->
-                        <id>npm run compile-css</id>
+                        <id>compile SCSS</id>
                         <goals>
                             <goal>npm</goal>
                         </goals>
                         <configuration>
                             <arguments>run compile-css</arguments>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>create editor bundle</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>run bundle-editor</arguments>
                         </configuration>
                     </execution>
                 </executions>
@@ -106,6 +121,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.2</version>
                 <configuration>
                     <archive>
                         <manifest>

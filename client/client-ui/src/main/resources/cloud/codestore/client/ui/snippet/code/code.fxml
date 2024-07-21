@@ -2,9 +2,9 @@
 
 <?import cloud.codestore.client.ui.icon.Icon?>
 <?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.web.WebView?>
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
       fx:controller="cloud.codestore.client.ui.snippet.code.SnippetCode"
       stylesheets="@code.css">
@@ -12,5 +12,5 @@
         <Icon styleClass="language"/>
         <ComboBox fx:id="languageSelection"/>
     </HBox>
-    <TextArea fx:id="snippetCode" promptText="%snippet.code.placeholder"/>
+    <WebView fx:id="browser" />
 </VBox>

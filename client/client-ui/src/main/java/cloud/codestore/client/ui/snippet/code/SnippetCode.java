@@ -6,45 +6,149 @@ import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.snippet.SnippetForm;
 import cloud.codestore.client.usecases.readlanguages.ReadLanguagesUseCase;
+import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextArea;
+import javafx.scene.web.WebView;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 @FxController
 public class SnippetCode implements SnippetForm {
+    private static final Logger LOGGER = LogManager.getLogger(SnippetCode.class);
+
     private ReadLanguagesUseCase readLanguagesUseCase;
 
     @FXML
     private ComboBox<Language> languageSelection;
     @FXML
-    private TextArea snippetCode;
+    private WebView browser;
+    private Editor editor = new LoadingEditor();
 
-    public SnippetCode(ReadLanguagesUseCase readLanguagesUseCase) {
+    SnippetCode(ReadLanguagesUseCase readLanguagesUseCase) {
         this.readLanguagesUseCase = readLanguagesUseCase;
     }
 
     @FXML
     private void initialize() {
         languageSelection.getItems().addAll(readLanguagesUseCase.readLanguages());
+
+        long startTime = System.currentTimeMillis();
+        browser.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
+            if (newState == Worker.State.SUCCEEDED) {
+                LOGGER.info("Editor loaded in {}ms", System.currentTimeMillis() - startTime);
+                editor = editor.loadingFinished();
+            }
+        });
+
+        //TODO dynamic path to editor.js
+        browser.getEngine().loadContent(
+                "<!DOCTYPE html>" +
+                "<html><body>" +
+                "<script src=\"file:///G:/Documents/codebox/{CodeStore} 2.0/desktop-app/client/client-ui/target/editor.js\">" +
+                "</script></body></html>"
+        );
     }
 
     @Override
     public void setEditing(boolean editable) {
         languageSelection.setEditable(editable);
-        snippetCode.setEditable(editable);
+        editor.setEditing(editable);
     }
 
     @Override
     public void visit(@Nonnull Snippet snippet) {
         languageSelection.getSelectionModel().select(snippet.getLanguage());
-        snippetCode.setText(snippet.getCode());
+        editor.setContent(snippet);
     }
 
     @Override
     public void visit(@Nonnull SnippetBuilder builder) {
         builder.language(languageSelection.getSelectionModel().getSelectedItem());
-        builder.code(snippetCode.getText());
+        builder.code(editor.getContent());
+    }
+
+    private interface Editor {
+        void setEditing(boolean editable);
+
+        void setContent(Snippet snippet);
+
+        String getContent();
+
+        Editor loadingFinished();
+    }
+
+    /**
+     * The editor is loaded asynchronously.
+     * This class represents the editor in its loading-state when it´s not ready yet.
+     * Interactions are recorded and applied to the web-editor as soon as it´s ready.
+     */
+    private class LoadingEditor implements Editor {
+        private boolean editable;
+        private Snippet snippet;
+
+        @Override
+        public void setEditing(boolean editable) {
+            this.editable = editable;
+        }
+
+        @Override
+        public void setContent(Snippet snippet) {
+            this.snippet = snippet;
+        }
+
+        @Override
+        public String getContent() {
+            return (String) browser.getEngine().executeScript("editor.getContent();");
+        }
+
+        @Override
+        public Editor loadingFinished() {
+            return new WebEditor(editable, snippet);
+        }
+    }
+
+    /**
+     * Represents the fully loaded web-editor.
+     */
+    private class WebEditor implements Editor {
+        WebEditor(boolean editable, @Nullable Snippet snippet) {
+            setEditing(editable);
+            if (snippet != null) {
+                setContent(snippet);
+            }
+        }
+
+        @Override
+        public void setEditing(boolean editable) {
+            browser.getEngine().executeScript("editor.setEditable(" + editable + ");");
+        }
+
+        @Override
+        public void setContent(Snippet snippet) {
+            String languageId = snippet.getLanguage() == null ? "" : snippet.getLanguage().id();
+            browser.getEngine().executeScript("editor.setLanguage(\"" + languageId + "\");");
+
+            String content = snippet.getCode() == null ? "" : snippet.getCode();
+            content = content.replace("\\", "\\\\"); // \ -> \\
+            content = content.replace("\"", "\\\""); // " -> \"
+            content = content.replace("\n", "\\n");  // <newline> -> \n
+            content = content.replace("\r", "");     // remove \r
+
+            browser.getEngine().executeScript("editor.setContent(\"" + content + "\");");
+        }
+
+        @Override
+        public String getContent() {
+            return (String) browser.getEngine().executeScript("editor.getContent();");
+        }
+
+        @Override
+        public Editor loadingFinished() {
+            return this;
+        }
     }
 }
