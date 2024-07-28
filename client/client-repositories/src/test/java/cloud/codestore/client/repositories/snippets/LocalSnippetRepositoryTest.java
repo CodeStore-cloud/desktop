@@ -7,6 +7,7 @@ import cloud.codestore.client.repositories.HttpClient;
 import cloud.codestore.client.repositories.Operation;
 import cloud.codestore.client.repositories.ResourceMetaInfo;
 import cloud.codestore.client.repositories.language.LanguageResource;
+import cloud.codestore.client.repositories.language.LocalLanguageRepository;
 import cloud.codestore.client.repositories.tags.LocalTagRepository;
 import cloud.codestore.client.repositories.tags.TagResource;
 import cloud.codestore.client.usecases.createsnippet.NewSnippetDto;
@@ -19,6 +20,7 @@ import cloud.codestore.jsonapi.document.ResourceCollectionDocument;
 import cloud.codestore.jsonapi.document.SingleResourceDocument;
 import cloud.codestore.jsonapi.link.Link;
 import cloud.codestore.jsonapi.relationship.ToManyRelationship;
+import cloud.codestore.jsonapi.relationship.ToOneRelationship;
 import cloud.codestore.jsonapi.resource.ResourceIdentifierObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -48,11 +50,14 @@ class LocalSnippetRepositoryTest {
     private static final String SNIPPET_URI = "http://localhost:8080/snippets/1";
     private static final String SNIPPET_TAGS_URI = "http://localhost:8080/tags?filter[snippet]=1";
     private static final String TAGS_URI = "http://localhost:8080/tags";
+    private static final String SNIPPET_LANGUAGE_URI = "http://localhost:8080/languages/10";
 
     @Mock
     private HttpClient client;
     @Mock
     private LocalTagRepository tagRepository;
+    @Mock
+    private LocalLanguageRepository languageRepository;
     @InjectMocks
     private LocalSnippetRepository repository;
 
@@ -92,6 +97,8 @@ class LocalSnippetRepositoryTest {
         ));
         when(client.get(SNIPPET_URI, SnippetResource.class)).thenReturn(document);
         when(tagRepository.get(SNIPPET_TAGS_URI)).thenReturn(List.of("hello", "world"));
+        Language java = new Language("Java", "10");
+        when(languageRepository.get(SNIPPET_LANGUAGE_URI)).thenReturn(java);
 
         Snippet snippet = repository.readSnippet(SNIPPET_URI);
 
@@ -101,6 +108,7 @@ class LocalSnippetRepositoryTest {
         assertThat(snippet.getDescription()).isEqualTo("With a short description");
         assertThat(snippet.getCode()).isEqualTo("System.out.println(\"Hello, World!\");");
         assertThat(snippet.getTags()).containsExactlyInAnyOrder("hello", "world");
+        assertThat(snippet.getLanguage()).isEqualTo(java);
     }
 
     @Test
@@ -280,13 +288,15 @@ class LocalSnippetRepositoryTest {
     }
 
     private SnippetResource testSnippet(int id, String title, String description, String code) {
-        SnippetResource snippet = mock(SnippetResource.class);
+        SnippetResource snippet = spy(new SnippetResource(
+                title, description, code,
+                new ToOneRelationship<>(SNIPPET_LANGUAGE_URI),
+                new ToManyRelationship<>(SNIPPET_TAGS_URI)
+        ));
+
         lenient().when(snippet.getId()).thenReturn(String.valueOf(id));
         lenient().when(snippet.getSelfLink()).thenReturn(SNIPPETS_URL + "/" + id);
-        lenient().when(snippet.getTitle()).thenReturn(title);
-        lenient().when(snippet.getDescription()).thenReturn(description);
-        lenient().when(snippet.getCode()).thenReturn(code);
-        lenient().when(snippet.getTags()).thenReturn(new ToManyRelationship<>(SNIPPET_TAGS_URI));
+
         return snippet;
     }
 }

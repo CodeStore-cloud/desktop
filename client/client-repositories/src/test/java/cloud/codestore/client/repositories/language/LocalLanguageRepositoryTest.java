@@ -3,6 +3,7 @@ package cloud.codestore.client.repositories.language;
 import cloud.codestore.client.Language;
 import cloud.codestore.client.repositories.HttpClient;
 import cloud.codestore.jsonapi.document.ResourceCollectionDocument;
+import cloud.codestore.jsonapi.document.SingleResourceDocument;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,7 @@ import static org.mockito.Mockito.*;
 @DisplayName("The local language repository")
 class LocalLanguageRepositoryTest {
     private static final String LANGUAGES_URL = "http://localhost:8080/languages";
+    private static final String LANGUAGE_URL = "http://localhost:8080/languages/10";
 
     @Mock
     private HttpClient client;
@@ -46,6 +48,19 @@ class LocalLanguageRepositoryTest {
                 new Language("Kotlin", "4"),
                 new Language("Python", "3")
         );
+    }
+
+    @Test
+    @DisplayName("retrieves a specific programming languages from the core")
+    void retrieveSingeLanguage() {
+        var document = new SingleResourceDocument<>(testResource("10", "Java"));
+        when(client.get(LANGUAGE_URL, LanguageResource.class)).thenReturn(document);
+
+        Language language = repository.get(LANGUAGE_URL);
+
+        assertThat(language).isNotNull();
+        assertThat(language.id()).isEqualTo("10");
+        assertThat(language.name()).isEqualTo("Java");
     }
 
     private LanguageResource[] testResources() {

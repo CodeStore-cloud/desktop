@@ -13,7 +13,7 @@ import java.util.List;
  * A repository which loads the available programming languages from the local {CodeStore} Core.
  */
 @Repository
-class LocalLanguageRepository implements ReadLanguagesUseCase {
+public class LocalLanguageRepository implements ReadLanguagesUseCase {
     private final HttpClient client;
 
     public LocalLanguageRepository(HttpClient client) {
@@ -28,5 +28,12 @@ class LocalLanguageRepository implements ReadLanguagesUseCase {
         return Arrays.stream(resourceCollection.getData(LanguageResource.class))
                      .map(resource -> new Language(resource.getName(), resource.getId()))
                      .toList();
+    }
+
+    @Nonnull
+    public Language get(String uri) {
+        var document = client.get(uri, LanguageResource.class);
+        var resource = document.getData();
+        return new Language(resource.getName(), resource.getId());
     }
 }

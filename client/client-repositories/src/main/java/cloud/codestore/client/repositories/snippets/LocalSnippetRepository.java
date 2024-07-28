@@ -7,6 +7,7 @@ import cloud.codestore.client.repositories.HttpClient;
 import cloud.codestore.client.repositories.Repository;
 import cloud.codestore.client.repositories.ResourceMetaInfo;
 import cloud.codestore.client.repositories.language.LanguageResource;
+import cloud.codestore.client.repositories.language.LocalLanguageRepository;
 import cloud.codestore.client.repositories.tags.LocalTagRepository;
 import cloud.codestore.client.repositories.tags.TagResource;
 import cloud.codestore.client.usecases.createsnippet.CreateSnippetUseCase;
@@ -43,10 +44,12 @@ class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase,
 
     private final HttpClient client;
     private final LocalTagRepository tagRepository;
+    private final LocalLanguageRepository languageRepository;
 
-    LocalSnippetRepository(HttpClient client, LocalTagRepository tagRepository) {
+    LocalSnippetRepository(HttpClient client, LocalTagRepository tagRepository, LocalLanguageRepository languageRepository) {
         this.client = client;
         this.tagRepository = tagRepository;
+        this.languageRepository = languageRepository;
     }
 
     @Nonnull
@@ -151,6 +154,7 @@ class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase,
 
     private Snippet convertToSnippet(SnippetResource snippetResource, MetaInformation meta) {
         String tagsUri = snippetResource.getTags().getRelatedResourceLink();
+        String languageUri = snippetResource.getLanguage().getRelatedResourceLink();
         Set<Permission> permissions = getPermissions((ResourceMetaInfo) meta);
         return Snippet.builder()
                       .id(snippetResource.getId())
@@ -159,6 +163,7 @@ class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase,
                       .description(snippetResource.getDescription())
                       .code(snippetResource.getCode())
                       .tags(tagRepository.get(tagsUri))
+                      .language(languageRepository.get(languageUri))
                       .permissions(permissions)
                       .build();
     }

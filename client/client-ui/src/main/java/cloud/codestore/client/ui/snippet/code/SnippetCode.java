@@ -130,7 +130,7 @@ public class SnippetCode implements SnippetForm {
         @Override
         public void setContent(Snippet snippet) {
             String languageId = snippet.getLanguage() == null ? "" : snippet.getLanguage().id();
-            browser.getEngine().executeScript("editor.setLanguage(\"" + languageId + "\");");
+            browser.getEngine().executeScript("editor.setLanguage(" + languageId + ");");
 
             String content = snippet.getCode() == null ? "" : snippet.getCode();
             content = content.replace("\\", "\\\\"); // \ -> \\
