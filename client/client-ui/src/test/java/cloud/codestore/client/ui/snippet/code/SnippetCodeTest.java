@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.testfx.framework.junit5.Start;
 
+import java.nio.file.Path;
 import java.util.List;
 
 import static org.mockito.Mockito.when;
@@ -35,7 +36,7 @@ class SnippetCodeTest extends AbstractUiTest {
                 new Language("HTML", "3")
         };
         when(readLanguagesUseCase.readLanguages()).thenReturn(List.of(languages));
-        controller = new SnippetCode(readLanguagesUseCase);
+        controller = new SnippetCode(readLanguagesUseCase, Path.of(".")); //todo update path
         start(stage, "code.fxml", controller);
     }
 

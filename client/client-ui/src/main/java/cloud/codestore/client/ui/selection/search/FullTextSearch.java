@@ -15,7 +15,7 @@ public class FullTextSearch {
     @FXML
     private TextField inputField;
 
-    public FullTextSearch(EventBus eventBus) {
+    FullTextSearch(EventBus eventBus) {
         this.eventBus = eventBus;
     }
 

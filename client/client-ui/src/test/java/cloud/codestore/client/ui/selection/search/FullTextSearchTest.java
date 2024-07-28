@@ -48,7 +48,6 @@ class FullTextSearchTest extends AbstractUiTest {
         inputField.setText("test");
         assertThat(inputField.getText()).isNotEmpty();
 
-        inputField.requestFocus();
         press(KeyCode.ESCAPE);
 
         assertThat(inputField.getText()).isNotNull().isEmpty();
