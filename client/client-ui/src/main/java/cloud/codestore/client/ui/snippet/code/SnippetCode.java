@@ -15,12 +15,15 @@ import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
 
 @FxController
 public class SnippetCode implements SnippetForm {
     private static final Logger LOGGER = LogManager.getLogger(SnippetCode.class);
 
-    private ReadLanguagesUseCase readLanguagesUseCase;
+    private final ReadLanguagesUseCase readLanguagesUseCase;
+    private final Path binDirectory;
 
     @FXML
     private ComboBox<Language> languageSelection;
@@ -28,12 +31,13 @@ public class SnippetCode implements SnippetForm {
     private WebView browser;
     private Editor editor = new LoadingEditor();
 
-    SnippetCode(ReadLanguagesUseCase readLanguagesUseCase) {
+    SnippetCode(ReadLanguagesUseCase readLanguagesUseCase, Path binDirectory) {
         this.readLanguagesUseCase = readLanguagesUseCase;
+        this.binDirectory = binDirectory;
     }
 
     @FXML
-    private void initialize() {
+    private void initialize() throws MalformedURLException {
         languageSelection.getItems().addAll(readLanguagesUseCase.readLanguages());
 
         long startTime = System.currentTimeMillis();
@@ -44,13 +48,9 @@ public class SnippetCode implements SnippetForm {
             }
         });
 
-        //TODO dynamic path to editor.js
-        browser.getEngine().loadContent(
-                "<!DOCTYPE html>" +
-                "<html><body>" +
-                "<script src=\"file:///G:/Documents/codebox/{CodeStore} 2.0/desktop-app/client/client-ui/target/editor.js\">" +
-                "</script></body></html>"
-        );
+        String editorUrl = binDirectory.resolve("editor.html").toUri().toString();
+        LOGGER.info("Loading editor from location " + editorUrl + " ...");
+        browser.getEngine().load(editorUrl);
     }
 
     @Override
@@ -112,7 +112,8 @@ public class SnippetCode implements SnippetForm {
     }
 
     /**
-     * Represents the fully loaded web-editor.
+     * The editor is loaded asynchronously.
+     * This class represents the fully loaded web-editor.
      */
     private class WebEditor implements Editor {
         WebEditor(boolean editable, @Nullable Snippet snippet) {
@@ -130,7 +131,7 @@ public class SnippetCode implements SnippetForm {
         @Override
         public void setContent(Snippet snippet) {
             String languageId = snippet.getLanguage() == null ? "" : snippet.getLanguage().id();
-            browser.getEngine().executeScript("editor.setLanguage(" + languageId + ");");
+            browser.getEngine().executeScript("editor.setLanguage(\"" + languageId + "\");");
 
             String content = snippet.getCode() == null ? "" : snippet.getCode();
             content = content.replace("\\", "\\\\"); // \ -> \\

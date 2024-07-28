@@ -59,6 +59,14 @@ public class CodeStoreClient {
         return new EventBus();
     }
 
+    /**
+     * @return the directory where the binary executables of {CodeStore} are located.
+     */
+    @Bean
+    public Path binDirectory(@Value("${codestore.bin:..}") String binaryPath) {
+        return Path.of(binaryPath).toAbsolutePath();
+    }
+
     private Path getDataDirectory(String dataDirectory) {
         if (dataDirectory.isEmpty()) {
             String userHome = System.getProperty("user.home");

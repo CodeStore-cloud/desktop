@@ -1,13 +1,11 @@
 import {
-    crosshairCursor,
+    drawSelection,
     EditorView,
     highlightActiveLine,
     highlightActiveLineGutter,
-    highlightSpecialChars,
     keymap,
     lineNumbers,
-    placeholder,
-    rectangularSelection
+    placeholder
 } from "@codemirror/view"
 import {Compartment, EditorState} from "@codemirror/state"
 import {
@@ -39,21 +37,19 @@ const readonly = new Compartment();
 const state = EditorState.create({
     extensions: [
         lineNumbers(),
-        highlightActiveLineGutter(),
-        highlightSpecialChars(),
         history(),
         indentOnInput(),
         syntaxHighlighting(defaultHighlightStyle, {fallback: true}),
         bracketMatching(),
         closeBrackets(),
-        rectangularSelection(),
-        crosshairCursor(),
+        drawSelection(),
+        highlightActiveLineGutter(),
         highlightActiveLine(),
         highlightSelectionMatches(),
         keymap.of([
             ...defaultKeymap,
             ...historyKeymap,
-            ...indentWithTab
+            indentWithTab
         ]),
         language.of([]),
         readonly.of(EditorState.readOnly.of(true)),
