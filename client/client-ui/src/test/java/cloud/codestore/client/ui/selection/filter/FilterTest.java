@@ -57,6 +57,19 @@ class FilterTest extends AbstractUiTest {
     }
 
     @Test
+    @DisplayName("ignores duplicate tags")
+    void ignoreDuplicateTags() {
+        var argument = ArgumentCaptor.forClass(FilterEvent.class);
+
+        tagsInput().setText("abc def abc");
+
+        verify(eventBus).post(argument.capture());
+        var filterProperties = argument.getValue().filterProperties();
+        assertThat(filterProperties.getTags()).isNotEmpty();
+        assertThat(filterProperties.getTags().get()).containsExactlyInAnyOrder("abc", "def");
+    }
+
+    @Test
     @DisplayName("triggers a FilterEvent without tags when the tag input is empty")
     void emptyTagInput() {
         var argument = ArgumentCaptor.forClass(FilterEvent.class);

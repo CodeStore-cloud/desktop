@@ -15,6 +15,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 
 import javax.annotation.Nonnull;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -74,8 +75,8 @@ public class Filter {
 
     @FXML
     void triggerEvent() {
-        String tagsRaw = tagsInput.getText();
-        Set<String> tags = tagsRaw.isEmpty() ? null : Set.of(tagsRaw.split(" "));
+        String tagsInput = this.tagsInput.getText();
+        Set<String> tags = tagsInput.isEmpty() ? null : new HashSet<>(List.of(tagsInput.split(" ")));
         Language language = languageSelection.getValue().language();
         FilterProperties filterProperties = new FilterProperties(tags, language);
         eventBus.post(new FilterEvent(filterProperties));
