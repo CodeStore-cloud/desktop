@@ -21,7 +21,7 @@ public class SnippetCode implements SnippetForm {
     @FXML
     private TextArea snippetCode;
 
-    public SnippetCode(ReadLanguagesUseCase readLanguagesUseCase) {
+    SnippetCode(ReadLanguagesUseCase readLanguagesUseCase) {
         this.readLanguagesUseCase = readLanguagesUseCase;
     }
 
@@ -32,7 +32,7 @@ public class SnippetCode implements SnippetForm {
 
     @Override
     public void setEditing(boolean editable) {
-        languageSelection.setEditable(editable);
+        languageSelection.setDisable(!editable);
         snippetCode.setEditable(editable);
     }
 
