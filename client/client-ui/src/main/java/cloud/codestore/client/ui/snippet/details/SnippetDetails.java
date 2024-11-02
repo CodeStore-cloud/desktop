@@ -6,6 +6,7 @@ import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.snippet.SnippetForm;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
@@ -13,6 +14,8 @@ import java.util.List;
 
 @FxController
 public class SnippetDetails implements SnippetForm {
+    @FXML
+    public VBox details;
     @FXML
     private TextField tagsInput;
 

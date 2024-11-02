@@ -1,12 +1,10 @@
-.hyperlink
-{
+.hyperlink {
     -fx-text-fill: inherit;
     -fx-font-family: Arial;
     -fx-border-color: transparent;
     -fx-underline: false;
 }
 
-.hyperlink:hover
-{
+.hyperlink:hover {
     -fx-underline: true;
 }
