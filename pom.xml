@@ -65,10 +65,25 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>3.1.3</version>
+                <!-- TODO remove as soon as Java 21 is officially supported -->
+                <!-- https://github.com/osundblad/intellij-annotations-instrumenter-maven-plugin/issues/61 -->
+                <configuration>
+                    <groupId>se.eris</groupId>
+                    <artifactId>notnull-instrumenter-maven-plugin</artifactId>
+                    <version>1.1.2-SNAPSHOT</version>
+                    <packaging>maven-plugin</packaging>
+                    <file>${basedir}/lib/notnull-instrumenter-maven-plugin-1.1.2-SNAPSHOT.jar</file>
+                </configuration>
+            </plugin>
+
+            <plugin>
                 <!-- processes @NonNull and @Nullable Annotations -->
                 <groupId>se.eris</groupId>
                 <artifactId>notnull-instrumenter-maven-plugin</artifactId>
-                <version>1.1.1</version>
+                <version>1.1.2-SNAPSHOT</version>
                 <configuration>
                     <notNull>
                         <param>javax.annotation.Nonnull</param>

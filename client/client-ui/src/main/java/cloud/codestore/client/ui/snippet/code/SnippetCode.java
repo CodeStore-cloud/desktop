@@ -55,7 +55,7 @@ public class SnippetCode implements SnippetForm {
 
     @Override
     public void setEditing(boolean editable) {
-        languageSelection.setEditable(editable);
+        languageSelection.setDisable(!editable);
         editor.setEditing(editable);
     }
 
