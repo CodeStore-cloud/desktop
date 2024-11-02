@@ -1,10 +1,12 @@
+@use "sass:math";
+
 $windowWidth: 1100px;
 $windowHeight: 700px;
 
 $borderSize: 1px;
 
 $primaryPadding: 10px;
-$secondaryPadding: $primaryPadding / 2;
+$secondaryPadding: math.div($primaryPadding, 2);
 
 $primaryElementSize: 30px;
 $secondaryElementSize: 22px;

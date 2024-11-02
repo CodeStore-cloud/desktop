@@ -1,5 +1,6 @@
 @use "colors";
 @use "size";
+@use "sass:math";
 
 .primaryBackground {
     -fx-background-color: colors.$primaryBackgroundColor;
@@ -48,13 +49,13 @@
     -fx-background-radius: 0;
     -fx-background-insets: 0;
 
-    $backgroundPosition: (size.$secondaryElementSize - size.$secondaryContentSize) / 2;
+    $backgroundPosition: math.div(size.$secondaryElementSize - size.$secondaryContentSize, 2);
     -fx-background-position: $backgroundPosition $backgroundPosition;
     -fx-pref-width: size.$secondaryElementSize;
     -fx-pref-height: size.$secondaryElementSize;
 
     &.primary {
-        $backgroundPosition: (size.$primaryElementSize - size.$primaryContentSize) / 2;
+        $backgroundPosition: math.div(size.$primaryElementSize - size.$primaryContentSize, 2);
         -fx-background-position: $backgroundPosition $backgroundPosition;
         -fx-pref-width: size.$primaryElementSize;
         -fx-pref-height: size.$primaryElementSize;

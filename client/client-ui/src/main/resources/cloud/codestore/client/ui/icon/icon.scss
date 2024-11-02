@@ -1,4 +1,5 @@
 @use "../size";
+@use "sass:math";
 
 Icon {
     -fx-pref-width: size.$secondaryElementSize;
@@ -8,7 +9,7 @@ Icon {
     -fx-max-width: size.$secondaryElementSize;
     -fx-max-height: size.$secondaryElementSize;
 
-    $backgroundPosition: (size.$secondaryElementSize - size.$secondaryContentSize) / 2;
+    $backgroundPosition: math.div(size.$secondaryElementSize - size.$secondaryContentSize, 2);
     -fx-background-repeat: no-repeat;
     -fx-background-position: $backgroundPosition $backgroundPosition;
 
