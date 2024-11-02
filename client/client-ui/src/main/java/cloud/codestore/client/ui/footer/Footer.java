@@ -14,7 +14,7 @@ public class Footer {
      */
     @FXML
     public void showImprint() {
-        DefaultBrowser.visit("https://codestore.cloud/terms/imprint");
+        DefaultBrowser.visit("https://codestore.cloud/imprint");
     }
 
     /**
@@ -22,6 +22,6 @@ public class Footer {
      */
     @FXML
     public void showPrivacy() {
-        DefaultBrowser.visit("https://codestore.cloud/terms/privacy");
+        DefaultBrowser.visit("https://codestore.cloud/privacy");
     }
 }
