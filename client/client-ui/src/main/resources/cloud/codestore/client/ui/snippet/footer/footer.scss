@@ -1,3 +1,9 @@
+@use "../../size";
+
+#footer {
+    //@include size.fixed-height(30);
+}
+
 #saveButton {
     -fx-background-image: url("save.png");
 }

@@ -7,18 +7,35 @@
            fx:controller="cloud.codestore.client.ui.snippet.SnippetController"
            stylesheets="@snippet.css">
 
-    <VBox fx:id="snippetPane" styleClass="primarySpacing">
-        <HBox>
+    <GridPane fx:id="snippetPane" styleClass="grid-pane,primarySpacing">
+        <columnConstraints>
+            <ColumnConstraints hgrow="ALWAYS"/>
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints vgrow="NEVER"/> <!-- title -->
+            <RowConstraints vgrow="NEVER"/>
+            <RowConstraints vgrow="NEVER"/> <!-- description -->
+            <RowConstraints vgrow="NEVER"/>
+            <RowConstraints vgrow="ALWAYS"/> <!-- code -->
+            <RowConstraints vgrow="NEVER"/>
+            <RowConstraints vgrow="NEVER"/> <!-- details -->
+            <RowConstraints vgrow="NEVER"/>
+            <RowConstraints vgrow="NEVER"/> <!-- footer -->
+        </rowConstraints>
+
+        <HBox GridPane.rowIndex="0">
             <fx:include source="./title/title.fxml" fx:id="snippetTitle" HBox.hgrow="ALWAYS"/>
-            <fx:include source="../history/history.fxml" HBox.hgrow="NEVER" />
+            <fx:include source="../history/history.fxml" HBox.hgrow="NEVER"/>
         </HBox>
-        <Separator/>
-        <fx:include source="./description/description.fxml" fx:id="snippetDescription"/>
-        <Separator/>
-        <fx:include source="./code/code.fxml" fx:id="snippetCode" VBox.vgrow="ALWAYS"/>
-        <fx:include source="./details/details.fxml" fx:id="snippetDetails"/>
-        <fx:include source="./footer/footer.fxml" fx:id="snippetFooter"/>
-    </VBox>
+        <Separator GridPane.rowIndex="1"/>
+        <fx:include source="./description/description.fxml" fx:id="snippetDescription" GridPane.rowIndex="2"/>
+        <Separator GridPane.rowIndex="3"/>
+        <fx:include source="./code/code.fxml" fx:id="snippetCode" GridPane.rowIndex="4"/>
+        <Separator GridPane.rowIndex="5"/>
+        <fx:include source="./details/details.fxml" fx:id="snippetDetails" GridPane.rowIndex="6"/>
+        <Separator GridPane.rowIndex="7"/>
+        <fx:include source="./footer/footer.fxml" fx:id="snippetFooter" GridPane.rowIndex="8"/>
+    </GridPane>
 
     <VBox fx:id="noSnippetLabel">
         <Label text="%snippet.noSelection"/>

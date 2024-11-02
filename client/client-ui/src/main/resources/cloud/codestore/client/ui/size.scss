@@ -12,3 +12,23 @@ $primaryElementSize: 30px;
 $secondaryElementSize: 22px;
 $primaryContentSize: 24px;
 $secondaryContentSize: 16px;
+
+@mixin fixed-size($size)
+{
+    @include fixed-width($size);
+    @include fixed-height($size);
+}
+
+@mixin fixed-width($width)
+{
+    -fx-pref-width: $width;
+    -fx-min-width: $width;
+    -fx-max-width: $width;
+}
+
+@mixin fixed-height($height)
+{
+    -fx-pref-height: $height;
+    -fx-min-height: $height;
+    -fx-max-height: $height;
+}

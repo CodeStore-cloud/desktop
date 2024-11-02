@@ -12,5 +12,5 @@
         <Icon styleClass="language"/>
         <ComboBox fx:id="languageSelection"/>
     </HBox>
-    <WebView fx:id="browser" />
+    <WebView fx:id="browser" VBox.vgrow="ALWAYS" />
 </VBox>

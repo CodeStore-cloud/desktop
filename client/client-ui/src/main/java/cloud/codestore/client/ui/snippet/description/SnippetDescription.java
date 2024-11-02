@@ -16,6 +16,11 @@ public class SnippetDescription implements SnippetForm {
     @FXML
     private TextArea snippetDescription;
 
+    @FXML
+    void initialize() {
+        snippetDescription.minHeightProperty().bind(snippetDescription.prefHeightProperty());
+    }
+
     @Override
     public void setEditing(boolean editable) {
         snippetDescription.setEditable(editable);

@@ -18,6 +18,9 @@
 
 .primarySpacing {
     -fx-spacing: size.$primaryPadding;
+    &.grid-pane {
+        -fx-vgap: size.$primaryPadding;
+    }
 }
 
 .secondarySpacing {
@@ -51,14 +54,12 @@
 
     $backgroundPosition: math.div(size.$secondaryElementSize - size.$secondaryContentSize, 2);
     -fx-background-position: $backgroundPosition $backgroundPosition;
-    -fx-pref-width: size.$secondaryElementSize;
-    -fx-pref-height: size.$secondaryElementSize;
+    @include size.fixed-size(size.$secondaryElementSize);
 
     &.primary {
         $backgroundPosition: math.div(size.$primaryElementSize - size.$primaryContentSize, 2);
         -fx-background-position: $backgroundPosition $backgroundPosition;
-        -fx-pref-width: size.$primaryElementSize;
-        -fx-pref-height: size.$primaryElementSize;
+        @include size.fixed-size(size.$primaryElementSize);
     }
 }
 
