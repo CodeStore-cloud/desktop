@@ -1,18 +1,12 @@
 @use "../colors";
+@use "../size";
 
 Separator {
-    -fx-pref-height: 1px;
-    -fx-min-height: 1px;
-    -fx-max-height: 1px;
     -fx-background-color: colors.$borderColor;
+    @include size.fixed-height(1);
 
-    .vertical {
-        -fx-pref-height: -1;
-        -fx-min-height: -1;
-        -fx-max-height: -1;
-
-        -fx-pref-width: 1px;
-        -fx-min-width: 1px;
-        -fx-max-width: 1px;
+    &.vertical {
+        @include size.fixed-height(USE_COMPUTED_SIZE);
+        @include size.fixed-width(1);
     }
 }
