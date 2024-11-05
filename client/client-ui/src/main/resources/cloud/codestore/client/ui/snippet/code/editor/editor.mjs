@@ -70,6 +70,10 @@ window.editor = {
         });
     },
 
+    isEditable: function() {
+        return !view.state.readOnly;
+    },
+
     setLanguage: function(languageId) {
         const lang = function() {
             switch(languageId) {

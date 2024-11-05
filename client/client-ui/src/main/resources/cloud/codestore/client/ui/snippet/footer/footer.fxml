@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.HBox?>
 <HBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
       fx:controller="cloud.codestore.client.ui.snippet.footer.SnippetFooter"
-      fx:id="footer" stylesheets="@footer.css" styleClass="primarySpacing" style="-fx-background-color: green;">
+      fx:id="footer" stylesheets="@footer.css" styleClass="primarySpacing">
 
     <Button fx:id="saveButton" styleClass="primary">
         <tooltip>

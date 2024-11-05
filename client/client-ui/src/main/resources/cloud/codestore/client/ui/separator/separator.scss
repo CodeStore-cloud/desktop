@@ -6,7 +6,7 @@ Separator {
     @include size.fixed-height(1);
 
     &.vertical {
-        @include size.fixed-height(USE_COMPUTED_SIZE);
+        @include size.fixed-height(-1);
         @include size.fixed-width(1);
     }
 }

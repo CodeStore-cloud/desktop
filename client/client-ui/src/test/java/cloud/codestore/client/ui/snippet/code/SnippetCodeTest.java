@@ -6,7 +6,7 @@ import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.AbstractUiTest;
 import cloud.codestore.client.usecases.readlanguages.ReadLanguagesUseCase;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextInputControl;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,8 +36,9 @@ class SnippetCodeTest extends AbstractUiTest {
                 new Language("HTML", "3")
         };
         when(readLanguagesUseCase.readLanguages()).thenReturn(List.of(languages));
-        controller = new SnippetCode(readLanguagesUseCase, Path.of(".")); //todo update path
+        controller = new SnippetCode(readLanguagesUseCase, Path.of("target"));
         start(stage, "code.fxml", controller);
+        // Editor is loaded synchronously in the tests, so no need to wait until it´s loaded
     }
 
     @Test
@@ -49,16 +50,19 @@ class SnippetCodeTest extends AbstractUiTest {
     @Test
     @DisplayName("sets the editability of the code and language selection")
     void setCodeEditable() {
-        var textField = textField();
         var comboBox = languageSelection();
 
         interact(() -> controller.setEditing(true));
-        assertThat(textField.isEditable()).isTrue();
-        assertThat(comboBox.isEditable()).isTrue();
+        assertBrowserIsEditable(true);
+        assertThat(comboBox.isDisabled()).isFalse();
 
         interact(() -> controller.setEditing(false));
-        assertThat(textField.isEditable()).isFalse();
-        assertThat(comboBox.isEditable()).isFalse();
+        assertBrowserIsEditable(false);
+        assertThat(comboBox.isDisabled()).isTrue();
+    }
+
+    private void assertBrowserIsEditable(boolean expectedValue) {
+        interact(() -> assertThat(browser().getEngine().executeScript("editor.isEditable();")).isEqualTo(expectedValue));
     }
 
     @Test
@@ -71,34 +75,38 @@ class SnippetCodeTest extends AbstractUiTest {
 
         interact(() -> controller.visit(snippet));
 
-        assertThat(textField()).hasText(snippet.getCode());
         Language selectedLanguage = languageSelection().getSelectionModel().getSelectedItem();
         assertThat(selectedLanguage).isEqualTo(snippet.getLanguage());
+
+        interact(() -> {
+            var content = browser().getEngine().executeScript("editor.getContent();");
+            assertThat(content).isEqualTo(snippet.getCode());
+        });
     }
 
     @Test
     @DisplayName("reads the code and language into the given snippet builder")
     void readDescription() {
-        String code = "print(\"Hello, World!\");";
-        Language language = new Language("Python", "1");
-        interact(() -> {
-            textField().setText(code);
-            languageSelection().getSelectionModel().select(language);
-        });
+        Snippet testSnippet = Snippet.builder()
+                                     .code("print(\"Hello, World!\");")
+                                     .language(new Language("Python", "1"))
+                                     .build();
+
+        interact(() -> controller.visit(testSnippet));
 
         SnippetBuilder builder = Snippet.builder();
-        controller.visit(builder);
+        interact(() -> controller.visit(builder));
 
-        Snippet snippet = builder.build();
-        assertThat(snippet.getCode()).isEqualTo(code);
-        assertThat(snippet.getLanguage()).isEqualTo(language);
+        Snippet readSnippet = builder.build();
+        assertThat(readSnippet.getCode()).isEqualTo(testSnippet.getCode());
+        assertThat(readSnippet.getLanguage()).isEqualTo(testSnippet.getLanguage());
     }
 
     private ComboBox<Language> languageSelection() {
         return lookup("#languageSelection").queryComboBox();
     }
 
-    private TextInputControl textField() {
-        return lookup("#snippetCode").queryTextInputControl();
+    private WebView browser() {
+        return lookup("#browser").queryAs(WebView.class);
     }
 }

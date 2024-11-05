@@ -15,7 +15,6 @@ import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.net.MalformedURLException;
 import java.nio.file.Path;
 
 @FxController
@@ -37,14 +36,16 @@ public class SnippetCode implements SnippetForm {
     }
 
     @FXML
-    private void initialize() throws MalformedURLException {
+    private void initialize() {
         languageSelection.getItems().addAll(readLanguagesUseCase.readLanguages());
 
         long startTime = System.currentTimeMillis();
         browser.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
             if (newState == Worker.State.SUCCEEDED) {
                 LOGGER.info("Editor loaded in {}ms", System.currentTimeMillis() - startTime);
-                editor = editor.loadingFinished();
+                editor.loadingFinished();
+            } else if (newState == Worker.State.FAILED) {
+                throw new RuntimeException("Loading editor failed!");
             }
         });
 
@@ -78,7 +79,7 @@ public class SnippetCode implements SnippetForm {
 
         String getContent();
 
-        Editor loadingFinished();
+        void loadingFinished();
     }
 
     /**
@@ -102,12 +103,12 @@ public class SnippetCode implements SnippetForm {
 
         @Override
         public String getContent() {
-            return (String) browser.getEngine().executeScript("editor.getContent();");
+            return "";
         }
 
         @Override
-        public Editor loadingFinished() {
-            return new WebEditor(editable, snippet);
+        public void loadingFinished() {
+            editor = new WebEditor(editable, snippet);
         }
     }
 
@@ -148,8 +149,6 @@ public class SnippetCode implements SnippetForm {
         }
 
         @Override
-        public Editor loadingFinished() {
-            return this;
-        }
+        public void loadingFinished() {}
     }
 }
