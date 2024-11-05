@@ -1,14 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import cloud.codestore.client.ui.icon.Icon?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<HBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
       fx:controller="cloud.codestore.client.ui.snippet.details.SnippetDetails"
       fx:id="details" stylesheets="@details.css">
-    <HBox>
+    <HBox HBox.hgrow="ALWAYS">
         <Icon styleClass="tag"/>
         <TextField fx:id="tagsInput" promptText="%snippet.details.tags.placeholder" HBox.hgrow="ALWAYS"/>
     </HBox>
-</VBox>
+    <GridPane fx:id="timestampContainer" hgap="5" HBox.hgrow="NEVER">
+        <columnConstraints>
+            <ColumnConstraints halignment="RIGHT" hgrow="NEVER" minWidth="-Infinity"/>
+            <ColumnConstraints halignment="LEFT" hgrow="NEVER" minWidth="-Infinity"/>
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints vgrow="NEVER"/>
+            <RowConstraints vgrow="NEVER"/>
+        </rowConstraints>
+        <Label text="%snippet.details.creationTime.label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <Label fx:id="creationTime" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+        <Label text="%snippet.details.modificationTime.label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <Label fx:id="modificationTime" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+    </GridPane>
+</HBox>

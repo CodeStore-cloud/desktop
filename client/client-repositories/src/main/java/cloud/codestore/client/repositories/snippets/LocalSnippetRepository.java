@@ -164,6 +164,8 @@ class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase,
                       .code(snippetResource.getCode())
                       .tags(tagRepository.get(tagsUri))
                       .language(languageRepository.get(languageUri))
+                      .created(snippetResource.getCreated())
+                      .modified(snippetResource.getModified())
                       .permissions(permissions)
                       .build();
     }
