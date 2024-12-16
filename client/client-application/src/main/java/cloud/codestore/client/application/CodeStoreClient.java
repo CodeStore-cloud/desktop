@@ -63,7 +63,7 @@ public class CodeStoreClient {
      * @return the directory where the binary executables of {CodeStore} are located.
      */
     @Bean
-    public Path binDirectory(@Value("${codestore.bin:..}") String binaryPath) {
+    public Path binDirectory(@Value("${codestore.bin:.}") String binaryPath) {
         return Path.of(binaryPath).toAbsolutePath();
     }
 

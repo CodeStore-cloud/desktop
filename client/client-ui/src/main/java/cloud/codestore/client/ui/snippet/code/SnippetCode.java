@@ -12,17 +12,20 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.web.WebView;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.util.IOUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.nio.file.Path;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Objects;
 
 @FxController
 public class SnippetCode implements SnippetForm {
     private static final Logger LOGGER = LogManager.getLogger(SnippetCode.class);
 
     private final ReadLanguagesUseCase readLanguagesUseCase;
-    private final Path binDirectory;
 
     @FXML
     private ComboBox<Language> languageSelection;
@@ -30,9 +33,8 @@ public class SnippetCode implements SnippetForm {
     private WebView browser;
     private Editor editor = new LoadingEditor();
 
-    SnippetCode(ReadLanguagesUseCase readLanguagesUseCase, Path binDirectory) {
+    SnippetCode(ReadLanguagesUseCase readLanguagesUseCase) {
         this.readLanguagesUseCase = readLanguagesUseCase;
-        this.binDirectory = binDirectory;
     }
 
     @FXML
@@ -49,9 +51,7 @@ public class SnippetCode implements SnippetForm {
             }
         });
 
-        String editorUrl = binDirectory.resolve("editor.html").toUri().toString();
-        LOGGER.info("Loading editor from location {} ...", editorUrl);
-        browser.getEngine().load(editorUrl);
+        browser.getEngine().loadContent(editorHtml());
     }
 
     @Override
@@ -72,12 +72,30 @@ public class SnippetCode implements SnippetForm {
         builder.code(editor.getContent());
     }
 
+    private String editorHtml() {
+        try {
+            String html = "";
+            try (InputStream htmlStream = Objects.requireNonNull(getClass().getResourceAsStream("editor/editor.html"))) {
+                html = IOUtils.toString(new InputStreamReader(htmlStream));
+            }
+
+            String js = "";
+            try (InputStream jsStream = Objects.requireNonNull(getClass().getResourceAsStream("editor/editor.js"))) {
+                js = IOUtils.toString(new InputStreamReader(jsStream));
+            }
+
+            return html.replace("{editor.js}", js);
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+
     private interface Editor {
         void setEditing(boolean editable);
 
-        void setContent(Snippet snippet);
-
         String getContent();
+
+        void setContent(Snippet snippet);
 
         void loadingFinished();
     }
@@ -97,13 +115,13 @@ public class SnippetCode implements SnippetForm {
         }
 
         @Override
-        public void setContent(Snippet snippet) {
-            this.snippet = snippet;
+        public String getContent() {
+            return "";
         }
 
         @Override
-        public String getContent() {
-            return "";
+        public void setContent(Snippet snippet) {
+            this.snippet = snippet;
         }
 
         @Override
@@ -130,6 +148,11 @@ public class SnippetCode implements SnippetForm {
         }
 
         @Override
+        public String getContent() {
+            return (String) browser.getEngine().executeScript("editor.getContent();");
+        }
+
+        @Override
         public void setContent(Snippet snippet) {
             String languageId = snippet.getLanguage() == null ? "" : snippet.getLanguage().id();
             browser.getEngine().executeScript("editor.setLanguage(\"" + languageId + "\");");
@@ -141,11 +164,6 @@ public class SnippetCode implements SnippetForm {
             content = content.replace("\r", "");     // remove \r
 
             browser.getEngine().executeScript("editor.setContent(\"" + content + "\");");
-        }
-
-        @Override
-        public String getContent() {
-            return (String) browser.getEngine().executeScript("editor.getContent();");
         }
 
         @Override
