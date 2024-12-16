@@ -86,7 +86,7 @@ class IndexedSnippetRepository implements CreateSnippetQuery, UpdateSnippetQuery
         index.add(snippetStream);
 
         long endTime = System.currentTimeMillis();
-        LOGGER.info("Indexing finished after " + (endTime - startTime) + "ms");
+        LOGGER.info("Indexing finished after {}ms", endTime - startTime);
     }
 
     private SortField toSortFields(SortProperties sortProperties) {

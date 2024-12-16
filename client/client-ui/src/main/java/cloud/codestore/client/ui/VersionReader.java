@@ -30,7 +30,7 @@ class VersionReader {
                 version = attributes.getValue(IMPLEMENTATION_VERSION);
             }
         } catch (Exception exception) {
-            LOGGER.warn("Unable to read version from " + MANIFEST_FILE, exception);
+            LOGGER.warn("Unable to read version from {}", MANIFEST_FILE, exception);
         }
 
         return version;

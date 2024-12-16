@@ -36,7 +36,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
-            <version>3.3.2</version>
+            <version>3.4.0</version>
         </dependency>
 
         <!-- Server-Mock for testing HttpClient -->

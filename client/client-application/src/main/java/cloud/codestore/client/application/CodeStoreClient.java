@@ -39,7 +39,7 @@ public class CodeStoreClient {
     public static void main(String[] args) {
         LOGGER.info("Starting {CodeStore} client ...");
         ApplicationContext context = new AnnotationConfigApplicationContext(CodeStoreClient.class);
-        LOGGER.debug("Active profiles: " + Arrays.toString(context.getEnvironment().getActiveProfiles()));
+        LOGGER.debug("Active profiles: {}", Arrays.toString(context.getEnvironment().getActiveProfiles()));
         FXMLLoaderFactory.setControllerFactory(context::getBean);
         Application.launch(FxApplication.class);
     }
@@ -47,10 +47,10 @@ public class CodeStoreClient {
     @Bean
     public HttpClient httpClient(@Value("${codestore.data:}") String dataDirectory) {
         Path directory = getDataDirectory(dataDirectory);
-        LOGGER.debug("Data directory: " + dataDirectory);
+        LOGGER.debug("Data directory: {}", dataDirectory);
         String apiRootUrl = new RootUrlReader().readApiUrl(directory);
         String accessToken = new AccessTokenReader().readAccessToken(directory);
-        LOGGER.info("Connecting to {CodeStore} Core at " + apiRootUrl);
+        LOGGER.info("Connecting to {CodeStore} Core at {}", apiRootUrl);
         return new HttpClient(apiRootUrl, accessToken);
     }
 

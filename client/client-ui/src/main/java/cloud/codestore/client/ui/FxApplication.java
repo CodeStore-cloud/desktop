@@ -60,6 +60,6 @@ public class FxApplication extends Application {
 
     private void logStartTime() {
         long jvmStart = ManagementFactory.getRuntimeMXBean().getStartTime();
-        LOGGER.info("Application started in " + (System.currentTimeMillis() - jvmStart) + "ms");
+        LOGGER.info("Application started in {}ms", System.currentTimeMillis() - jvmStart);
     }
 }

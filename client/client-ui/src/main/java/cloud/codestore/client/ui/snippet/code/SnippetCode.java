@@ -50,7 +50,7 @@ public class SnippetCode implements SnippetForm {
         });
 
         String editorUrl = binDirectory.resolve("editor.html").toUri().toString();
-        LOGGER.info("Loading editor from location " + editorUrl + " ...");
+        LOGGER.info("Loading editor from location {} ...", editorUrl);
         browser.getEngine().load(editorUrl);
     }
 

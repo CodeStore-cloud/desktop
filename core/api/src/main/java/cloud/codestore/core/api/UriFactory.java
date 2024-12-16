@@ -24,7 +24,7 @@ public class UriFactory implements ApplicationListener<ServletWebServerInitializ
     public void onApplicationEvent(ServletWebServerInitializedEvent event) {
         int port = event.getWebServer().getPort();
         ROOT_URI = "http://localhost:" + port;
-        LOGGER.info("Listening on " + ROOT_URI);
+        LOGGER.info("Listening on {}", ROOT_URI);
     }
 
     /**
