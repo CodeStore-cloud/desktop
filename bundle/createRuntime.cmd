@@ -4,7 +4,17 @@ SET JDK_PATH="%1"
 SET JAVAFX_PATH="%2"
 SET OUTPUT_PATH="runtime"
 SET MODULE_PATH="%JDK_PATH%\jmods;%JAVAFX_PATH%"
-SET MODULES="jdk.localedata,java.logging,java.net.http,javafx.controls,javafx.fxml,javafx.web"
+SET MODULES=jdk.localedata,^
+java.logging,^
+java.net.http,^
+java.management,^
+java.naming,^
+java.security.jgss,^
+java.instrument,^
+javafx.graphics,^
+javafx.controls,^
+javafx.fxml,^
+javafx.web
 
 if exist "%JAVA_HOME%\bin\jlink.exe" (
     SET JLINK_EXE="%JAVA_HOME%\bin\jlink.exe"
