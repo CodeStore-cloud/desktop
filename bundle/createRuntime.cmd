@@ -1,0 +1,29 @@
+@echo off
+
+SET JDK_PATH="%1"
+SET JAVAFX_PATH="%2"
+SET OUTPUT_PATH="runtime"
+SET MODULE_PATH="%JDK_PATH%\jmods;%JAVAFX_PATH%"
+SET MODULES="jdk.localedata,java.logging,java.net.http,javafx.controls,javafx.fxml,javafx.web"
+
+if exist "%JAVA_HOME%\bin\jlink.exe" (
+    SET JLINK_EXE="%JAVA_HOME%\bin\jlink.exe"
+) else (
+    SET JLINK_EXE="%JAVA_HOME%\bin\jlink"
+)
+
+if exist %OUTPUT_PATH% rmdir /s /q %OUTPUT_PATH%
+
+echo Creating Java runtime ...
+
+%JLINK_EXE% ^
+--module-path %MODULE_PATH% ^
+--add-modules %MODULES% ^
+--include-locales en,de ^
+--strip-debug ^
+--no-header-files ^
+--no-man-pages ^
+--compress=2 ^
+--output %OUTPUT_PATH%
+
+exit /b

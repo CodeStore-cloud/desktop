@@ -24,7 +24,7 @@ The application is divided into two modules, each running in a separate process:
 ### {CodeStore} Core
 
 The {CodeStore} Core contains the basic functionalities like saving, editing and deleting code snippets, as well as
-synchronizing code snippets with the {CodeStore} cloud. The data can be accessed via the {CodeStore} Core API.
+synchronizing code snippets with a cloud service. The data can be accessed via the {CodeStore} Core API.
 
 ### Graphical User Interface
 
@@ -49,11 +49,13 @@ desktop-app
 |   |-- client-repositories  -> access file system and Core API
 |   `-- client-application   -> main module and dependency injection
 |
-`-- core
-    |-- useCases             -> abstract application logic
-    |-- api                  -> REST API
-    |-- repositories         -> access file system and public server
-    `-- application          -> main module and dependency injection
+|-- core
+|   |-- useCases             -> abstract application logic
+|   |-- api                  -> REST API
+|   |-- repositories         -> access file system and public server
+|   `-- application          -> main module and dependency injection
+|
+`-- bundle                   -> application bundle build scripts
 ```
 
 ## Starting the Application
