@@ -4,10 +4,8 @@ import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.snippet.SnippetForm;
-import com.sun.javafx.scene.control.skin.Utils;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
-import javafx.scene.text.TextBoundsType;
 
 import javax.annotation.Nonnull;
 
@@ -38,13 +36,13 @@ public class SnippetDescription implements SnippetForm {
     }
 
     private void updateHeight() {
-        double height = Utils.computeTextHeight(
-                snippetDescription.getFont(),
-                snippetDescription.getText(),
-                snippetDescription.getWidth(),
-                TextBoundsType.VISUAL
-        );
-
-        snippetDescription.setPrefHeight(height + 10);
+//        double height = Utils.computeTextHeight(
+//                snippetDescription.getFont(),
+//                snippetDescription.getText(),
+//                snippetDescription.getWidth(),
+//                TextBoundsType.VISUAL
+//        );
+//
+//        snippetDescription.setPrefHeight(height + 10);
     }
 }
