@@ -44,7 +44,7 @@
                 <version>3.4.2</version>
                 <configuration>
                     <finalName>CodeStoreClient</finalName>
-                    <outputDirectory>${project.build.directory}\bin</outputDirectory>
+                    <outputDirectory>${project.build.directory}/bin</outputDirectory>
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
@@ -68,7 +68,7 @@
                             <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}\bin</outputDirectory>
+                            <outputDirectory>${project.build.directory}/bin</outputDirectory>
                             <includeScope>runtime</includeScope>
                         </configuration>
                     </execution>

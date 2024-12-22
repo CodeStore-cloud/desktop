@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -105,15 +106,15 @@ public record Directory(Path path) {
      * Returns al files inside this directory.
      *
      * @return a list of {@link File}s representing the files (not subdirectories) inside this directory.
+     * The list is empty if there are no files in this directory, or if the directory does not exist.
      */
     public List<File> getFiles() throws RepositoryException {
-        try {
-            return Files.list(path)
-                        .filter(Files::isRegularFile)
+        try (Stream<Path> files = Files.list(path)) {
+            return files.filter(Files::isRegularFile)
                         .map(File::new)
                         .collect(Collectors.toList());
         } catch (NoSuchFileException exception) {
-            throw new RepositoryException(exception, "directory.notExists", path);
+            return Collections.emptyList();
         } catch (IOException exception) {
             throw new RepositoryException(exception, "directory.couldNotAccess", path);
         }

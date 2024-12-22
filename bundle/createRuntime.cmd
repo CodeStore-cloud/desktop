@@ -2,7 +2,7 @@
 
 SET JDK_PATH="%1"
 SET JAVAFX_PATH="%2"
-SET OUTPUT_PATH="runtime"
+SET OUTPUT_PATH="target/runtime"
 SET MODULE_PATH="%JDK_PATH%\jmods;%JAVAFX_PATH%"
 SET MODULES=jdk.localedata,^
 java.logging,^
@@ -33,7 +33,6 @@ echo Creating Java runtime ...
 --strip-debug ^
 --no-header-files ^
 --no-man-pages ^
---compress=2 ^
 --output %OUTPUT_PATH%
 
 exit /b

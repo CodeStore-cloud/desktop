@@ -12,21 +12,22 @@
     <artifactId>bundle</artifactId>
     <packaging>pom</packaging>
 
+    <properties>
+        <spring.profile>default</spring.profile>
+        <jdk.path>%JAVA_HOME%</jdk.path>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <properties>
+                <spring.profile>dev</spring.profile>
+            </properties>
+        </profile>
+    </profiles>
+
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
-                <version>3.3.2</version>
-                <configuration>
-                    <filesets>
-                        <fileset>
-                            <directory>runtime</directory>
-                        </fileset>
-                    </filesets>
-                </configuration>
-            </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
@@ -47,11 +48,11 @@
                                 </requireEnvironmentVariable>
                                 <requireProperty>
                                     <property>jdk.path</property>
-                                    <message>You must set the "jdk.path" property. E.g. -Djdk.path=%userprofile%/.jdks/openjdk-21</message>
+                                    <message>You must set the "jdk.path" property.</message>
                                 </requireProperty>
                                 <requireProperty>
                                     <property>javafx.path</property>
-                                    <message>You must set the "javafx.path" property! E.g. -Djavafx.path=%userprofile%/.jdks/javafx-jmods-17</message>
+                                    <message>You must set the "javafx.path" property!</message>
                                 </requireProperty>
                             </rules>
                         </configuration>
@@ -60,7 +61,67 @@
             </plugin>
 
             <plugin>
-                <!-- Create custom Java runtime including JavaFX runtime -->
+                <!-- Copy core and client binaries -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-core-binaries</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/core</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.parent.basedir}/core/application/target/bin</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-client-binaries</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/client</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.parent.basedir}/client/client-application/target/bin</directory>
+                                    <excludes>
+                                        <exclude>javafx-*.jar</exclude>
+                                    </excludes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-start-scripts</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}/${spring.profile}</directory>
+                                    <includes>
+                                        <include>*.cmd</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <!-- Create custom runtime -->
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.0.0</version>
