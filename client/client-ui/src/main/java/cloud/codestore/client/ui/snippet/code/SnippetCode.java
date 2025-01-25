@@ -4,11 +4,14 @@ import cloud.codestore.client.Language;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.FxController;
+import cloud.codestore.client.ui.selection.filter.QuickFilterEvent;
 import cloud.codestore.client.ui.snippet.SnippetForm;
 import cloud.codestore.client.usecases.readlanguages.ReadLanguagesUseCase;
+import com.google.common.eventbus.EventBus;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.web.WebView;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,20 +29,29 @@ public class SnippetCode implements SnippetForm {
     private static final Logger LOGGER = LogManager.getLogger(SnippetCode.class);
 
     private final ReadLanguagesUseCase readLanguagesUseCase;
+    private final EventBus eventBus;
 
     @FXML
     private ComboBox<Language> languageSelection;
     @FXML
+    private Label languageQuickfilter;
+    @FXML
     private WebView browser;
     private Editor editor = new LoadingEditor();
 
-    SnippetCode(ReadLanguagesUseCase readLanguagesUseCase) {
+    SnippetCode(ReadLanguagesUseCase readLanguagesUseCase, EventBus eventBus) {
         this.readLanguagesUseCase = readLanguagesUseCase;
+        this.eventBus = eventBus;
     }
 
     @FXML
     private void initialize() {
         languageSelection.getItems().addAll(readLanguagesUseCase.readLanguages());
+        languageSelection.managedProperty().bind(languageSelection.visibleProperty());
+        languageQuickfilter.managedProperty().bind(languageQuickfilter.visibleProperty());
+        languageSelection.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            languageQuickfilter.setText(newValue == null ? "" : newValue.toString());
+        });
 
         long startTime = System.currentTimeMillis();
         browser.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
@@ -54,9 +66,16 @@ public class SnippetCode implements SnippetForm {
         browser.getEngine().loadContent(editorHtml());
     }
 
+    @FXML
+    private void quickfilterLanguage() {
+        Language language = languageSelection.getSelectionModel().getSelectedItem();
+        eventBus.post(new QuickFilterEvent(language));
+    }
+
     @Override
     public void setEditing(boolean editable) {
-        languageSelection.setDisable(!editable);
+        languageSelection.setVisible(editable);
+        languageQuickfilter.setVisible(!editable);
         editor.setEditing(editable);
     }
 
@@ -158,12 +177,28 @@ public class SnippetCode implements SnippetForm {
             browser.getEngine().executeScript("editor.setLanguage(\"" + languageId + "\");");
 
             String content = snippet.getCode() == null ? "" : snippet.getCode();
-            content = content.replace("\\", "\\\\"); // \ -> \\
-            content = content.replace("\"", "\\\""); // " -> \"
-            content = content.replace("\n", "\\n");  // <newline> -> \n
-            content = content.replace("\r", "");     // remove \r
+            content = escapeBackslashes(content);
+            content = escapeDoubleQuotes(content);
+            content = escapeLineBreaks(content);
+            content = removeCarriageReturns(content);
 
             browser.getEngine().executeScript("editor.setContent(\"" + content + "\");");
+        }
+
+        private String escapeBackslashes(String content) {
+            return content.replace("\\", "\\\\");
+        }
+
+        private String escapeDoubleQuotes(String content) {
+            return content.replace("\"", "\\\"");
+        }
+
+        private String escapeLineBreaks(String content) {
+            return content.replace("\n", "\\n");
+        }
+
+        private String removeCarriageReturns(String content) {
+            return content.replace("\r", "");
         }
 
         @Override
