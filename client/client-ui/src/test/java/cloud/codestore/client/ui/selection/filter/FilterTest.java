@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.testfx.framework.junit5.Start;
 
@@ -24,9 +25,11 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("The filter controller")
 class FilterTest extends AbstractUiTest {
+    private static final Language JAVA = new Language("Java", "3");
+
     @Mock
     private ReadLanguagesUseCase readLanguagesUseCase;
-    @Mock
+    @Spy
     private EventBus eventBus;
     @InjectMocks
     private Filter controller;
@@ -36,7 +39,7 @@ class FilterTest extends AbstractUiTest {
         lenient().when(readLanguagesUseCase.readLanguages()).thenReturn(List.of(
                 new Language("Python", "1"),
                 new Language("HTML", "2"),
-                new Language("Java", "3"),
+                JAVA,
                 new Language("Kotlin", "4")
         ));
 
@@ -90,14 +93,28 @@ class FilterTest extends AbstractUiTest {
 
         var comboBox = languageSelection();
         assertThat(comboBox.getItems()).hasSize(5);
-        assertThat(comboBox.getItems().get(0)).isEqualTo(new LanguageItem(null, "All"));
+        assertThat(comboBox.getItems().getFirst()).isEqualTo(new LanguageItem(null, "All"));
 
         interact(() -> comboBox.getSelectionModel().select(3));
 
         verify(eventBus).post(argument.capture());
         var filterProperties = argument.getValue().filterProperties();
         assertThat(filterProperties.getLanguage()).isNotEmpty();
-        assertThat(filterProperties.getLanguage().get()).isEqualTo(new Language("Java", "3"));
+        assertThat(filterProperties.getLanguage().get()).isEqualTo(JAVA);
+    }
+
+    @Test
+    @DisplayName("triggers a FilterEvent when receiving a QuickFilterEvent")
+    void quickfilterEvent() {
+        var argument = ArgumentCaptor.forClass(FilterEvent.class);
+
+        interact(() -> eventBus.post(new QuickFilterEvent(JAVA)));
+        assertThat(languageSelection().getSelectionModel().getSelectedItem().language()).isEqualTo(JAVA);
+
+        verify(eventBus).post(argument.capture());
+        var filterProperties = argument.getValue().filterProperties();
+        assertThat(filterProperties.getLanguage()).isNotEmpty();
+        assertThat(filterProperties.getLanguage().get()).isEqualTo(JAVA);
     }
 
     private TextInputControl tagsInput() {

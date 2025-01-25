@@ -17,6 +17,7 @@ import javafx.scene.layout.Pane;
 import javax.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @FxController
@@ -54,6 +55,16 @@ public class Filter {
     @Subscribe
     private void toggle(@Nonnull ToggleSortEvent event) {
         filterPanel.setVisible(false);
+    }
+
+    @Subscribe
+    private void quickfilter(@Nonnull QuickFilterEvent event) {
+        Language language = event.language();
+        languageSelection.getItems()
+                         .stream()
+                         .filter(item -> Objects.equals(item.language(), language))
+                         .findFirst()
+                         .ifPresent(item -> languageSelection.getSelectionModel().select(item));
     }
 
     private void handleTagInput() {
