@@ -34,7 +34,7 @@ class FullTextSearchTest extends AbstractUiTest {
     void triggerFullTextSearch() {
         var argument = ArgumentCaptor.forClass(FullTextSearchEvent.class);
 
-        inputField().setText("test");
+        interact(() -> inputField().setText("test"));
 
         verify(eventBus).post(argument.capture());
         var event = argument.getValue();
@@ -45,7 +45,7 @@ class FullTextSearchTest extends AbstractUiTest {
     @DisplayName("is cleared when pressing ESC")
     void clearInputOnESC() {
         var inputField = inputField();
-        inputField.setText("test");
+        interact(() -> inputField.setText("test"));
         assertThat(inputField.getText()).isNotEmpty();
 
         press(KeyCode.ESCAPE);
@@ -57,7 +57,7 @@ class FullTextSearchTest extends AbstractUiTest {
     @DisplayName("is cleared when pressing the search-icon")
     void clearInputIcon() {
         var inputField = inputField();
-        inputField.setText("test");
+        interact(() -> inputField.setText("test"));
         assertThat(inputField.getText()).isNotEmpty();
 
         Labeled icon = icon();

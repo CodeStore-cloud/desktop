@@ -41,14 +41,14 @@ class SnippetDetailsTest extends AbstractUiTest {
     @DisplayName("sets the tags of the given snippet")
     void setTags() {
         Snippet snippet = Snippet.builder().tags(List.of("A", "B", "C")).build();
-        controller.visit(snippet);
+        interact(() -> controller.visit(snippet));
         assertThat(tagsInput()).hasText("A B C");
     }
 
     @Test
     @DisplayName("reads the tags into the given snippet builder")
     void readTags() {
-        tagsInput().setText("A B C");
+        interact(() -> tagsInput().setText("A B C"));
 
         SnippetBuilder builder = Snippet.builder();
         controller.visit(builder);

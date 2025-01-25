@@ -63,7 +63,7 @@ class SnippetListTest extends AbstractUiTest {
     void selectSnippet() {
         var argument = ArgumentCaptor.forClass(SnippetSelectedEvent.class);
 
-        listView().getSelectionModel().select(0);
+        interact(() -> listView().getSelectionModel().select(0));
 
         verify(eventBus).post(argument.capture());
         SnippetSelectedEvent event = argument.getValue();

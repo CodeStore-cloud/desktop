@@ -185,6 +185,9 @@ public class SnippetController {
      */
     private class NewSnippetState implements ControllerState {
         NewSnippetState() {
+            noSnippetLabel.setVisible(false);
+            snippetPane.setVisible(true);
+
             accept(EMPTY_SNIPPET);
             setEditing(true);
         }

@@ -101,6 +101,7 @@ class SnippetControllerTest {
 
             selectSnippet();
 
+            verifyShowSnippetPane();
             verifyEditable(false);
             verifyVisit(testSnippet);
         }
@@ -113,6 +114,7 @@ class SnippetControllerTest {
             eventBus.post(new CreateSnippetEvent());
 
             verify(readSnippetUseCase, never()).readSnippet(anyString());
+            verifyShowSnippetPane();
             verifyVisit(EMPTY_SNIPPET);
             verifyEditable(true);
         }
@@ -233,6 +235,11 @@ class SnippetControllerTest {
         verify(snippetCodeController).setEditing(editable);
         verify(snippetDetailsController).setEditing(editable);
         verify(snippetFooterController).setEditing(editable);
+    }
+
+    private void verifyShowSnippetPane() {
+        verify(noSnippetLabel).setVisible(false);
+        verify(snippetPane).setVisible(true);
     }
 
     private void verifyVisit(Snippet snippet) {

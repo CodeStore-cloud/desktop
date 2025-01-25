@@ -39,20 +39,20 @@
                             <goal>enforce</goal>
                         </goals>
                         <configuration>
-                            <fail>true</fail>
+                            <fail>false</fail>
                             <rules>
                                 <!-- https://maven.apache.org/enforcer/enforcer-rules/index.html -->
                                 <requireEnvironmentVariable>
                                     <variableName>JAVA_HOME</variableName>
-                                    <message>You must set the "JAVA_HOME" environment variable.</message>
+                                    <message>The "JAVA_HOME" environment variable is not set.</message>
                                 </requireEnvironmentVariable>
                                 <requireProperty>
                                     <property>jdk.path</property>
-                                    <message>You must set the "jdk.path" property.</message>
+                                    <message>The "jdk.path" property is not set.</message>
                                 </requireProperty>
                                 <requireProperty>
                                     <property>javafx.path</property>
-                                    <message>You must set the "javafx.path" property!</message>
+                                    <message>The "javafx.path" property is not set.</message>
                                 </requireProperty>
                             </rules>
                         </configuration>
