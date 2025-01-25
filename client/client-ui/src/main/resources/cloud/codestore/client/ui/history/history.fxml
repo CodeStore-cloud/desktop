@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.HBox?>
 <AnchorPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
             fx:controller="cloud.codestore.client.ui.history.History"
-            stylesheets="@history.css">
+            fx:id="historyPane" stylesheets="@history.css">
     <HBox>
         <Button fx:id="prevSnippetButton" focusTraversable="false" onAction="#selectPreviousSnippet">
             <tooltip>

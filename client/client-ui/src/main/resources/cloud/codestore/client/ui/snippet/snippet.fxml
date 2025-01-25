@@ -25,7 +25,7 @@
 
         <HBox GridPane.rowIndex="0">
             <fx:include source="./title/title.fxml" fx:id="snippetTitle" HBox.hgrow="ALWAYS"/>
-            <fx:include source="../history/history.fxml" HBox.hgrow="NEVER"/>
+            <fx:include source="../history/history.fxml" fx:id="history" HBox.hgrow="NEVER"/>
         </HBox>
         <Separator GridPane.rowIndex="1"/>
         <fx:include source="./description/description.fxml" fx:id="snippetDescription" GridPane.rowIndex="2"/>

@@ -4,6 +4,7 @@ import cloud.codestore.client.Language;
 import cloud.codestore.client.Permission;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
+import cloud.codestore.client.ui.history.History;
 import cloud.codestore.client.ui.selection.list.CreateSnippetEvent;
 import cloud.codestore.client.ui.selection.list.SnippetSelectedEvent;
 import cloud.codestore.client.ui.snippet.code.SnippetCode;
@@ -66,6 +67,8 @@ class SnippetControllerTest {
     private Pane snippetPane;
     @Mock
     private Pane noSnippetLabel;
+    @Mock
+    private History history;
 
     @InjectMocks
     private SnippetController snippetController = new SnippetController(
@@ -235,6 +238,7 @@ class SnippetControllerTest {
         verify(snippetCodeController).setEditing(editable);
         verify(snippetDetailsController).setEditing(editable);
         verify(snippetFooterController).setEditing(editable);
+        verify(history).setVisible(!editable);
     }
 
     private void verifyShowSnippetPane() {
@@ -275,7 +279,8 @@ class SnippetControllerTest {
                 snippetDescriptionController,
                 snippetCodeController,
                 snippetDetailsController,
-                snippetFooterController
+                snippetFooterController,
+                history
         );
     }
 

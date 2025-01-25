@@ -8,13 +8,14 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.layout.Pane;
 
 import javax.annotation.Nonnull;
 import java.util.Stack;
 
 @FxController
 public class History {
-    /** Used to avoid handling SnippetSelectedEvents thrown by this class itself. */
+    /** Used to avoid handling SnippetSelectedEvents triggered by this class itself. */
     private boolean handleSelection = true;
     private String currentSnippet;
     private Stack<String> previousSnippets = new Stack<>();
@@ -22,10 +23,11 @@ public class History {
     private EventBus eventBus;
 
     @FXML
+    private Pane historyPane;
+    @FXML
     private Button prevSnippetButton;
     @FXML
     private Button nextSnippetButton;
-
 
     History(EventBus eventBus) {
         this.eventBus = eventBus;
@@ -90,6 +92,10 @@ public class History {
             handleSelection = false;
             eventBus.post(new SnippetSelectedEvent(currentSnippet));
         }
+    }
+
+    public void setVisible(boolean visible) {
+        historyPane.setVisible(visible);
     }
 
     private boolean hasPreviousSnippets() {

@@ -3,6 +3,7 @@ package cloud.codestore.client.ui.snippet;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.FxController;
+import cloud.codestore.client.ui.history.History;
 import cloud.codestore.client.ui.selection.list.CreateSnippetEvent;
 import cloud.codestore.client.ui.selection.list.SnippetSelectedEvent;
 import cloud.codestore.client.ui.snippet.code.SnippetCode;
@@ -52,6 +53,8 @@ public class SnippetController {
     private SnippetDetails snippetDetailsController;
     @FXML
     private SnippetFooter snippetFooterController;
+    @FXML
+    private History historyController;
 
     SnippetController(
             @Nonnull ReadSnippetUseCase readSnippetUseCase,
@@ -98,6 +101,7 @@ public class SnippetController {
     }
 
     private void setEditing(boolean editable) {
+        historyController.setVisible(!editable);
         for (SnippetForm form : forms) {
             form.setEditing(editable);
         }
