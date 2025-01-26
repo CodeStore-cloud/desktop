@@ -1,7 +1,6 @@
 package cloud.codestore.client.ui.selection.sort;
 
 import cloud.codestore.client.ui.FxController;
-import cloud.codestore.client.ui.selection.ToggleSortEvent;
 import com.google.common.eventbus.EventBus;
 import javafx.fxml.FXML;
 

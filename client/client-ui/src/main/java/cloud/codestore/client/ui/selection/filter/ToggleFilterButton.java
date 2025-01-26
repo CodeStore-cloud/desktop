@@ -1,7 +1,6 @@
 package cloud.codestore.client.ui.selection.filter;
 
 import cloud.codestore.client.ui.FxController;
-import cloud.codestore.client.ui.selection.ToggleFilterEvent;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import javafx.collections.ObservableList;

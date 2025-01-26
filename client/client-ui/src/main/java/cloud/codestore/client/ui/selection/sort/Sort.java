@@ -2,8 +2,7 @@ package cloud.codestore.client.ui.selection.sort;
 
 import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.UiMessages;
-import cloud.codestore.client.ui.selection.ToggleFilterEvent;
-import cloud.codestore.client.ui.selection.ToggleSortEvent;
+import cloud.codestore.client.ui.selection.filter.ToggleFilterEvent;
 import cloud.codestore.client.ui.selection.search.FullTextSearchEvent;
 import cloud.codestore.client.usecases.listsnippets.SortProperties;
 import com.google.common.eventbus.EventBus;
