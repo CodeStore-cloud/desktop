@@ -38,8 +38,8 @@ public class SnippetFooter implements SnippetForm {
     public void setEditing(boolean editing) {
         saveButton.setVisible(editing);
         cancelButton.setVisible(editing);
-        editButton.setVisible(!editing && permissions.contains(Permission.DELETE));
-        deleteButton.setVisible(!editing && permissions.contains(Permission.UPDATE));
+        editButton.setVisible(!editing && permissions.contains(Permission.UPDATE));
+        deleteButton.setVisible(!editing && permissions.contains(Permission.DELETE));
     }
 
     @Override

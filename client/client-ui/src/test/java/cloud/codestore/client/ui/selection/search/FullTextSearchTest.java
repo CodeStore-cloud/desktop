@@ -46,8 +46,9 @@ class FullTextSearchTest extends AbstractUiTest {
     void clearInputOnESC() {
         var inputField = inputField();
         interact(() -> inputField.setText("test"));
-        assertThat(inputField.getText()).isNotEmpty();
+        assertThat(inputField.getText()).isEqualTo("test");
 
+        interact(inputField::requestFocus);
         press(KeyCode.ESCAPE);
 
         assertThat(inputField.getText()).isNotNull().isEmpty();
