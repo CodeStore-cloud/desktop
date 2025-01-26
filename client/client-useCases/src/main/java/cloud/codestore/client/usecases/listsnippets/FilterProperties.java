@@ -35,4 +35,8 @@ public class FilterProperties {
     public Optional<Language> getLanguage() {
         return Optional.ofNullable(language);
     }
+
+    public boolean isEmpty() {
+        return (tags == null || tags.isEmpty()) && language == null;
+    }
 }

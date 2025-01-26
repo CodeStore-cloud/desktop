@@ -1,20 +1,16 @@
-package cloud.codestore.client.ui.selection;
+package cloud.codestore.client.ui.selection.sort;
 
 import cloud.codestore.client.ui.FxController;
+import cloud.codestore.client.ui.selection.ToggleSortEvent;
 import com.google.common.eventbus.EventBus;
 import javafx.fxml.FXML;
 
 @FxController
-public class Selection {
+public class ToggleSortButton {
     private EventBus eventBus;
 
-    public Selection(EventBus eventBus) {
+    ToggleSortButton(EventBus eventBus) {
         this.eventBus = eventBus;
-    }
-
-    @FXML
-    void toggleFilter() {
-        eventBus.post(new ToggleFilterEvent());
     }
 
     @FXML

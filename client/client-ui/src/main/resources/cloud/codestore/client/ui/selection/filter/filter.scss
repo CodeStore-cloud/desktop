@@ -1,3 +1,10 @@
+.button.filter {
+    -fx-background-image: url("filter.png");
+    &.filled {
+        -fx-background-image: url("filter_filled.png");
+    }
+}
+
 Icon.tag {
     -fx-background-image: url("tag.png");
 }
