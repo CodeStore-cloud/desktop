@@ -14,7 +14,9 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.stage.Stage;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -58,16 +60,50 @@ class SnippetListTest extends AbstractUiTest {
         assertThat(items).containsExactlyInAnyOrder(testItems().toArray(new SnippetListItem[0]));
     }
 
-    @Test
-    @DisplayName("triggers a SnippetSelectedEvent when a snippet is selected")
-    void selectSnippet() {
-        var argument = ArgumentCaptor.forClass(SnippetSelectedEvent.class);
+    @Nested
+    @DisplayName("when a snippet is selected")
+    class SnippetSelected {
+        private ArgumentCaptor<SnippetSelectedEvent> eventCaptor;
 
-        interact(() -> listView().getSelectionModel().select(0));
+        @BeforeEach
+        void setUp() {
+            eventCaptor = ArgumentCaptor.forClass(SnippetSelectedEvent.class);
+            interact(() -> listView().getSelectionModel().selectFirst());
+        }
 
-        verify(eventBus).post(argument.capture());
-        SnippetSelectedEvent event = argument.getValue();
-        assertThat(event.snippetUri()).isEqualTo(uri(1));
+        @Test
+        @DisplayName("triggers a SnippetSelectedEvent")
+        void selectSnippet() {
+            verify(eventBus).post(eventCaptor.capture());
+            SnippetSelectedEvent event = eventCaptor.getValue();
+            assertThat(event.snippetUri()).isEqualTo(uri(1));
+        }
+
+        @Test
+        @DisplayName("ignores duplicate selection")
+        void duplicateSelection() {
+            clearInvocations(eventBus);
+            interact(() -> listView().getSelectionModel().selectFirst());
+            verify(eventBus, never()).post(any(SnippetSelectedEvent.class));
+        }
+
+        @Nested
+        @DisplayName("by another component")
+        class OtherComponent {
+            @BeforeEach
+            void setUp() {
+                interact(() -> {
+                    listView().getSelectionModel().clearSelection();
+                    eventBus.post(new SnippetSelectedEvent(SNIPPET_URI));
+                });
+            }
+
+            @Test
+            @DisplayName("selects the snippet")
+            void selectSnippetExternally() {
+                assertSelected(SNIPPET_URI);
+            }
+        }
     }
 
     @Test
@@ -144,26 +180,55 @@ class SnippetListTest extends AbstractUiTest {
         verify(readSnippetsUseCase).getPage(anyString(), any(), eq(sortProperties));
     }
 
-    @Test
-    @DisplayName("reloads the snippets when a SippetCreatedEvent is triggered")
-    void snippetCreated() {
-        reset(readSnippetsUseCase);
-        interact(() -> eventBus.post(new SnippetCreatedEvent(SNIPPET_URI)));
-        verify(readSnippetsUseCase).getPage(anyString(), any(), any());
+    @Nested
+    @DisplayName("when a new snippet is created")
+    class SnippetCreated {
+        @BeforeEach
+        void setUp() {
+            clearInvocations(readSnippetsUseCase);
+            interact(() -> eventBus.post(new SnippetCreatedEvent(SNIPPET_URI)));
+        }
+
+        @Test
+        @DisplayName("reloads the snippets")
+        void snippetCreated() {
+            verify(readSnippetsUseCase).getPage(anyString(), any(), any());
+        }
+
+        @Test
+        @DisplayName("selects the new code snippet")
+        void selectSnippet() {
+            assertSelected(SNIPPET_URI);
+        }
     }
 
-    @Test
-    @DisplayName("reloads the snippets when a SnippetUpdatedEvent is triggered")
-    void snippetUpdated() {
-        reset(readSnippetsUseCase);
-        interact(() -> eventBus.post(new SnippetUpdatedEvent(SNIPPET_URI)));
-        verify(readSnippetsUseCase).getPage(anyString(), any(), any());
+    @Nested
+    @DisplayName("when a snippet is updated")
+    class SnippetUpdated {
+        @BeforeEach
+        void setUp() {
+            interact(() -> listView().getSelectionModel().selectFirst());
+            clearInvocations(readSnippetsUseCase);
+            interact(() -> eventBus.post(new SnippetUpdatedEvent(SNIPPET_URI)));
+        }
+
+        @Test
+        @DisplayName("reloads the snippets")
+        void snippetUpdated() {
+            verify(readSnippetsUseCase).getPage(anyString(), any(), any());
+        }
+
+        @Test
+        @DisplayName("keeps current selection")
+        void selectSnippet() {
+            assertSelected(SNIPPET_URI);
+        }
     }
 
     @Test
     @DisplayName("reloads the snippets when a SnippetDeletedEvent is triggered")
     void snippetDeleted() {
-        reset(readSnippetsUseCase);
+        clearInvocations(readSnippetsUseCase);
         interact(() -> eventBus.post(new SnippetDeletedEvent(SNIPPET_URI)));
         verify(readSnippetsUseCase).getPage(anyString(), any(), any());
     }
@@ -181,6 +246,12 @@ class SnippetListTest extends AbstractUiTest {
             eventBus.post(new FullTextSearchEvent("test"));
             assertThat(button.isVisible()).isTrue();
         });
+    }
+
+    private void assertSelected(String uri) {
+        SnippetListItem selectedItem = listView().getSelectionModel().getSelectedItem();
+        assertThat(selectedItem).isNotNull();
+        assertThat(selectedItem.uri()).isEqualTo(uri);
     }
 
     private ListView<SnippetListItem> listView() {
