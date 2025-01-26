@@ -3,7 +3,7 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.*?>
 <VBox xmlns="http://javafx.com/javafx/17.0.2" xmlns:fx="http://javafx.com/fxml/1"
-      fx:id="root" stylesheets="@global.css,@root.css,@separator/separator.css,@icon/icon.css" styleClass="primaryBackground">
+      fx:id="root" stylesheets="@global.css,@root.css,@separator/separator.css" styleClass="primaryBackground">
     <fx:include source="./header/header.fxml"/>
     <SplitPane dividerPositions="0.4" VBox.vgrow="ALWAYS">
         <AnchorPane styleClass="secondaryBackground,primaryPadding">

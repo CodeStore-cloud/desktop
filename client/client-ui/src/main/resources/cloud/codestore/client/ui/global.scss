@@ -46,7 +46,7 @@
     -fx-show-duration: 10000ms;
 }
 
-.button {
+.button, Icon {
     -fx-background-color: transparent;
     -fx-background-repeat: no-repeat;
     -fx-background-radius: 0;
@@ -60,6 +60,10 @@
         $backgroundPosition: math.div(size.$primaryElementSize - size.$primaryContentSize, 2);
         -fx-background-position: $backgroundPosition $backgroundPosition;
         @include size.fixed-size(size.$primaryElementSize);
+    }
+
+    &.clearable:hover {
+        -fx-background-image: url("clear.png");
     }
 }
 
