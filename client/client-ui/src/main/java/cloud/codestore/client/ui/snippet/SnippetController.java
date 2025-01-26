@@ -150,8 +150,8 @@ public class SnippetController {
      */
     private class DefaultState implements ControllerState {
         DefaultState() {
-            setEditing(false);
             accept(EMPTY_SNIPPET);
+            setEditing(false);
 
             noSnippetLabel.setVisible(true);
             snippetPane.setVisible(false);
@@ -166,8 +166,8 @@ public class SnippetController {
             noSnippetLabel.setVisible(false);
             snippetPane.setVisible(true);
 
-            setEditing(false);
             accept(snippet);
+            setEditing(false);
         }
 
         @Override

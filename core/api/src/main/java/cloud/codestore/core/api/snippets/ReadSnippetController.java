@@ -41,7 +41,9 @@ public class ReadSnippetController {
     private ResourceMetaInfo createMetaInfo(Set<Permission> permissions, String snippetUri) {
         List<Operation> operations = new ArrayList<>();
         for (Permission permission : permissions) {
-            if (permission == Permission.DELETE) {
+            if (permission == Permission.UPDATE) {
+                operations.add(new Operation("updateSnippet", HttpMethod.PATCH.name(), snippetUri));
+            } else if (permission == Permission.DELETE) {
                 operations.add(new Operation("deleteSnippet", HttpMethod.DELETE.name(), snippetUri));
             }
         }

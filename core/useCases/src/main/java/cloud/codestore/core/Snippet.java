@@ -96,7 +96,7 @@ public class Snippet {
 
     @Nonnull
     public Set<Permission> getPermissions() {
-        return Set.of(Permission.DELETE);
+        return Set.of(Permission.UPDATE, Permission.DELETE);
     }
 
     @Override

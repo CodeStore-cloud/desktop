@@ -45,9 +45,12 @@ class ReadSnippetResourceTest extends SnippetControllerTest {
                         .andExpect(jsonPath("$.data.relationships.language.links.related", endsWith(languagePath)))
                         .andExpect(jsonPath("$.data.links.self", is(SNIPPET_URL)))
                         .andExpect(jsonPath("$.meta.operations").isArray())
-                        .andExpect(jsonPath("$.meta.operations[0].operation", is("deleteSnippet")))
-                        .andExpect(jsonPath("$.meta.operations[0].method", is("DELETE")))
-                        .andExpect(jsonPath("$.meta.operations[0].href", is(SNIPPET_URL)));
+                        .andExpect(jsonPath("$.meta.operations[0].operation", is("updateSnippet")))
+                        .andExpect(jsonPath("$.meta.operations[0].method", is("PATCH")))
+                        .andExpect(jsonPath("$.meta.operations[0].href", is(SNIPPET_URL)))
+                        .andExpect(jsonPath("$.meta.operations[1].operation", is("deleteSnippet")))
+                        .andExpect(jsonPath("$.meta.operations[1].method", is("DELETE")))
+                        .andExpect(jsonPath("$.meta.operations[1].href", is(SNIPPET_URL)));
     }
 
     private Snippet testSnippet() {

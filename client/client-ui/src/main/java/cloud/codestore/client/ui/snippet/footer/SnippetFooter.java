@@ -9,6 +9,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.Set;
 
 @FxController
@@ -23,6 +24,8 @@ public class SnippetFooter implements SnippetForm {
     @FXML
     private Button editButton;
 
+    private Set<Permission> permissions = Collections.emptySet();
+
     @FXML
     private void initialize() {
         saveButton.managedProperty().bind(saveButton.visibleProperty());
@@ -35,15 +38,13 @@ public class SnippetFooter implements SnippetForm {
     public void setEditing(boolean editing) {
         saveButton.setVisible(editing);
         cancelButton.setVisible(editing);
-        editButton.setVisible(!editing);
-        deleteButton.setVisible(!editing);
+        editButton.setVisible(!editing && permissions.contains(Permission.DELETE));
+        deleteButton.setVisible(!editing && permissions.contains(Permission.UPDATE));
     }
 
     @Override
     public void visit(@Nonnull Snippet snippet) {
-        Set<Permission> permissions = snippet.getPermissions();
-        deleteButton.setVisible(permissions.contains(Permission.DELETE));
-        editButton.setVisible(permissions.contains(Permission.UPDATE));
+        permissions = snippet.getPermissions();
     }
 
     @Override
