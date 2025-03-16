@@ -4,6 +4,7 @@ import cloud.codestore.client.Language;
 import cloud.codestore.client.ui.AbstractUiTest;
 import cloud.codestore.client.usecases.readlanguages.ReadLanguagesUseCase;
 import com.google.common.eventbus.EventBus;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextInputControl;
 import javafx.stage.Stage;
@@ -44,15 +45,15 @@ class FilterTest extends AbstractUiTest {
         ));
 
         start(stage, "filter.fxml", controller);
+        eventBus.post(new ToggleFilterEvent());
     }
 
     @Test
     @DisplayName("triggers a FilterEvent when the tags changed")
     void tagsChanged() {
-        var argument = ArgumentCaptor.forClass(FilterEvent.class);
-
         tagsInput().setText("hello world");
 
+        var argument = ArgumentCaptor.forClass(FilterEvent.class);
         verify(eventBus).post(argument.capture());
         var filterProperties = argument.getValue().filterProperties();
         assertThat(filterProperties.getTags()).isNotEmpty();
@@ -62,10 +63,9 @@ class FilterTest extends AbstractUiTest {
     @Test
     @DisplayName("ignores duplicate tags")
     void ignoreDuplicateTags() {
-        var argument = ArgumentCaptor.forClass(FilterEvent.class);
-
         tagsInput().setText("abc def abc");
 
+        var argument = ArgumentCaptor.forClass(FilterEvent.class);
         verify(eventBus).post(argument.capture());
         var filterProperties = argument.getValue().filterProperties();
         assertThat(filterProperties.getTags()).isNotEmpty();
@@ -75,12 +75,11 @@ class FilterTest extends AbstractUiTest {
     @Test
     @DisplayName("triggers a FilterEvent without tags when the tag input is empty")
     void emptyTagInput() {
-        var argument = ArgumentCaptor.forClass(FilterEvent.class);
-
         TextInputControl inputField = tagsInput();
         inputField.setText("test");
         inputField.setText("");
 
+        var argument = ArgumentCaptor.forClass(FilterEvent.class);
         verify(eventBus, times(2)).post(argument.capture());
         var filterProperties = argument.getValue().filterProperties(); // second call
         assertThat(filterProperties.getTags()).isEmpty();
@@ -89,14 +88,13 @@ class FilterTest extends AbstractUiTest {
     @Test
     @DisplayName("triggers a FilterEvent when the programming language changed")
     void languageChanged() {
-        var argument = ArgumentCaptor.forClass(FilterEvent.class);
-
         var comboBox = languageSelection();
         assertThat(comboBox.getItems()).hasSize(5);
         assertThat(comboBox.getItems().getFirst()).isEqualTo(new LanguageItem(null, "All"));
 
         interact(() -> comboBox.getSelectionModel().select(3));
 
+        var argument = ArgumentCaptor.forClass(FilterEvent.class);
         verify(eventBus).post(argument.capture());
         var filterProperties = argument.getValue().filterProperties();
         assertThat(filterProperties.getLanguage()).isNotEmpty();
@@ -106,15 +104,28 @@ class FilterTest extends AbstractUiTest {
     @Test
     @DisplayName("triggers a FilterEvent when receiving a QuickFilterEvent")
     void quickfilterEvent() {
-        var argument = ArgumentCaptor.forClass(FilterEvent.class);
 
         interact(() -> eventBus.post(new QuickFilterEvent(JAVA)));
         assertThat(languageSelection().getSelectionModel().getSelectedItem().language()).isEqualTo(JAVA);
 
+        var argument = ArgumentCaptor.forClass(FilterEvent.class);
         verify(eventBus).post(argument.capture());
         var filterProperties = argument.getValue().filterProperties();
         assertThat(filterProperties.getLanguage()).isNotEmpty();
         assertThat(filterProperties.getLanguage().get()).isEqualTo(JAVA);
+    }
+
+    @Test
+    @DisplayName("clears all filter when pressing the 'clearFilter' button")
+    void clearFilter() {
+        clearInvocations(eventBus);
+        clickOn(clearFilterButton());
+
+        assertThat(tagsInput().getText()).isEmpty();
+        assertThat(languageSelection().getSelectionModel().getSelectedItem().language()).isNull();
+        var argument = ArgumentCaptor.forClass(FilterEvent.class);
+        verify(eventBus).post(argument.capture());
+        assertThat(argument.getValue().filterProperties().isEmpty()).isTrue();
     }
 
     private TextInputControl tagsInput() {
@@ -123,5 +134,9 @@ class FilterTest extends AbstractUiTest {
 
     private ComboBox<LanguageItem> languageSelection() {
         return lookup("#languageSelection").queryComboBox();
+    }
+
+    private Button clearFilterButton() {
+        return lookup("#clearFilter").queryButton();
     }
 }

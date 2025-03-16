@@ -36,6 +36,7 @@ public class Filter {
     private TextField tagsInput;
     @FXML
     private ComboBox<LanguageItem> languageSelection;
+    private boolean filterEventEnabled = true;
 
     @FXML
     private void initialize() {
@@ -85,10 +86,30 @@ public class Filter {
 
     @FXML
     void triggerEvent() {
-        String tagsInput = this.tagsInput.getText();
-        Set<String> tags = tagsInput.isEmpty() ? null : new HashSet<>(List.of(tagsInput.split(" ")));
-        Language language = languageSelection.getValue().language();
-        FilterProperties filterProperties = new FilterProperties(tags, language);
-        eventBus.post(new FilterEvent(filterProperties));
+        if (filterEventEnabled) {
+            String tagsInput = this.tagsInput.getText();
+            Set<String> tags = tagsInput.isEmpty() ? null : new HashSet<>(List.of(tagsInput.split(" ")));
+            Language language = languageSelection.getValue().language();
+            FilterProperties filterProperties = new FilterProperties(tags, language);
+            eventBus.post(new FilterEvent(filterProperties));
+        }
+    }
+
+    @FXML
+    void clearFilter() {
+        doWithoutFiringFilterEvent(() -> {
+            this.tagsInput.clear();
+            this.languageSelection.getSelectionModel().selectFirst();
+        });
+        eventBus.post(new FilterEvent(new FilterProperties()));
+    }
+
+    private void doWithoutFiringFilterEvent(Runnable runnable) {
+        try {
+            filterEventEnabled = false;
+            runnable.run();
+        } finally {
+            filterEventEnabled = true;
+        }
     }
 }

@@ -2,21 +2,31 @@
 
 <?import cloud.codestore.client.ui.icon.Icon?>
 <?import cloud.codestore.client.ui.separator.Separator?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.*?>
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
       fx:controller="cloud.codestore.client.ui.selection.filter.Filter"
       fx:id="filterPanel" stylesheets="@filter.css" styleClass="secondarySpacing">
     <Separator/>
-    <HBox>
-        <Icon styleClass="tag"/>
-        <TextField fx:id="tagsInput" promptText="%filter.tags.placeholder"/>
-    </HBox>
-    <Separator/>
-    <HBox>
-        <Icon styleClass="language"/>
-        <ComboBox fx:id="languageSelection" onAction="#triggerEvent"/>
+    <HBox styleClass="secondarySpacing">
+        <VBox styleClass="secondarySpacing" HBox.hgrow="ALWAYS">
+            <HBox>
+                <Icon styleClass="tag"/>
+                <TextField fx:id="tagsInput" promptText="%filter.tags.placeholder"/>
+            </HBox>
+            <Separator/>
+            <HBox>
+                <Icon styleClass="language"/>
+                <ComboBox fx:id="languageSelection" onAction="#triggerEvent"/>
+            </HBox>
+        </VBox>
+        <Button fx:id="clearFilter" onAction="#clearFilter">
+            <tooltip>
+                <Tooltip text="%filter.clear.tooltip" />
+            </tooltip>
+        </Button>
     </HBox>
 </VBox>
