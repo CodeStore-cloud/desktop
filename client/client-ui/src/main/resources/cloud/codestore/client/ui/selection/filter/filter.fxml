@@ -15,7 +15,7 @@
         <VBox styleClass="secondarySpacing" HBox.hgrow="ALWAYS">
             <HBox>
                 <Icon styleClass="tag"/>
-                <TextField fx:id="tagsInput" promptText="%filter.tags.placeholder"/>
+                <TextField fx:id="tagsInput" promptText="%filter.tags.placeholder" HBox.hgrow="ALWAYS"/>
             </HBox>
             <Separator/>
             <HBox>

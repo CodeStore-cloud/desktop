@@ -14,10 +14,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 
 import javax.annotation.Nonnull;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @FxController
 public class Filter {
@@ -59,12 +56,23 @@ public class Filter {
 
     @Subscribe
     private void quickfilter(@Nonnull QuickFilterEvent event) {
+        String tag = event.tag();
+        if (tag != null) {
+            List<String> tags = new ArrayList<>(List.of(tagsInput.getText().split(" ")));
+            if (!tags.contains(tag)) {
+                tags.add(tag);
+                tagsInput.setText(String.join(" ",  tags));
+            }
+        }
+
         Language language = event.language();
-        languageSelection.getItems()
-                         .stream()
-                         .filter(item -> Objects.equals(item.language(), language))
-                         .findFirst()
-                         .ifPresent(item -> languageSelection.getSelectionModel().select(item));
+        if (language != null) {
+            languageSelection.getItems()
+                             .stream()
+                             .filter(item -> Objects.equals(item.language(), language))
+                             .findFirst()
+                             .ifPresent(item -> languageSelection.getSelectionModel().select(item));
+        }
     }
 
     private void handleTagInput() {

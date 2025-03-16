@@ -9,6 +9,7 @@
     <HBox HBox.hgrow="ALWAYS">
         <Icon styleClass="tag"/>
         <TextField fx:id="tagsInput" promptText="%snippet.details.tags.placeholder" HBox.hgrow="ALWAYS"/>
+        <FlowPane fx:id="quickFilterTags" styleClass="flow-pane" HBox.hgrow="ALWAYS"/>
     </HBox>
     <GridPane fx:id="timestampContainer" hgap="5" HBox.hgrow="NEVER">
         <columnConstraints>

@@ -71,10 +71,12 @@ public class SnippetList implements ChangeListener<SnippetListItem> {
     }
 
     private void loadSnippets() {
+        String latestSelectedSnippetUri = currentSnippetUri;
         list.getItems().clear();
         SnippetPage page = readSnippetsUseCase.getPage(searchQuery, filterProperties, sortProperties);
         createSnippet.setVisible(page.permissions().contains(Permission.CREATE));
         showSnippets(page);
+        currentSnippetUri = latestSelectedSnippetUri;
         updateSelection();
     }
 

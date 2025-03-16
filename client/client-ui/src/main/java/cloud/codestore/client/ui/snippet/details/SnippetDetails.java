@@ -3,7 +3,9 @@ package cloud.codestore.client.ui.snippet.details;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.FxController;
+import cloud.codestore.client.ui.selection.filter.QuickFilterEvent;
 import cloud.codestore.client.ui.snippet.SnippetForm;
+import com.google.common.eventbus.EventBus;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -30,6 +32,8 @@ public class SnippetDetails implements SnippetForm {
     @FXML
     private TextField tagsInput;
     @FXML
+    private Pane quickFilterTags;
+    @FXML
     private GridPane timestampContainer;
     @FXML
     private Pane creationTimeContainer;
@@ -39,6 +43,12 @@ public class SnippetDetails implements SnippetForm {
     private Label creationTime;
     @FXML
     private Label modificationTime;
+
+    private final EventBus eventBus;
+
+    SnippetDetails(EventBus eventBus) {
+        this.eventBus = eventBus;
+    }
 
     static {
         String pattern = DateTimeFormatterBuilder.getLocalizedDateTimePattern(
@@ -50,15 +60,29 @@ public class SnippetDetails implements SnippetForm {
         DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(pattern);
     }
 
+    @FXML
+    private void initialize() {
+        tagsInput.managedProperty().bind(tagsInput.visibleProperty());
+        quickFilterTags.managedProperty().bind(quickFilterTags.visibleProperty());
+    }
+
     @Override
     public void setEditing(boolean editable) {
-        tagsInput.setEditable(editable);
+        tagsInput.setVisible(editable);
+        quickFilterTags.setVisible(!editable);
     }
 
     @Override
     public void visit(@Nonnull Snippet snippet) {
         String tagsString = String.join(" ", snippet.getTags());
         tagsInput.setText(tagsString);
+
+        quickFilterTags.getChildren().clear();
+        for (String tag :  snippet.getTags()) {
+            Label tagLabel = new Label(tag);
+            tagLabel.setOnMouseClicked(event -> eventBus.post(new QuickFilterEvent(tag)));
+            quickFilterTags.getChildren().add(tagLabel);
+        }
 
         setCreationTime(snippet.getCreated());
         setModificationTime(snippet.getModified());

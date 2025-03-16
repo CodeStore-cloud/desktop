@@ -9,6 +9,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextInputControl;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -102,20 +103,6 @@ class FilterTest extends AbstractUiTest {
     }
 
     @Test
-    @DisplayName("triggers a FilterEvent when receiving a QuickFilterEvent")
-    void quickfilterEvent() {
-
-        interact(() -> eventBus.post(new QuickFilterEvent(JAVA)));
-        assertThat(languageSelection().getSelectionModel().getSelectedItem().language()).isEqualTo(JAVA);
-
-        var argument = ArgumentCaptor.forClass(FilterEvent.class);
-        verify(eventBus).post(argument.capture());
-        var filterProperties = argument.getValue().filterProperties();
-        assertThat(filterProperties.getLanguage()).isNotEmpty();
-        assertThat(filterProperties.getLanguage().get()).isEqualTo(JAVA);
-    }
-
-    @Test
     @DisplayName("clears all filter when pressing the 'clearFilter' button")
     void clearFilter() {
         clearInvocations(eventBus);
@@ -126,6 +113,40 @@ class FilterTest extends AbstractUiTest {
         var argument = ArgumentCaptor.forClass(FilterEvent.class);
         verify(eventBus).post(argument.capture());
         assertThat(argument.getValue().filterProperties().isEmpty()).isTrue();
+    }
+
+    @Nested
+    @DisplayName("when recieving a QuickFilterEvent")
+    class QuickFilterTest {
+        @Test
+        @DisplayName("applies the language")
+        void quickfilterLanguage() {
+            interact(() -> eventBus.post(new QuickFilterEvent(JAVA)));
+            assertThat(languageSelection().getSelectionModel().getSelectedItem().language()).isEqualTo(JAVA);
+
+            var argument = ArgumentCaptor.forClass(FilterEvent.class);
+            verify(eventBus).post(argument.capture());
+            var filterProperties = argument.getValue().filterProperties();
+            assertThat(filterProperties.getLanguage()).isNotEmpty();
+            assertThat(filterProperties.getLanguage().get()).isEqualTo(JAVA);
+        }
+
+        @Test
+        @DisplayName("adds the nested tag")
+        void quickfilterTag() {
+            tagsInput().setText("tag1 tag2");
+            interact(() -> eventBus.post(new QuickFilterEvent("another-tag")));
+            assertThat(tagsInput().getText()).isEqualTo("tag1 tag2 another-tag");
+        }
+
+        @Test
+        @DisplayName("ignores duplicate tags")
+        void ignoreDuplicateTags() {
+            String text = "tag1 tag2 tag3";
+            tagsInput().setText(text);
+            eventBus.post(new QuickFilterEvent("tag2"));
+            assertThat(tagsInput().getText()).isEqualTo(text);
+        }
     }
 
     private TextInputControl tagsInput() {

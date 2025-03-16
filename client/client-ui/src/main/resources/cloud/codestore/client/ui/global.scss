@@ -119,3 +119,7 @@
     -fx-max-height: size.$secondaryElementSize;
     -fx-padding: 0;
 }
+
+.flow-pane {
+    -fx-hgap: size.$secondaryPadding;
+}
