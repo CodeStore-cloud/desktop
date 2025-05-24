@@ -2,7 +2,7 @@
 
 SET JDK_PATH="%1"
 SET JAVAFX_PATH="%2"
-SET OUTPUT_PATH="target/runtime"
+SET OUTPUT_PATH="target\application\runtime"
 SET MODULE_PATH="%JDK_PATH%\jmods;%JAVAFX_PATH%"
 SET MODULES=jdk.localedata,^
 java.logging,^
@@ -23,8 +23,6 @@ if exist "%JAVA_HOME%\bin\jlink.exe" (
 )
 
 if exist %OUTPUT_PATH% rmdir /s /q %OUTPUT_PATH%
-
-echo Creating Java runtime ...
 
 %JLINK_EXE% ^
 --module-path %MODULE_PATH% ^

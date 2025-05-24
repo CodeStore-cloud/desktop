@@ -24,6 +24,39 @@
                 <spring.profile>dev</spring.profile>
             </properties>
         </profile>
+
+        <profile>
+            <id>windows-executable</id>
+            <activation>
+                <property>
+                    <name>inno.setup.path</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <executions>
+                            <execution>
+                                <id>create Windows installation file</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>${inno.setup.path}/ISCC.exe</executable>
+                                    <arguments>
+                                        <argument>windows-bundle-config.iss</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <build>
@@ -33,19 +66,30 @@
                 <artifactId>maven-enforcer-plugin</artifactId>
                 <version>3.5.0</version>
                 <executions>
+                    <!-- https://maven.apache.org/enforcer/enforcer-rules/index.html -->
                     <execution>
-                        <id>enforce-properties</id>
+                        <id>check optional properties</id>
                         <goals>
                             <goal>enforce</goal>
                         </goals>
                         <configuration>
                             <fail>false</fail>
                             <rules>
-                                <!-- https://maven.apache.org/enforcer/enforcer-rules/index.html -->
                                 <requireEnvironmentVariable>
                                     <variableName>JAVA_HOME</variableName>
                                     <message>The "JAVA_HOME" environment variable is not set.</message>
                                 </requireEnvironmentVariable>
+                            </rules>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>check required properties</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <fail>true</fail>
+                            <rules>
                                 <requireProperty>
                                     <property>jdk.path</property>
                                     <message>The "jdk.path" property is not set.</message>
@@ -67,13 +111,13 @@
                 <version>3.2.0</version>
                 <executions>
                     <execution>
-                        <id>copy-core-binaries</id>
-                        <phase>package</phase>
+                        <id>copy core binaries</id>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/core</outputDirectory>
+                            <outputDirectory>${project.build.directory}/application/core</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>${project.parent.basedir}/core/application/target/bin</directory>
@@ -82,13 +126,13 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>copy-client-binaries</id>
-                        <phase>package</phase>
+                        <id>copy client binaries</id>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/client</outputDirectory>
+                            <outputDirectory>${project.build.directory}/application/client</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>${project.parent.basedir}/client/client-application/target/bin</directory>
@@ -100,13 +144,13 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>copy-start-scripts</id>
-                        <phase>package</phase>
+                        <id>copy start scripts</id>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <outputDirectory>${project.build.directory}/application</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>${project.basedir}/${spring.profile}</directory>
@@ -127,8 +171,8 @@
                 <version>3.0.0</version>
                 <executions>
                     <execution>
-                        <id>create runtime</id>
-                        <phase>package</phase>
+                        <id>create java runtime</id>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
