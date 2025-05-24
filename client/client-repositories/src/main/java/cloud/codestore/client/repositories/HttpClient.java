@@ -23,42 +23,45 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
+import java.util.concurrent.CompletableFuture;
 
 public class HttpClient {
     private static final MediaType JSONAPI_MEDIATYPE = MediaType.valueOf(JsonApiDocument.MEDIA_TYPE);
     private static final int MAX_BUFFER_SIZE = 1024 * 1024;
 
-    private final WebClient client;
-    private final String rootUrl;
+    private WebClient client;
+    private String rootUrl;
     private String snippetCollectionUrl;
     private String languageCollectionUrl;
     private String tagsCollectionUrl;
 
-    public HttpClient(@Nonnull String rootUrl, @Nonnull String accessToken) {
-        this.rootUrl = rootUrl;
+    public HttpClient(@Nonnull CompletableFuture<String> rootUrl, @Nonnull CompletableFuture<String> accessToken) {
+        CompletableFuture.allOf(rootUrl, accessToken).thenAccept(result -> {
+            this.rootUrl = rootUrl.join();
 
-        ObjectMapper objectMapper = new JsonApiObjectMapper(new ResourceMetaInfo.ResourceMetaInfoDeserializer())
-                .registerResourceType(RootResource.RESOURCE_TYPE, RootResource.class)
-                .registerResourceType(SnippetResource.RESOURCE_TYPE, SnippetResource.class)
-                .registerResourceType(LanguageResource.RESOURCE_TYPE, LanguageResource.class)
-                .registerResourceType(TagResource.RESOURCE_TYPE, TagResource.class);
+            ObjectMapper objectMapper = new JsonApiObjectMapper(new ResourceMetaInfo.ResourceMetaInfoDeserializer())
+                    .registerResourceType(RootResource.RESOURCE_TYPE, RootResource.class)
+                    .registerResourceType(SnippetResource.RESOURCE_TYPE, SnippetResource.class)
+                    .registerResourceType(LanguageResource.RESOURCE_TYPE, LanguageResource.class)
+                    .registerResourceType(TagResource.RESOURCE_TYPE, TagResource.class);
 
-        DefaultUriBuilderFactory uriBuilderFactory = new DefaultUriBuilderFactory();
-        uriBuilderFactory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
+            DefaultUriBuilderFactory uriBuilderFactory = new DefaultUriBuilderFactory();
+            uriBuilderFactory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
 
-        this.client = WebClient.builder()
-                               .uriBuilderFactory(uriBuilderFactory)
-                               .defaultHeaders(httpHeaders -> {
-                                   httpHeaders.set(HttpHeaders.ACCEPT, JsonApiDocument.MEDIA_TYPE);
-                                   httpHeaders.setBearerAuth(accessToken);
-                               })
-                               .codecs(configurer -> {
-                                   MimeType mimeType = MimeType.valueOf(JsonApiDocument.MEDIA_TYPE);
-                                   configurer.defaultCodecs().jackson2JsonEncoder(new Jackson2JsonEncoder(objectMapper, mimeType));
-                                   configurer.defaultCodecs().jackson2JsonDecoder(new Jackson2JsonDecoder(objectMapper, mimeType));
-                                   configurer.defaultCodecs().maxInMemorySize(MAX_BUFFER_SIZE);
-                               })
-                               .build();
+            this.client = WebClient.builder()
+                                   .uriBuilderFactory(uriBuilderFactory)
+                                   .defaultHeaders(httpHeaders -> {
+                                       httpHeaders.set(HttpHeaders.ACCEPT, JsonApiDocument.MEDIA_TYPE);
+                                       httpHeaders.setBearerAuth(accessToken.join());
+                                   })
+                                   .codecs(configurer -> {
+                                       MimeType mimeType = MimeType.valueOf(JsonApiDocument.MEDIA_TYPE);
+                                       configurer.defaultCodecs().jackson2JsonEncoder(new Jackson2JsonEncoder(objectMapper, mimeType));
+                                       configurer.defaultCodecs().jackson2JsonDecoder(new Jackson2JsonDecoder(objectMapper, mimeType));
+                                       configurer.defaultCodecs().maxInMemorySize(MAX_BUFFER_SIZE);
+                                   })
+                                   .build();
+        });
     }
 
     @Nonnull

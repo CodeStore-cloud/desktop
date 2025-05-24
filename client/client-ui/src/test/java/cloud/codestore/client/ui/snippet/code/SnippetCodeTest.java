@@ -4,6 +4,7 @@ import cloud.codestore.client.Language;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.AbstractUiTest;
+import cloud.codestore.client.ui.CoreConnectionEstablishedEvent;
 import cloud.codestore.client.ui.selection.filter.QuickFilterEvent;
 import cloud.codestore.client.usecases.readlanguages.ReadLanguagesUseCase;
 import com.google.common.eventbus.EventBus;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.testfx.framework.junit5.Start;
 
@@ -27,8 +29,8 @@ import static org.testfx.assertions.api.Assertions.assertThat;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("The code controller")
 class SnippetCodeTest extends AbstractUiTest {
-    @Mock
-    private EventBus eventBus;
+    @Spy
+    private EventBus eventBus = new EventBus();
     @Mock
     private ReadLanguagesUseCase readLanguagesUseCase;
     private SnippetCode controller;
@@ -44,6 +46,7 @@ class SnippetCodeTest extends AbstractUiTest {
         controller = new SnippetCode(readLanguagesUseCase, eventBus);
         start(stage, "code.fxml", controller);
         // Editor is loaded synchronously in the tests, so no need to wait until it´s loaded
+        eventBus.post(new CoreConnectionEstablishedEvent());
     }
 
     @Test

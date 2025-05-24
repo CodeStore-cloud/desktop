@@ -2,6 +2,7 @@ package cloud.codestore.client.ui.selection.list;
 
 import cloud.codestore.client.Permission;
 import cloud.codestore.client.ui.AbstractUiTest;
+import cloud.codestore.client.ui.CoreConnectionEstablishedEvent;
 import cloud.codestore.client.ui.selection.filter.FilterEvent;
 import cloud.codestore.client.ui.selection.search.FullTextSearchEvent;
 import cloud.codestore.client.ui.selection.sort.SortEvent;
@@ -51,6 +52,8 @@ class SnippetListTest extends AbstractUiTest {
 
         SnippetList controller = new SnippetList(readSnippetsUseCase, eventBus);
         start(stage, "snippetList.fxml", controller);
+        eventBus.post(new CoreConnectionEstablishedEvent());
+        clearInvocations(eventBus);
     }
 
     @Test

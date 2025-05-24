@@ -14,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
@@ -25,7 +26,9 @@ class HttpClientTest {
     private static final String ACCESS_TOKEN = "dummy-token";
 
     private MockWebServer mockBackEnd;
-    private HttpClient client = new HttpClient("http://localhost:8080", ACCESS_TOKEN);
+    private HttpClient client = new HttpClient(
+            CompletableFuture.completedFuture("http://localhost:8080"),
+            CompletableFuture.completedFuture( ACCESS_TOKEN));
 
     @BeforeEach
     void setUp() throws IOException {

@@ -3,6 +3,7 @@ package cloud.codestore.client.application;
 import cloud.codestore.client.UseCase;
 import cloud.codestore.client.repositories.HttpClient;
 import cloud.codestore.client.repositories.Repository;
+import cloud.codestore.client.ui.CoreConnectionEstablishedEvent;
 import cloud.codestore.client.ui.FXMLLoaderFactory;
 import cloud.codestore.client.ui.FxApplication;
 import cloud.codestore.client.ui.FxController;
@@ -17,6 +18,7 @@ import org.springframework.context.annotation.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * The main class of the {CodeStore} Client.
@@ -48,9 +50,16 @@ public class CodeStoreClient {
     public HttpClient httpClient(@Value("${codestore.data:}") String dataDirectory) {
         Path directory = getDataDirectory(dataDirectory);
         LOGGER.debug("Data directory: {}", dataDirectory);
-        String apiRootUrl = new RootUrlReader().readApiUrl(directory);
-        String accessToken = new AccessTokenReader().readAccessToken(directory);
-        LOGGER.info("Connecting to {CodeStore} Core at {}", apiRootUrl);
+
+        AsyncFileReader fileReader = new AsyncFileReader();
+        CompletableFuture<String> apiRootUrl = fileReader.readFile(directory.resolve("core-api-url"));
+        CompletableFuture<String> accessToken = fileReader.readFile(directory.resolve("core-api-access-token"));
+
+        CompletableFuture.allOf(apiRootUrl, accessToken).thenAccept(result -> {
+            LOGGER.info("Connecting to {CodeStore} Core at {}", apiRootUrl.join());
+            eventBus().post(new CoreConnectionEstablishedEvent());
+        });
+
         return new HttpClient(apiRootUrl, accessToken);
     }
 

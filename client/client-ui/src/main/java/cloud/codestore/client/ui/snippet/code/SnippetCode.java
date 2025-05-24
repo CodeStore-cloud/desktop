@@ -3,11 +3,13 @@ package cloud.codestore.client.ui.snippet.code;
 import cloud.codestore.client.Language;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
+import cloud.codestore.client.ui.CoreConnectionEstablishedEvent;
 import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.selection.filter.QuickFilterEvent;
 import cloud.codestore.client.ui.snippet.SnippetForm;
 import cloud.codestore.client.usecases.readlanguages.ReadLanguagesUseCase;
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
@@ -42,11 +44,11 @@ public class SnippetCode implements SnippetForm {
     SnippetCode(ReadLanguagesUseCase readLanguagesUseCase, EventBus eventBus) {
         this.readLanguagesUseCase = readLanguagesUseCase;
         this.eventBus = eventBus;
+        eventBus.register(this);
     }
 
     @FXML
     private void initialize() {
-        languageSelection.getItems().addAll(readLanguagesUseCase.readLanguages());
         languageSelection.managedProperty().bind(languageSelection.visibleProperty());
         languageQuickfilter.managedProperty().bind(languageQuickfilter.visibleProperty());
         languageSelection.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
@@ -64,6 +66,11 @@ public class SnippetCode implements SnippetForm {
         });
 
         browser.getEngine().loadContent(editorHtml());
+    }
+
+    @Subscribe
+    private void coreConnected(@Nonnull CoreConnectionEstablishedEvent event) {
+        languageSelection.getItems().addAll(readLanguagesUseCase.readLanguages());
     }
 
     @FXML

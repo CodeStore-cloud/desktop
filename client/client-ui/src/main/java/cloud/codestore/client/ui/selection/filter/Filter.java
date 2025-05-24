@@ -1,6 +1,7 @@
 package cloud.codestore.client.ui.selection.filter;
 
 import cloud.codestore.client.Language;
+import cloud.codestore.client.ui.CoreConnectionEstablishedEvent;
 import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.UiMessages;
 import cloud.codestore.client.ui.selection.sort.ToggleSortEvent;
@@ -39,9 +40,7 @@ public class Filter {
     private void initialize() {
         filterPanel.managedProperty().bind(filterPanel.visibleProperty());
         filterPanel.setVisible(false);
-
         handleTagInput();
-        fillLanguageSelection();
     }
 
     @Subscribe
@@ -52,6 +51,11 @@ public class Filter {
     @Subscribe
     private void toggle(@Nonnull ToggleSortEvent event) {
         filterPanel.setVisible(false);
+    }
+
+    @Subscribe
+    private void coreConnected(@Nonnull CoreConnectionEstablishedEvent event) {
+        fillLanguageSelection();
     }
 
     @Subscribe

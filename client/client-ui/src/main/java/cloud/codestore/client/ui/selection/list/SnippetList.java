@@ -1,6 +1,7 @@
 package cloud.codestore.client.ui.selection.list;
 
 import cloud.codestore.client.Permission;
+import cloud.codestore.client.ui.CoreConnectionEstablishedEvent;
 import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.selection.filter.FilterEvent;
 import cloud.codestore.client.ui.selection.search.FullTextSearchEvent;
@@ -55,7 +56,6 @@ public class SnippetList implements ChangeListener<SnippetListItem> {
         createSnippet.managedProperty().bind(createSnippet.visibleProperty());
         handleNextPageVisibility();
         handleSnippetSelection();
-        loadSnippets();
     }
 
     private void handleNextPageVisibility() {
@@ -149,6 +149,11 @@ public class SnippetList implements ChangeListener<SnippetListItem> {
 
     @Subscribe
     private void snippetDeleted(@Nonnull SnippetDeletedEvent event) {
+        loadSnippets();
+    }
+
+    @Subscribe
+    private void coreConnected(@Nonnull CoreConnectionEstablishedEvent event) {
         loadSnippets();
     }
 

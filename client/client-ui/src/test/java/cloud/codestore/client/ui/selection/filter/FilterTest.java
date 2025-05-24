@@ -2,6 +2,7 @@ package cloud.codestore.client.ui.selection.filter;
 
 import cloud.codestore.client.Language;
 import cloud.codestore.client.ui.AbstractUiTest;
+import cloud.codestore.client.ui.CoreConnectionEstablishedEvent;
 import cloud.codestore.client.usecases.readlanguages.ReadLanguagesUseCase;
 import com.google.common.eventbus.EventBus;
 import javafx.scene.control.Button;
@@ -38,7 +39,7 @@ class FilterTest extends AbstractUiTest {
 
     @Start
     public void start(Stage stage) throws Exception {
-        lenient().when(readLanguagesUseCase.readLanguages()).thenReturn(List.of(
+        when(readLanguagesUseCase.readLanguages()).thenReturn(List.of(
                 new Language("Python", "1"),
                 new Language("HTML", "2"),
                 JAVA,
@@ -46,7 +47,9 @@ class FilterTest extends AbstractUiTest {
         ));
 
         start(stage, "filter.fxml", controller);
+        eventBus.post(new CoreConnectionEstablishedEvent());
         eventBus.post(new ToggleFilterEvent());
+        clearInvocations(eventBus);
     }
 
     @Test
