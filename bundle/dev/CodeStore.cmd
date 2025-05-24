@@ -1,4 +1,12 @@
 @echo off
+setlocal
 
-::start .\startCore.cmd
-call .\runtime\bin\java.exe -Dspring.profiles.active=dev -jar .\client\CodeStoreClient.jar
+set JAVA=java.exe
+if "%1" == "-w" (
+    set JAVA=javaw.exe
+)
+
+start .\startCore.cmd %1
+start .\runtime\bin\%JAVA% -Dspring.profiles.active=dev -jar .\client\CodeStoreClient.jar
+
+endlocal

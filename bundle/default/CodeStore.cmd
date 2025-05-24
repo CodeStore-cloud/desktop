@@ -1,3 +1,3 @@
 @echo off
-::start .\startCore.cmd
-call .\runtime\bin\javaw.exe -jar .\client\CodeStoreClient.jar
+start .\startCore.cmd
+start .\runtime\bin\javaw.exe -jar .\client\CodeStoreClient.jar

@@ -32,5 +32,3 @@ if exist %OUTPUT_PATH% rmdir /s /q %OUTPUT_PATH%
 --no-header-files ^
 --no-man-pages ^
 --output %OUTPUT_PATH%
-
-exit /b
