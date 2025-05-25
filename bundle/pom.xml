@@ -17,6 +17,20 @@
         <jdk.path>%JAVA_HOME%</jdk.path>
     </properties>
 
+    <dependencies>
+        <!-- Required to enforce build order -->
+        <dependency>
+            <groupId>cloud.codestore</groupId>
+            <artifactId>client-application</artifactId>
+            <version>2.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>cloud.codestore</groupId>
+            <artifactId>application</artifactId>
+            <version>2.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
     <profiles>
         <profile>
             <id>dev</id>
@@ -26,7 +40,7 @@
         </profile>
 
         <profile>
-            <id>windows-executable</id>
+            <id>windows-installer</id>
             <activation>
                 <property>
                     <name>inno.setup.path</name>

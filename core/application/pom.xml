@@ -32,6 +32,8 @@
     </dependencies>
 
     <build>
+        <finalName>CodeStoreCore</finalName>
+
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -45,7 +47,6 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.4.2</version>
                 <configuration>
-                    <finalName>CodeStoreCore</finalName>
                     <outputDirectory>${project.build.directory}/bin</outputDirectory>
                     <archive>
                         <manifest>
