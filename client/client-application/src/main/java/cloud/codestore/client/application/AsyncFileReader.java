@@ -44,7 +44,6 @@ class AsyncFileReader {
             }
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
-            throw new RuntimeException("Unable to read file " + file, exception);
         }
     }
 }

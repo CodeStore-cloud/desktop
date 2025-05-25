@@ -10,6 +10,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
+import java.util.Map;
+
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.StringEndsWith.endsWith;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -45,12 +49,15 @@ class ReadSnippetResourceTest extends SnippetControllerTest {
                         .andExpect(jsonPath("$.data.relationships.language.links.related", endsWith(languagePath)))
                         .andExpect(jsonPath("$.data.links.self", is(SNIPPET_URL)))
                         .andExpect(jsonPath("$.meta.operations").isArray())
-                        .andExpect(jsonPath("$.meta.operations[0].operation", is("updateSnippet")))
-                        .andExpect(jsonPath("$.meta.operations[0].method", is("PATCH")))
-                        .andExpect(jsonPath("$.meta.operations[0].href", is(SNIPPET_URL)))
-                        .andExpect(jsonPath("$.meta.operations[1].operation", is("deleteSnippet")))
-                        .andExpect(jsonPath("$.meta.operations[1].method", is("DELETE")))
-                        .andExpect(jsonPath("$.meta.operations[1].href", is(SNIPPET_URL)));
+                        .andExpect(jsonPath("$.meta.operations", hasSize(2)))
+                        .andExpect(jsonPath("$.meta.operations", containsInAnyOrder(
+                                Map.of("operation", "updateSnippet",
+                                        "method", "PATCH",
+                                        "href", SNIPPET_URL),
+                                Map.of("operation", "deleteSnippet",
+                                        "method", "DELETE",
+                                        "href", SNIPPET_URL)
+                        )));
     }
 
     private Snippet testSnippet() {

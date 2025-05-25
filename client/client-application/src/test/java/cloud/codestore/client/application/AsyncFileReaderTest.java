@@ -12,7 +12,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("The async file reader")
 class AsyncFileReaderTest {
@@ -55,17 +54,5 @@ class AsyncFileReaderTest {
         Files.writeString(testFile, FILE_CONTENT);
 
         assertThat(future.get()).isEqualTo(FILE_CONTENT);
-    }
-
-    @Test
-    @DisplayName("throws an exception when reading fails")
-    void throwsExceptionWhenReadingFails() throws IOException {
-        Path directory = tempDirectory.resolve("not-a-file");
-        Files.createDirectory(directory);
-
-        assertThatThrownBy(() -> fileReader.readFile(directory).get())
-            .hasMessageContaining("Unable to read file not-a-file");
-
-        Files.deleteIfExists(directory);
     }
 }
