@@ -3,7 +3,7 @@ package cloud.codestore.client.ui.snippet.code;
 import cloud.codestore.client.Language;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
-import cloud.codestore.client.ui.CoreConnectionEstablishedEvent;
+import cloud.codestore.client.ui.ApplicationReadyEvent;
 import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.selection.filter.QuickFilterEvent;
 import cloud.codestore.client.ui.snippet.SnippetForm;
@@ -69,7 +69,7 @@ public class SnippetCode implements SnippetForm {
     }
 
     @Subscribe
-    private void coreConnected(@Nonnull CoreConnectionEstablishedEvent event) {
+    private void applicationReady(@Nonnull ApplicationReadyEvent event) {
         languageSelection.getItems().addAll(readLanguagesUseCase.readLanguages());
     }
 

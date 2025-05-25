@@ -10,16 +10,19 @@ import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.annotation.Nonnull;
 import java.awt.*;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * The JavaFX main class to show the GUI.
  */
 public class FxApplication extends Application {
     private static final Logger LOGGER = LogManager.getLogger(FxApplication.class);
+    private static CompletableFuture<Void> uiInitialized;
 
     @Override
     public void start(Stage window) {
@@ -29,6 +32,11 @@ public class FxApplication extends Application {
         hideLoadingScreen();
         DefaultBrowser.init(getHostServices());
         logStartTime();
+        uiInitialized.complete(null);
+    }
+
+    public static void setUiInitializedCallback(@Nonnull CompletableFuture<Void> callback) {
+        uiInitialized = callback;
     }
 
     private void setCodeStoreIcon(Stage window) {
@@ -60,6 +68,6 @@ public class FxApplication extends Application {
 
     private void logStartTime() {
         long jvmStart = ManagementFactory.getRuntimeMXBean().getStartTime();
-        LOGGER.info("Application started in {}ms", System.currentTimeMillis() - jvmStart);
+        LOGGER.info("UI started in {}ms", System.currentTimeMillis() - jvmStart);
     }
 }

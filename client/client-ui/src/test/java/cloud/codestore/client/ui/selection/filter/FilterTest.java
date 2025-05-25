@@ -2,7 +2,7 @@ package cloud.codestore.client.ui.selection.filter;
 
 import cloud.codestore.client.Language;
 import cloud.codestore.client.ui.AbstractUiTest;
-import cloud.codestore.client.ui.CoreConnectionEstablishedEvent;
+import cloud.codestore.client.ui.ApplicationReadyEvent;
 import cloud.codestore.client.usecases.readlanguages.ReadLanguagesUseCase;
 import com.google.common.eventbus.EventBus;
 import javafx.scene.control.Button;
@@ -47,7 +47,7 @@ class FilterTest extends AbstractUiTest {
         ));
 
         start(stage, "filter.fxml", controller);
-        eventBus.post(new CoreConnectionEstablishedEvent());
+        eventBus.post(new ApplicationReadyEvent());
         eventBus.post(new ToggleFilterEvent());
         clearInvocations(eventBus);
     }

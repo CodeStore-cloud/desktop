@@ -3,12 +3,13 @@ package cloud.codestore.client.application;
 import cloud.codestore.client.UseCase;
 import cloud.codestore.client.repositories.HttpClient;
 import cloud.codestore.client.repositories.Repository;
-import cloud.codestore.client.ui.CoreConnectionEstablishedEvent;
+import cloud.codestore.client.ui.ApplicationReadyEvent;
 import cloud.codestore.client.ui.FXMLLoaderFactory;
 import cloud.codestore.client.ui.FxApplication;
 import cloud.codestore.client.ui.FxController;
 import com.google.common.eventbus.EventBus;
 import javafx.application.Application;
+import javafx.application.Platform;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,15 +38,23 @@ import java.util.concurrent.CompletableFuture;
 })
 public class CodeStoreClient {
     private static final Logger LOGGER = LogManager.getLogger(CodeStoreClient.class);
+    private static CompletableFuture<Void> uiInitialized =  new CompletableFuture<>();
 
     public static void main(String[] args) {
         LOGGER.info("Starting {CodeStore} client ...");
         ApplicationContext context = new AnnotationConfigApplicationContext(CodeStoreClient.class);
         LOGGER.debug("Active profiles: {}", Arrays.toString(context.getEnvironment().getActiveProfiles()));
         FXMLLoaderFactory.setControllerFactory(context::getBean);
+        FxApplication.setUiInitializedCallback(uiInitialized);
         Application.launch(FxApplication.class);
     }
 
+    /**
+     * Creates an {@link HttpClient} that
+     *
+     * @param dataDirectory the path of the directory containing the user´s data.
+     * @return a {@link HttpClient} object that may not be fully initialized.
+     */
     @Bean
     public HttpClient httpClient(@Value("${codestore.data:}") String dataDirectory) {
         Path directory = getDataDirectory(dataDirectory);
@@ -55,12 +64,16 @@ public class CodeStoreClient {
         CompletableFuture<String> apiRootUrl = fileReader.readFile(directory.resolve("core-api-url"));
         CompletableFuture<String> accessToken = fileReader.readFile(directory.resolve("core-api-access-token"));
 
-        CompletableFuture.allOf(apiRootUrl, accessToken).thenAccept(result -> {
+        CompletableFuture<Void> clientInitialized = new CompletableFuture<>();
+        HttpClient httpClient = new HttpClient(apiRootUrl, accessToken, clientInitialized);
+
+        CompletableFuture.allOf(uiInitialized, clientInitialized).thenRun(() -> {
             LOGGER.info("Connecting to {CodeStore} Core at {}", apiRootUrl.join());
-            eventBus().post(new CoreConnectionEstablishedEvent());
+            LOGGER.info("Application ready!");
+            Platform.runLater(() -> eventBus().post(new ApplicationReadyEvent()));
         });
 
-        return new HttpClient(apiRootUrl, accessToken);
+        return httpClient;
     }
 
     @Bean

@@ -4,7 +4,7 @@ import cloud.codestore.client.Language;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.AbstractUiTest;
-import cloud.codestore.client.ui.CoreConnectionEstablishedEvent;
+import cloud.codestore.client.ui.ApplicationReadyEvent;
 import cloud.codestore.client.ui.selection.filter.QuickFilterEvent;
 import cloud.codestore.client.usecases.readlanguages.ReadLanguagesUseCase;
 import com.google.common.eventbus.EventBus;
@@ -46,7 +46,7 @@ class SnippetCodeTest extends AbstractUiTest {
         controller = new SnippetCode(readLanguagesUseCase, eventBus);
         start(stage, "code.fxml", controller);
         // Editor is loaded synchronously in the tests, so no need to wait until it´s loaded
-        eventBus.post(new CoreConnectionEstablishedEvent());
+        eventBus.post(new ApplicationReadyEvent());
     }
 
     @Test

@@ -28,7 +28,8 @@ class HttpClientTest {
     private MockWebServer mockBackEnd;
     private HttpClient client = new HttpClient(
             CompletableFuture.completedFuture("http://localhost:8080"),
-            CompletableFuture.completedFuture( ACCESS_TOKEN));
+            CompletableFuture.completedFuture(ACCESS_TOKEN),
+            new CompletableFuture<>());
 
     @BeforeEach
     void setUp() throws IOException {
@@ -39,6 +40,22 @@ class HttpClientTest {
     @AfterEach
     void tearDown() throws IOException {
         mockBackEnd.shutdown();
+    }
+
+    @Test
+    @DisplayName("calls the callback function when fully initialized")
+    void callsCallbackWhenFullyInitialized() {
+        CompletableFuture<String> apiRootUrl = new CompletableFuture<>();
+        CompletableFuture<String> apiAccessToken = new CompletableFuture<>();
+
+        CompletableFuture<Void> clientInitialized = new CompletableFuture<>();
+        new HttpClient(apiRootUrl, apiAccessToken, clientInitialized);
+        assertThat(clientInitialized).isNotCompleted();
+
+        apiRootUrl.complete("http://localhost:8080");
+        apiAccessToken.complete(ACCESS_TOKEN);
+
+        assertThat(clientInitialized).isCompleted();
     }
 
     @Test

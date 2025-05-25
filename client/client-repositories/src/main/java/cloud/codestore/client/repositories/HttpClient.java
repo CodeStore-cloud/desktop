@@ -25,6 +25,9 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nonnull;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * The client for communicating with the {CodeStore} Core.
+ */
 public class HttpClient {
     private static final MediaType JSONAPI_MEDIATYPE = MediaType.valueOf(JsonApiDocument.MEDIA_TYPE);
     private static final int MAX_BUFFER_SIZE = 1024 * 1024;
@@ -35,8 +38,21 @@ public class HttpClient {
     private String languageCollectionUrl;
     private String tagsCollectionUrl;
 
-    public HttpClient(@Nonnull CompletableFuture<String> rootUrl, @Nonnull CompletableFuture<String> accessToken) {
-        CompletableFuture.allOf(rootUrl, accessToken).thenAccept(result -> {
+    /**
+     * Since the URL and access token to the {CodeStore} core may not be present during creation, an instance may not
+     * be fully initialized. As soon as the parameters are available, the client gets initialized and calls the give
+     * callback afterward.
+     *
+     * @param rootUrl the root URL to the {CodeStore} Core.
+     * @param accessToken the access token to the {CodeStore} Core API.
+     * @param clientInitializedCallback a callback which is called as soon as the client is fully initialized.
+     */
+    public HttpClient(
+            @Nonnull CompletableFuture<String> rootUrl,
+            @Nonnull CompletableFuture<String> accessToken,
+            CompletableFuture<Void> clientInitializedCallback
+    ) {
+        CompletableFuture.allOf(rootUrl, accessToken).thenRun(() -> {
             this.rootUrl = rootUrl.join();
 
             ObjectMapper objectMapper = new JsonApiObjectMapper(new ResourceMetaInfo.ResourceMetaInfoDeserializer())
@@ -61,6 +77,8 @@ public class HttpClient {
                                        configurer.defaultCodecs().maxInMemorySize(MAX_BUFFER_SIZE);
                                    })
                                    .build();
+
+            clientInitializedCallback.complete(null);
         });
     }
 
