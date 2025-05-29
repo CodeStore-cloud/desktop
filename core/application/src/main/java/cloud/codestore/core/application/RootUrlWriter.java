@@ -20,7 +20,7 @@ class RootUrlWriter {
     }
 
     @EventListener(ApplicationReadyEvent.class)
-    public void writeRootUrl() {
+    void writeRootUrl() {
         String rootUrl = UriFactory.createUri("");
         File rootUrlFile = dataDirectory.getFile("core-api-url");
         rootUrlFile.write(rootUrl);

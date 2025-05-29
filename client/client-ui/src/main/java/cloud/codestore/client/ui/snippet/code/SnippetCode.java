@@ -100,12 +100,12 @@ public class SnippetCode implements SnippetForm {
 
     private String editorHtml() {
         try {
-            String html = "";
+            String html;
             try (InputStream htmlStream = Objects.requireNonNull(getClass().getResourceAsStream("editor/editor.html"))) {
                 html = IOUtils.toString(new InputStreamReader(htmlStream));
             }
 
-            String js = "";
+            String js;
             try (InputStream jsStream = Objects.requireNonNull(getClass().getResourceAsStream("editor/editor.js"))) {
                 js = IOUtils.toString(new InputStreamReader(jsStream));
             }

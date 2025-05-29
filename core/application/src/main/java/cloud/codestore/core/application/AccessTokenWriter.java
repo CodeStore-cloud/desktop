@@ -24,7 +24,7 @@ class AccessTokenWriter {
     }
 
     @EventListener(ApplicationReadyEvent.class)
-    public void writeAccessToken() {
+    void writeAccessToken() {
         File tokenFile = dataDirectory.getFile("core-api-access-token");
         tokenFile.write(accessToken);
         tokenFile.path().toFile().deleteOnExit();
