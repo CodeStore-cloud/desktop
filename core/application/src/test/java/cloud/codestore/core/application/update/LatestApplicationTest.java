@@ -1,13 +1,15 @@
 package cloud.codestore.core.application.update;
 
-
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.*;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,14 +18,12 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@DisplayName("The Updater")
-class UpdaterTest {
-    private static final String CURRENT_VERSION = "2.0.0";
+@DisplayName("The LatestApplication object")
+class LatestApplicationTest {
 
     private static HttpServer server;
-
-    private Updater updater;
     private HttpContext context;
+    private LatestApplication latestApplication;
 
     @BeforeAll
     static void beforeAll() throws IOException {
@@ -38,10 +38,13 @@ class UpdaterTest {
 
     @BeforeEach
     void setUp() {
-        updater = new Updater(
-                "http://localhost:" + server.getAddress().getPort(),
-                CURRENT_VERSION
-        );
+        String url = "http://localhost:" + server.getAddress().getPort();
+        latestApplication = new LatestApplication(url);
+    }
+
+    @AfterEach
+    void tearDown() {
+        server.removeContext(context);
     }
 
     private HttpHandler returnNotFound() {
@@ -57,11 +60,6 @@ class UpdaterTest {
         @BeforeEach
         void setUp() {
             context = server.createContext("/download/latestVersion.json");
-        }
-
-        @AfterEach
-        void tearDown() {
-            server.removeContext(context);
         }
 
         @Test
@@ -107,7 +105,9 @@ class UpdaterTest {
         }
 
         private void expectVersionAvailable(boolean expectedResult) throws Exception {
-            assertThat(updater.isUpdateAvailable().get(1, TimeUnit.SECONDS)).isEqualTo(expectedResult);
+            Boolean updateAvailable = latestApplication.isNewerThan("2.0.0")
+                                                       .get(1, TimeUnit.SECONDS);
+            assertThat(updateAvailable).isEqualTo(expectedResult);
         }
 
         private HttpHandler returnOk(String body) {
@@ -138,7 +138,6 @@ class UpdaterTest {
 
         @AfterEach
         void tearDown() {
-            server.removeContext(context);
             if (downloadedFile != null) {
                 try {
                     Files.deleteIfExists(downloadedFile);
@@ -149,17 +148,19 @@ class UpdaterTest {
 
         @Test
         @DisplayName("saves the file to a temporary directory")
-        void downloadsToTempDir() throws IOException {
+        void downloadsToTempDir() throws Exception {
             context.setHandler(returnOk());
 
-            updater.downloadNewVersion();
+            InstallerExecutable installer = latestApplication.download().get(1, TimeUnit.SECONDS);
 
-            downloadedFile = updater.getDownloadedApplicationFile();
-            assertThat(downloadedFile).isNotNull();
-            assertThat(downloadedFile).exists();
-            assertThat(downloadedFile).isRegularFile();
-            assertThat(downloadedFile).hasFileName("CodeStore.exe");
-            assertThat(downloadedFile).hasBinaryContent(FILE_CONTENT);
+            assertThat(installer).isNotNull();
+
+            Field field = InstallerExecutable.class.getDeclaredField("file");
+            ReflectionUtils.makeAccessible(field);
+            downloadedFile = (Path) ReflectionUtils.getField(field, installer);
+            assertThat(downloadedFile).isNotNull()
+                                      .hasFileName("CodeStore.exe")
+                                      .hasBinaryContent(FILE_CONTENT);
         }
 
         @Test
@@ -167,9 +168,9 @@ class UpdaterTest {
         void serverError() {
             context.setHandler(returnNotFound());
 
-            assertThatThrownBy(() -> updater.downloadNewVersion())
-                    .isInstanceOf(IOException.class)
-                    .hasMessage("Failed to download CodeStore.exe");
+            assertThatThrownBy(() -> latestApplication.download().get())
+                    .rootCause()
+                    .isInstanceOf(WebClientResponseException.class);
         }
 
         private HttpHandler returnOk() {
