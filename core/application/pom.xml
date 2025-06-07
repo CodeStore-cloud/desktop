@@ -29,6 +29,13 @@
             <artifactId>repositories</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- Web Client -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+            <version>${spring.boot.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
