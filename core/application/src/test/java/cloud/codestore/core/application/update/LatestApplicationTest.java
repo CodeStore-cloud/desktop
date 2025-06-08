@@ -5,22 +5,21 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.*;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.util.StreamUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.net.http.HttpTimeoutException;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@DisplayName("The LatestApplication object")
+@DisplayName("The LatestApplication")
 class LatestApplicationTest {
 
     private static HttpServer server;
@@ -54,6 +53,14 @@ class LatestApplicationTest {
             exchange.sendResponseHeaders(404, 0);
             exchange.getResponseBody().close();
         };
+    }
+
+    /**
+     * The context can´t be cleared as long as the context handler is sleeping.
+     * So we need to wait for it to finish sleeping.
+     */
+    private void awaitSleepingContextHandler(CountDownLatch countDownLatch) throws InterruptedException {
+        countDownLatch.await();
     }
 
     @Nested
@@ -150,51 +157,35 @@ class LatestApplicationTest {
     }
 
     @Nested
-    @DisplayName("when downloading the new version")
+    @DisplayName("for downloading the new version")
     class DownloadNewVersionTest {
         private static final byte[] FILE_CONTENT = "mock content".getBytes();
-        private Path downloadedFile;
 
         @BeforeEach
         void setUp() {
             context = server.createContext("/download/CodeStore.exe");
         }
 
-        @AfterEach
-        void tearDown() {
-            if (downloadedFile != null) {
-                try {
-                    Files.deleteIfExists(downloadedFile);
-                    Files.deleteIfExists(downloadedFile.getParent());
-                } catch (IOException ignore) {}
-            }
-        }
-
         @Test
-        @DisplayName("saves the file to a temporary directory")
-        void downloadsToTempDir() throws Exception {
+        @DisplayName("creates an InstallerExecutable instance")
+        void downloadsToTempDir() throws NoSuchFieldException, IOException {
             context.setHandler(returnOk());
 
-            InstallerExecutable installer = latestApplication.download().get(1, TimeUnit.SECONDS);
-
+            InstallerExecutable installer = latestApplication.getInstaller();
             assertThat(installer).isNotNull();
+            assertThat(getContentLength(installer)).isEqualTo(FILE_CONTENT.length);
 
-            Field field = InstallerExecutable.class.getDeclaredField("file");
-            ReflectionUtils.makeAccessible(field);
-            downloadedFile = (Path) ReflectionUtils.getField(field, installer);
-            assertThat(downloadedFile).isNotNull()
-                                      .hasFileName("CodeStore.exe")
-                                      .hasBinaryContent(FILE_CONTENT);
+            try (InputStream in = getInputStream(installer); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                StreamUtils.copy(in, out);
+                assertThat(out.toByteArray()).isEqualTo(FILE_CONTENT);
+            }
         }
 
         @Test
         @DisplayName("fails if the server returns an error")
         void serverError() {
             context.setHandler(returnNotFound());
-
-            assertThatThrownBy(() -> latestApplication.download().get())
-                    .rootCause()
-                    .isInstanceOf(WebClientResponseException.class);
+            assertThatThrownBy(() -> latestApplication.getInstaller()).isInstanceOf(IOException.class);
         }
 
         @Test
@@ -214,16 +205,14 @@ class LatestApplicationTest {
                 }
             });
 
-            assertThatThrownBy(() -> latestApplication.download().get())
-                    .rootCause()
-                    .isInstanceOf(TimeoutException.class);
-
+            assertThatThrownBy(() -> latestApplication.getInstaller()).isInstanceOf(HttpTimeoutException.class);
             awaitSleepingContextHandler(countDownLatch);
         }
 
         private HttpHandler returnOk() {
             return exchange -> {
                 exchange.sendResponseHeaders(200, FILE_CONTENT.length);
+                exchange.getResponseHeaders().set("Content-Length", String.valueOf(FILE_CONTENT.length));
                 exchange.getResponseHeaders().set("Content-Type", "application/octet-stream");
 
                 try (OutputStream responseStream = exchange.getResponseBody()) {
@@ -232,13 +221,17 @@ class LatestApplicationTest {
                 }
             };
         }
-    }
 
-    /**
-     * The context can´t be cleared as long as the context handler is sleeping.
-     * So we need to wait for it to finish sleeping.
-     */
-    private void awaitSleepingContextHandler(CountDownLatch countDownLatch) throws InterruptedException {
-        countDownLatch.await();
+        private InputStream getInputStream(InstallerExecutable installer) throws NoSuchFieldException {
+            Field field = InstallerExecutable.class.getDeclaredField("inputStream");
+            ReflectionUtils.makeAccessible(field);
+            return (InputStream) ReflectionUtils.getField(field, installer);
+        }
+
+        private Long getContentLength(InstallerExecutable installer) throws NoSuchFieldException {
+            Field field = InstallerExecutable.class.getDeclaredField("contentLength");
+            ReflectionUtils.makeAccessible(field);
+            return (Long) ReflectionUtils.getField(field, installer);
+        }
     }
 }

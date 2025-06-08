@@ -8,20 +8,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Represents the latest available application on the server.
+ * Represents the latest available application.
  */
 @Component
 class LatestApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(LatestApplication.class);
     private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(5);
 
+    private final HttpClient client = HttpClient.newHttpClient();
     private final String homepageUrl;
     private CompletableFuture<Integer> latestVersion;
 
@@ -56,41 +61,45 @@ class LatestApplication {
     }
 
     /**
-     * Downloads the executable to install the latest application.
-     *
-     * @return a {@link CompletableFuture} that, when completed, returns an {@link InstallerExecutable} for installing
-     * the application.
+     * @return an {@link InstallerExecutable} that represents the executable for installing the latest application.
      */
-    CompletableFuture<InstallerExecutable> download() {
-        return downloadExe().thenApply(fileContent -> {
-            try {
-                return new InstallerExecutable(fileContent);
-            } catch (IOException exception) {
-                throw new RuntimeException("Failed to save installer.", exception);
-            }
-        });
-    }
-
-    private CompletableFuture<byte[]> downloadExe() {
+    InstallerExecutable getInstaller() throws IOException {
         LOGGER.info("Downloading installer...");
-        return WebClient.create(homepageUrl)
-                        .get()
-                        .uri("/download/CodeStore.exe")
-                        .retrieve()
-                        .bodyToMono(byte[].class)
-                        .timeout(DEFAULT_TIMEOUT)
-                        .toFuture();
+        HttpRequest request = HttpRequest.newBuilder()
+                                         .uri(URI.create(homepageUrl + "/download/CodeStore.exe"))
+                                         .timeout(DEFAULT_TIMEOUT)
+                                         .GET()
+                                         .build();
+
+        try {
+            var response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            if (response.statusCode() == 200) {
+                long contentLength = response.headers().firstValueAsLong("Content-Length").orElse(-1);
+                return new InstallerExecutable(contentLength, response.body());
+            } else {
+                throw new IOException("HTTP Error: " + response.statusCode());
+            }
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new IOException(exception);
+        }
     }
 
     private CompletableFuture<Integer> loadLatestVersion() {
-        return WebClient.create(homepageUrl)
-                        .get()
-                        .uri("/download/latestVersion.json")
-                        .retrieve()
-                        .bodyToMono(String.class)
-                        .timeout(DEFAULT_TIMEOUT)
-                        .map(this::parseVersionInfo)
-                        .toFuture();
+        HttpRequest request = HttpRequest.newBuilder()
+                                         .uri(URI.create(homepageUrl + "/download/latestVersion.json"))
+                                         .timeout(DEFAULT_TIMEOUT)
+                                         .GET()
+                                         .build();
+
+        return client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                     .thenApply(response -> {
+                         if (response.statusCode() == 200) {
+                             return parseVersionInfo(response.body());
+                         } else {
+                             throw new UncheckedIOException(new IOException("HTTP Error: " + response.statusCode()));
+                         }
+                     });
     }
 
     private int parseVersionInfo(String body) {
