@@ -3,14 +3,15 @@ package cloud.codestore.core.application.update;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -19,11 +20,18 @@ import java.util.concurrent.CompletableFuture;
 @Component
 class LatestApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(LatestApplication.class);
+    private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(5);
 
     private final String homepageUrl;
+    private CompletableFuture<Integer> latestVersion;
 
     LatestApplication(@Value("${homepage.url}") String homepageUrl) {
         this.homepageUrl = homepageUrl;
+    }
+
+    @PostConstruct
+    void init() {
+        latestVersion = loadLatestVersion();
     }
 
     /**
@@ -34,7 +42,11 @@ class LatestApplication {
      */
     CompletableFuture<Boolean> isNewerThan(String currentVersion) {
         int currentVersionAsInt = asInt(currentVersion);
-        return loadLatestVersion().thenApply(latestVersion -> latestVersion > currentVersionAsInt);
+        return latestVersion.exceptionally(exception -> {
+                                LOGGER.error("Failed to check for updates.", exception);
+                                return 0;
+                            })
+                            .thenApply(latestVersion -> latestVersion > currentVersionAsInt);
     }
 
     /**
@@ -59,6 +71,7 @@ class LatestApplication {
                         .uri("/download/CodeStore.exe")
                         .retrieve()
                         .bodyToMono(byte[].class)
+                        .timeout(DEFAULT_TIMEOUT)
                         .toFuture();
     }
 
@@ -68,11 +81,8 @@ class LatestApplication {
                         .uri("/download/latestVersion.json")
                         .retrieve()
                         .bodyToMono(String.class)
+                        .timeout(DEFAULT_TIMEOUT)
                         .map(this::parseVersionInfo)
-                        .onErrorResume(exception -> {
-                            LOGGER.error("Failed to check for updates.", exception);
-                            return Mono.just(0);
-                        })
                         .toFuture();
     }
 

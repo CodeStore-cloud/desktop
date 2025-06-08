@@ -13,7 +13,9 @@ import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -104,9 +106,31 @@ class LatestApplicationTest {
             expectVersionAvailable(false);
         }
 
+        @Test
+        @DisplayName("returns false if a timeout occurs")
+        void handleTimeout() throws Exception {
+            CountDownLatch countDownLatch = new CountDownLatch(1);
+
+            context.setHandler(exchange -> {
+                try {
+                    Thread.sleep(6000);
+                    exchange.sendResponseHeaders(404, 0);
+                    exchange.getResponseBody().close();
+                    countDownLatch.countDown();
+                } catch (InterruptedException exception) {
+                    Thread.currentThread().interrupt();
+                    countDownLatch.countDown();
+                }
+            });
+
+            expectVersionAvailable(false);
+
+            awaitSleepingContextHandler(countDownLatch);
+        }
+
         private void expectVersionAvailable(boolean expectedResult) throws Exception {
-            Boolean updateAvailable = latestApplication.isNewerThan("2.0.0")
-                                                       .get(1, TimeUnit.SECONDS);
+            latestApplication.init();
+            Boolean updateAvailable = latestApplication.isNewerThan("2.0.0").get();
             assertThat(updateAvailable).isEqualTo(expectedResult);
         }
 
@@ -173,6 +197,30 @@ class LatestApplicationTest {
                     .isInstanceOf(WebClientResponseException.class);
         }
 
+        @Test
+        @DisplayName("fails if a timeout occurs")
+        void handleTimeout() throws Exception {
+            CountDownLatch countDownLatch = new CountDownLatch(1);
+
+            context.setHandler(exchange -> {
+                try {
+                    Thread.sleep(6000);
+                    exchange.sendResponseHeaders(404, 0);
+                    exchange.getResponseBody().close();
+                    countDownLatch.countDown();
+                } catch (InterruptedException exception) {
+                    Thread.currentThread().interrupt();
+                    countDownLatch.countDown();
+                }
+            });
+
+            assertThatThrownBy(() -> latestApplication.download().get())
+                    .rootCause()
+                    .isInstanceOf(TimeoutException.class);
+
+            awaitSleepingContextHandler(countDownLatch);
+        }
+
         private HttpHandler returnOk() {
             return exchange -> {
                 exchange.sendResponseHeaders(200, FILE_CONTENT.length);
@@ -184,5 +232,13 @@ class LatestApplicationTest {
                 }
             };
         }
+    }
+
+    /**
+     * The context can´t be cleared as long as the context handler is sleeping.
+     * So we need to wait for it to finish sleeping.
+     */
+    private void awaitSleepingContextHandler(CountDownLatch countDownLatch) throws InterruptedException {
+        countDownLatch.await();
     }
 }
