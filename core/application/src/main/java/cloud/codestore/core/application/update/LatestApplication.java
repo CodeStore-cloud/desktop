@@ -46,7 +46,13 @@ class LatestApplication {
                                 LOGGER.error("Failed to check for updates.", exception);
                                 return 0;
                             })
-                            .thenApply(latestVersion -> latestVersion > currentVersionAsInt);
+                            .thenApply(latestVersion -> {
+                                boolean updateAvailable = latestVersion > currentVersionAsInt;
+                                if (updateAvailable) {
+                                    LOGGER.info("Update available");
+                                }
+                                return updateAvailable;
+                            });
     }
 
     /**
@@ -66,6 +72,7 @@ class LatestApplication {
     }
 
     private CompletableFuture<byte[]> downloadExe() {
+        LOGGER.info("Downloading installer...");
         return WebClient.create(homepageUrl)
                         .get()
                         .uri("/download/CodeStore.exe")
