@@ -1,6 +1,9 @@
 package cloud.codestore.core.application;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,6 +19,10 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("The system tray")
 class CodeStoreSystemTrayTest {
+    static {
+        Locale.setDefault(Locale.ENGLISH);
+    }
+
     private static final int UPDATE_MENU_ITEM_INDEX = 0;
     private static final int EXIT_MENU_ITEM_INDEX = 1;
 
@@ -23,11 +30,6 @@ class CodeStoreSystemTrayTest {
     private SystemTray systemTray;
     private TrayIcon trayIcon;
     private CodeStoreSystemTray codeStoreTray;
-
-    @BeforeAll
-    static void beforeAll() {
-        Locale.setDefault(Locale.ENGLISH);
-    }
 
     @BeforeEach
     void setUp() throws AWTException {

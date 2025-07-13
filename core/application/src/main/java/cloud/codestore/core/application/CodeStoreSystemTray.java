@@ -21,13 +21,14 @@ import java.util.ResourceBundle;
 @Component
 public class CodeStoreSystemTray {
     private static final Logger LOGGER = LoggerFactory.getLogger(CodeStoreSystemTray.class);
-    private static final ResourceBundle resourceBundle = ResourceBundle.getBundle("tray-messages");
+    private final ResourceBundle resourceBundle;
 
     private final SystemTray systemTray;
     private final TrayIcon trayIcon;
 
     @Autowired
     CodeStoreSystemTray(@Nullable SystemTray systemTray) {
+        this.resourceBundle = ResourceBundle.getBundle("tray-messages");
         this.systemTray = systemTray;
         if (this.systemTray == null) {
             LOGGER.warn("System Tray is not supported");
