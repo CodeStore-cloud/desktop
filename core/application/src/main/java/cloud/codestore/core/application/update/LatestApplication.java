@@ -53,9 +53,7 @@ class LatestApplication {
                             })
                             .thenApply(latestVersion -> {
                                 boolean updateAvailable = latestVersion > currentVersionAsInt;
-                                if (updateAvailable) {
-                                    LOGGER.info("Update available");
-                                }
+                                LOGGER.info(updateAvailable ? "Update available" : "Application up to date");
                                 return updateAvailable;
                             });
     }
@@ -66,6 +64,7 @@ class LatestApplication {
     InstallerExecutable getInstaller() throws IOException {
         LOGGER.info("Downloading installer...");
         HttpRequest request = HttpRequest.newBuilder()
+                                         .version(HttpClient.Version.HTTP_1_1)
                                          .uri(URI.create(homepageUrl + "/download/CodeStore.exe"))
                                          .timeout(DEFAULT_TIMEOUT)
                                          .GET()
@@ -87,6 +86,7 @@ class LatestApplication {
 
     private CompletableFuture<Integer> loadLatestVersion() {
         HttpRequest request = HttpRequest.newBuilder()
+                                         .version(HttpClient.Version.HTTP_1_1)
                                          .uri(URI.create(homepageUrl + "/download/latestVersion.json"))
                                          .timeout(DEFAULT_TIMEOUT)
                                          .GET()

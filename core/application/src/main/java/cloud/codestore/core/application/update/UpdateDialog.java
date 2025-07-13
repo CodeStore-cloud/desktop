@@ -12,21 +12,20 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 import java.util.ResourceBundle;
 
 /**
  * The dialog that shows the progress of downloading the application.
  */
-class UpdateDialog extends Application {
+public class UpdateDialog extends Application {
     private static final ResourceBundle MESSAGES = ResourceBundle.getBundle("dialog-messages");
     private static final int PADDING = 10;
     private static UpdateDialog INSTANCE;
 
     private Runnable cancelCallback = () -> {};
     private ProgressBar progressBar;
-    private Stage stage;
+    private Stage window;
 
     static UpdateDialog show() {
         launch(UpdateDialog.class);
@@ -39,19 +38,19 @@ class UpdateDialog extends Application {
     }
 
     @Override
-    public void start(Stage stage) {
-        this.stage = stage;
-        if (stage.getStyle() != StageStyle.UNDECORATED) {
-            stage.initStyle(StageStyle.UNDECORATED);
-        }
-        stage.setTitle(MESSAGES.getString("dialog.update.progress.title"));
+    public void start(Stage window) {
+        this.window = window;
+//        if (window.getStyle() != StageStyle.UNDECORATED) {
+//            window.initStyle(StageStyle.UNDECORATED);
+//        }
+        window.setTitle(MESSAGES.getString("dialog.update.progress.title"));
 
         Pane rootPane = createRootPane();
 
         Scene scene = new Scene(rootPane, 250, 130);
-        stage.setScene(scene);
-        stage.setResizable(false);
-        stage.show();
+        window.setScene(scene);
+        window.setResizable(false);
+        window.show();
     }
 
     /**
@@ -70,7 +69,7 @@ class UpdateDialog extends Application {
     }
 
     void close() {
-        this.stage.close();
+        this.window.close();
     }
 
     private Pane createRootPane() {
