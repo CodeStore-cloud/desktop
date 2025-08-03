@@ -15,9 +15,7 @@ class UpdateDialog extends AbstractDialog {
     private Runnable cancelCallback = () -> {};
     private ProgressBar progressBar;
 
-    @Override
-    void show() {
-        super.show();
+    UpdateDialog() {
         setOnClose(cancelCallback);
     }
 

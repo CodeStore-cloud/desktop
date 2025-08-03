@@ -1,7 +1,5 @@
 package cloud.codestore.core.application.update;
 
-import javafx.application.Application;
-import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -15,23 +13,39 @@ import javafx.stage.Stage;
 import java.util.ResourceBundle;
 import java.util.concurrent.CountDownLatch;
 
-public abstract class AbstractDialog {
+abstract class AbstractDialog {
     private static final ResourceBundle MESSAGES = ResourceBundle.getBundle("dialog-messages");
     private static final int PADDING = 10;
 
     private CountDownLatch visibilityLatch = new CountDownLatch(1);
-    private UI delegate;
+    private Runnable onClose = () -> {};
+    private Stage window;
 
     void show() {
-        Thread thread = new Thread(() -> UI.show(this));
-        thread.setDaemon(true);
-        thread.start();
+        Platform.runLater(() -> {
+            if (window == null) {
+                window = new Stage();
+            }
+
+            window.setTitle(getTitle());
+            window.setResizable(false);
+            window.setOnCloseRequest(event -> onClose.run());
+            window.showingProperty()
+                  .addListener((observable, oldValue, newValue) -> visibilityLatch.countDown());
+
+            Pane rootPane = createRootPane();
+            Scene scene = new Scene(rootPane, rootPane.getPrefWidth(), rootPane.getPrefHeight());
+            window.setScene(scene);
+            window.show();
+            System.out.println("after show");
+        });
 
         waitForDialogToBeVisible();
+        System.out.println("Dialog showing");
     }
 
     void close() {
-        Platform.runLater(delegate::close);
+        Platform.runLater(window::close);
     }
 
     String getMessage(String key) {
@@ -39,11 +53,7 @@ public abstract class AbstractDialog {
     }
 
     void setOnClose(Runnable runnable) {
-        delegate.window.setOnCloseRequest(event -> runnable.run());
-    }
-
-    HostServices getHostServices() {
-        return delegate.getHostServices();
+        this.onClose = runnable;
     }
 
     abstract String getTitle();
@@ -51,12 +61,6 @@ public abstract class AbstractDialog {
     abstract Node[] getElements();
 
     abstract Button[] getButtons();
-
-    private void onInit(UI delegate) {
-        this.delegate = delegate;
-        delegate.window.showingProperty()
-                       .addListener((observable, oldValue, newValue) -> visibilityLatch.countDown());
-    }
 
     private void waitForDialogToBeVisible() {
         try {
@@ -67,44 +71,17 @@ public abstract class AbstractDialog {
         }
     }
 
-    public static class UI extends Application {
-        private static AbstractDialog controller;
-        private Stage window;
+    private Pane createRootPane() {
+        VBox pane = new VBox();
+        pane.setPadding(new Insets(PADDING));
+        pane.setSpacing(PADDING);
 
-        private static void show(AbstractDialog controller) {
-            UI.controller = controller;
-            launch();
-        }
+        ButtonBar buttonBar = new ButtonBar();
+        buttonBar.getButtons().addAll(getButtons());
 
-        @Override
-        public void start(Stage window) throws Exception {
-            this.window = window;
-            controller.onInit(this);
-            window.setTitle(controller.getTitle());
+        pane.getChildren().addAll(getElements());
+        pane.getChildren().add(buttonBar);
 
-            Pane rootPane = createRootPane();
-            Scene scene = new Scene(rootPane, rootPane.getPrefWidth(), rootPane.getPrefHeight());
-            window.setScene(scene);
-            window.setResizable(false);
-            window.show();
-        }
-
-        private Pane createRootPane() {
-            VBox pane = new VBox();
-            pane.setPadding(new Insets(PADDING));
-            pane.setSpacing(PADDING);
-
-            ButtonBar buttonBar = new ButtonBar();
-            buttonBar.getButtons().addAll(controller.getButtons());
-
-            pane.getChildren().addAll(controller.getElements());
-            pane.getChildren().add(buttonBar);
-
-            return pane;
-        }
-
-        private void close() {
-            window.close();
-        }
+        return pane;
     }
 }

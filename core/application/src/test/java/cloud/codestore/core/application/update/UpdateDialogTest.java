@@ -20,13 +20,11 @@ class UpdateDialogTest extends ApplicationTest {
 
     @Start
     public void start(Stage stage) throws Exception {
-        AbstractDialog.UI delegate = new AbstractDialog.UI();
-
-        Field field = AbstractDialog.UI.class.getDeclaredField("controller");
+        Field field = AbstractDialog.class.getDeclaredField("window");
         ReflectionUtils.makeAccessible(field);
-        ReflectionUtils.setField(field, delegate, updateDialog);
+        ReflectionUtils.setField(field, updateDialog, stage);
 
-        delegate.start(stage);
+        updateDialog.show();
     }
 
     @Test

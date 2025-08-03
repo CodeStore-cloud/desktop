@@ -18,13 +18,12 @@ class ErrorDialogTest extends ApplicationTest {
     @Start
     public void start(Stage stage) throws Exception {
         ErrorDialog errorDialog = new ErrorDialog(exception);
-        AbstractDialog.UI delegate = new AbstractDialog.UI();
 
-        Field field = AbstractDialog.UI.class.getDeclaredField("controller");
+        Field field = AbstractDialog.class.getDeclaredField("window");
         ReflectionUtils.makeAccessible(field);
-        ReflectionUtils.setField(field, delegate, errorDialog);
+        ReflectionUtils.setField(field, errorDialog, stage);
 
-        delegate.start(stage);
+        errorDialog.show();
     }
 
     @Test

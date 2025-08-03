@@ -48,6 +48,8 @@ class Updater {
     }
 
     private void downloadUpdate(ActionEvent event) {
+        JavaFxInitializer.startJavaFxRuntime();
+
         try {
             UpdateDialog dialog = new UpdateDialog();
             InstallerExecutable installer = latestApplication.getInstaller();
