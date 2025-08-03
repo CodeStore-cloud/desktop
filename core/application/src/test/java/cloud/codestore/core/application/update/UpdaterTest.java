@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 import static org.mockito.Mockito.*;
@@ -20,10 +21,8 @@ class UpdaterTest {
 
     @Mock
     private LatestApplication latestApplication;
-
     @Mock
     private CodeStoreSystemTray tray;
-
     private Updater updater;
 
     @BeforeEach
@@ -61,10 +60,8 @@ class UpdaterTest {
     @Nested
     @DisplayName("when downloading update")
     class DownloadUpdateTest {
-
         @Mock
         private UpdateDialog updateDialog;
-
         @Mock
         private InstallerExecutable installer;
 
@@ -75,25 +72,54 @@ class UpdaterTest {
                 mockedUpdateDialog.when(UpdateDialog::show).thenReturn(updateDialog);
                 when(latestApplication.getInstaller()).thenReturn(installer);
 
-                getUpdateHandler().actionPerformed(null);
+                performUpdate();
 
                 verify(updateDialog).onCancel(any());
                 verify(installer).setProgressListener(any());
                 verify(installer).download();
-                verify(installer).execute();
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("after downloading finished")
+    class AfterDownloadTest {
+        @Mock
+        private UpdateDialog updateDialog;
+        @Mock
+        private InstallerExecutable installer;
+
+        @BeforeEach
+        void setUp() throws Exception {
+            try (var mockedUpdateDialog = mockStatic(UpdateDialog.class)) {
+                mockedUpdateDialog.when(UpdateDialog::show).thenReturn(updateDialog);
+                when(latestApplication.getInstaller()).thenReturn(installer);
+                performUpdate();
             }
         }
 
-        private ActionListener getUpdateHandler() {
-            final ActionListener[] updateHandler = {null};
-
-            doAnswer(invocation -> {
-                updateHandler[0] = invocation.getArgument(0, ActionListener.class);
-                return null;
-            }).when(tray).setUpdateHandler(any());
-
-            updater.checkForUpdates();
-            return updateHandler[0];
+        @Test
+        @DisplayName("close the update dialog")
+        void closeDialog() {
+            verify(updateDialog).close();
         }
+
+        @Test
+        @DisplayName("execute the installer")
+        void executeInstaller() throws IOException {
+            verify(installer).execute();
+        }
+    }
+
+    private void performUpdate() {
+        final ActionListener[] updateHandler = {null};
+
+        doAnswer(invocation -> {
+            updateHandler[0] = invocation.getArgument(0, ActionListener.class);
+            return null;
+        }).when(tray).setUpdateHandler(any());
+
+        updater.checkForUpdates();
+        updateHandler[0].actionPerformed(null);
     }
 }

@@ -14,7 +14,7 @@ import java.nio.file.Path;
  */
 class InstallerExecutable {
     private static final Logger LOGGER = LoggerFactory.getLogger(InstallerExecutable.class);
-    private static final int BUFFER_SIZE = 4096;
+    private static final int BUFFER_SIZE = 524288; // 512 KB
 
     private final long contentLength;
     private final InputStream inputStream;

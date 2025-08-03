@@ -52,6 +52,7 @@ class Updater {
             dialog.onCancel(installer::cancelDownload);
             installer.setProgressListener(dialog::setProgress);
             installer.download();
+            dialog.close();
             installer.execute();
             //TODO exit application
         } catch (IOException exception) {

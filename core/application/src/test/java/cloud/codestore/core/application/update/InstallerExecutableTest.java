@@ -51,14 +51,14 @@ class InstallerExecutableTest {
         void callProgressListener() throws IOException {
             AtomicInteger progressListenerCount = new AtomicInteger();
             AtomicReference<Double> progress = new AtomicReference<>((double) 0);
-            installer.setProgressListener(p -> {
+            installer.setProgressListener(value -> {
                 progressListenerCount.incrementAndGet();
-                progress.set(p);
+                progress.set(value);
             });
 
             installer.download();
 
-            assertThat(progressListenerCount.get()).isEqualTo(25);
+            assertThat(progressListenerCount.get()).isEqualTo(20);
             assertThat(progress.get()).isEqualTo(1.0);
         }
 
@@ -88,8 +88,8 @@ class InstallerExecutableTest {
     }
 
     private static byte[] randomContent() {
-        int onHundredKilobytes = 100 * 1024;
-        byte[] data = new byte[onHundredKilobytes];
+        int tenMB = 1024 * 1024 * 10;
+        byte[] data = new byte[tenMB];
 
         Random random = new Random();
         random.nextBytes(data);
