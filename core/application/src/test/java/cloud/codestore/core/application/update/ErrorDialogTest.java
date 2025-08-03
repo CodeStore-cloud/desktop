@@ -17,20 +17,20 @@ class ErrorDialogTest extends ApplicationTest {
 
     @Start
     public void start(Stage stage) throws Exception {
-        ErrorDialog errorDialog = new ErrorDialog();
-        Field exceptionField = ErrorDialog.class.getDeclaredField("exception");
-        ReflectionUtils.makeAccessible(exceptionField);
-        ReflectionUtils.setField(exceptionField, errorDialog, exception);
-        errorDialog.start(stage);
+        ErrorDialog errorDialog = new ErrorDialog(exception);
+        AbstractDialog.UI delegate = new AbstractDialog.UI();
+
+        Field field = AbstractDialog.UI.class.getDeclaredField("controller");
+        ReflectionUtils.makeAccessible(field);
+        ReflectionUtils.setField(field, delegate, errorDialog);
+
+        delegate.start(stage);
     }
 
     @Test
     @DisplayName("sends an error report when the user clicks \"report error\"")
-    void sendErrorReport() throws InterruptedException {
-        Thread.sleep(10000);
-
+    void sendErrorReport() {
         clickOn(".button");
-
         Assertions.fail();
     }
 }

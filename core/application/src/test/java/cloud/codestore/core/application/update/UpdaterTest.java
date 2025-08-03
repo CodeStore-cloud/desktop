@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedConstruction;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.awt.event.ActionListener;
@@ -61,19 +63,17 @@ class UpdaterTest {
     @DisplayName("when downloading installer")
     class DownloadInstallerTest {
         @Mock
-        private UpdateDialog updateDialog;
-        @Mock
         private InstallerExecutable installer;
 
         @Test
         @DisplayName("shows update dialog and downloads installer")
         void showsDialogAndDownloadsInstaller() throws Exception {
-            try (var mockedUpdateDialog = mockStatic(UpdateDialog.class)) {
-                mockedUpdateDialog.when(UpdateDialog::show).thenReturn(updateDialog);
+            try (MockedConstruction<UpdateDialog> mockDialog = Mockito.mockConstruction(UpdateDialog.class)) {
                 when(latestApplication.getInstaller()).thenReturn(installer);
 
                 performUpdate();
 
+                UpdateDialog updateDialog = mockDialog.constructed().get(0);
                 verify(updateDialog).onCancel(any());
                 verify(installer).setProgressListener(any());
                 verify(installer).download();
@@ -84,17 +84,16 @@ class UpdaterTest {
     @Nested
     @DisplayName("after downloading finished")
     class AfterDownloadTest {
-        @Mock
         private UpdateDialog updateDialog;
         @Mock
         private InstallerExecutable installer;
 
         @BeforeEach
         void setUp() throws Exception {
-            try (var mockedUpdateDialog = mockStatic(UpdateDialog.class)) {
-                mockedUpdateDialog.when(UpdateDialog::show).thenReturn(updateDialog);
+            try (MockedConstruction<UpdateDialog> mockDialog = Mockito.mockConstruction(UpdateDialog.class)) {
                 when(latestApplication.getInstaller()).thenReturn(installer);
                 performUpdate();
+                updateDialog = mockDialog.constructed().get(0);
             }
         }
 

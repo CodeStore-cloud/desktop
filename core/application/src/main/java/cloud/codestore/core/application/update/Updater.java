@@ -48,19 +48,21 @@ class Updater {
     }
 
     private void downloadUpdate(ActionEvent event) {
-        UpdateDialog dialog = UpdateDialog.show();
-
         try {
+            UpdateDialog dialog = new UpdateDialog();
             InstallerExecutable installer = latestApplication.getInstaller();
             dialog.onCancel(installer::cancelDownload);
             installer.setProgressListener(dialog::setProgress);
+
+            dialog.show();
             installer.download();
+
             dialog.close();
             installer.execute();
             //TODO exit application
         } catch (IOException exception) {
             LOGGER.error("Failed to download update.", exception);
-            ErrorDialog.show(exception);
+            new ErrorDialog(exception).show();
         }
     }
 }

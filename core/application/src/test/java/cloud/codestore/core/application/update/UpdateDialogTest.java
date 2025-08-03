@@ -4,9 +4,11 @@ import javafx.scene.control.ProgressBar;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.util.ReflectionUtils;
 import org.testfx.framework.junit5.ApplicationTest;
 import org.testfx.framework.junit5.Start;
 
+import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.testfx.assertions.api.Assertions.assertThat;
@@ -17,8 +19,14 @@ class UpdateDialogTest extends ApplicationTest {
     private UpdateDialog updateDialog = new UpdateDialog();
 
     @Start
-    public void start(Stage stage) {
-        updateDialog.start(stage);
+    public void start(Stage stage) throws Exception {
+        AbstractDialog.UI delegate = new AbstractDialog.UI();
+
+        Field field = AbstractDialog.UI.class.getDeclaredField("controller");
+        ReflectionUtils.makeAccessible(field);
+        ReflectionUtils.setField(field, delegate, updateDialog);
+
+        delegate.start(stage);
     }
 
     @Test
