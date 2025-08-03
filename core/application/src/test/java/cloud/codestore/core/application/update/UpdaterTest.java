@@ -58,8 +58,8 @@ class UpdaterTest {
     }
 
     @Nested
-    @DisplayName("when downloading update")
-    class DownloadUpdateTest {
+    @DisplayName("when downloading installer")
+    class DownloadInstallerTest {
         @Mock
         private UpdateDialog updateDialog;
         @Mock

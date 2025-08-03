@@ -1,6 +1,8 @@
 package cloud.codestore.core.application.update;
 
 import cloud.codestore.core.application.CodeStoreSystemTray;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -15,6 +17,7 @@ import java.io.IOException;
  */
 @Component
 class Updater {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Updater.class);
 
     private final LatestApplication latestApplication;
     private final String currentVersion;
@@ -56,8 +59,8 @@ class Updater {
             installer.execute();
             //TODO exit application
         } catch (IOException exception) {
-            // TODO show error dialog
-            throw new RuntimeException(exception);
+            LOGGER.error("Failed to download update.", exception);
+            ErrorDialog.show(exception);
         }
     }
 }
