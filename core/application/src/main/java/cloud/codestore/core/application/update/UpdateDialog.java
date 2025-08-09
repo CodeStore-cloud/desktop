@@ -1,22 +1,38 @@
 package cloud.codestore.core.application.update;
 
-import javafx.geometry.Pos;
-import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
+import javafx.application.Platform;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
+import javax.annotation.Nonnull;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
 
 /**
  * The dialog that shows the progress of downloading the application.
  */
-class UpdateDialog extends AbstractDialog {
-    private Runnable cancelCallback = () -> {};
+public class UpdateDialog {
+    @FXML
     private ProgressBar progressBar;
+    @FXML
+    private Stage window;
+    private Runnable cancelCallback = () -> {};
 
-    UpdateDialog() {
-        setOnClose(cancelCallback);
+    void show() throws IOException {
+        URL fxmlFile = getClass().getResource("updateDialog.fxml");
+        ResourceBundle resourceBundle = ResourceBundle.getBundle("dialog-messages");
+        FXMLLoader fxmlLoader = new FXMLLoader(fxmlFile, resourceBundle);
+        fxmlLoader.setControllerFactory(controllerClass -> this);
+        Stage window = fxmlLoader.load();
+        window.setOnCloseRequest(event -> cancel());
+        window.show();
+    }
+
+    void close() {
+        Platform.runLater(window::close);
     }
 
     /**
@@ -31,35 +47,12 @@ class UpdateDialog extends AbstractDialog {
     /**
      * @param callback a function to be called whenever the user clicks "cancel".
      */
-    void onCancel(Runnable callback) {
+    void onCancel(@Nonnull Runnable callback) {
         this.cancelCallback = callback;
     }
 
-    @Override
-    String getTitle() {
-        return getMessage("dialog.update.progress.title");
-    }
-
-    @Override
-    Node[] getElements() {
-        Label updateMessage = new Label(getMessage("dialog.update.progress.message"));
-        Label dialogText = new Label(getMessage("dialog.update.progress.autoRestart"));
-        progressBar = new ProgressBar();
-        progressBar.setProgress(0);
-        progressBar.setMinHeight(progressBar.getPrefHeight());
-        progressBar.setMaxWidth(Double.MAX_VALUE);
-        VBox.setVgrow(progressBar, Priority.ALWAYS);
-
-        return new Node[]{updateMessage, dialogText, progressBar};
-    }
-
-    @Override
-    Button[] getButtons() {
-        Button cancelButton = new Button(getMessage("dialog.update.progress.cancel"));
-        cancelButton.setCancelButton(true);
-        cancelButton.setOnAction(event -> cancelCallback.run());
-        cancelButton.setAlignment(Pos.BOTTOM_RIGHT);
-
-        return new Button[]{cancelButton};
+    @FXML
+    private void cancel() {
+        cancelCallback.run();
     }
 }

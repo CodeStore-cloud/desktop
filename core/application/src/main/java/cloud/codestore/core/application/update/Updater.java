@@ -10,7 +10,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.awt.event.ActionEvent;
-import java.io.IOException;
 
 /**
  * Checks for updates and shows corresponding messages and dialogs.
@@ -48,7 +47,7 @@ class Updater {
     }
 
     private void downloadUpdate(ActionEvent event) {
-        JavaFxInitializer.startJavaFxRuntime();
+//        JavaFxInitializer.startJavaFxRuntime();
 
         try {
             UpdateDialog dialog = new UpdateDialog();
@@ -62,9 +61,9 @@ class Updater {
             dialog.close();
             installer.execute();
             //TODO exit application
-        } catch (IOException exception) {
-            LOGGER.error("Failed to download update.", exception);
-            new ErrorDialog(exception).show();
+        } catch (Throwable error) {
+            LOGGER.error("Failed to download update.", error);
+            new ErrorDialog(error).show();
         }
     }
 }
