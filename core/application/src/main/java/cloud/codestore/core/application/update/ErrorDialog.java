@@ -1,5 +1,6 @@
 package cloud.codestore.core.application.update;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
@@ -10,6 +11,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 /**
@@ -18,6 +20,7 @@ import java.util.ResourceBundle;
  */
 public class ErrorDialog {
     private static final Logger LOGGER = LoggerFactory.getLogger(ErrorDialog.class);
+    private static final String FXML_FILE_NAME = "errorDialog.fxml";
 
     @FXML
     private Stage window;
@@ -27,19 +30,26 @@ public class ErrorDialog {
         this.exception = exception;
     }
 
+    /**
+     * Shows this dialog.
+     */
     void show() {
-        URL fxmlFile = getClass().getResource("errorDialog.fxml");
+        URL fxmlFile = getClass().getResource(FXML_FILE_NAME);
+        Objects.requireNonNull(fxmlFile, "Cannot find " + FXML_FILE_NAME);
+
         ResourceBundle resourceBundle = ResourceBundle.getBundle("dialog-messages");
         FXMLLoader fxmlLoader = new FXMLLoader(fxmlFile, resourceBundle);
         fxmlLoader.setControllerFactory(controllerClass -> this);
 
-        try {
-            window = fxmlLoader.load();
-            window.show();
-        } catch (IOException exception) {
-            LOGGER.error("Failed to show error dialog. Visiting homepage...", exception);
-            visitHomepage();
-        }
+        Platform.runLater(() -> {
+            try {
+                window = fxmlLoader.load();
+                window.show();
+            } catch (IOException exception) {
+                LOGGER.error("Failed to show error dialog. Visiting homepage...", exception);
+                visitHomepage();
+            }
+        });
     }
 
     @FXML

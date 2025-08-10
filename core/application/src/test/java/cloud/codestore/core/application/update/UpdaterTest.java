@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -119,6 +120,8 @@ class UpdaterTest {
         }).when(tray).setUpdateHandler(any());
 
         updater.checkForUpdates();
-        updateHandler[0].actionPerformed(null);
+        try (MockedStatic<JavaFxInitializer> initializerMock = Mockito.mockStatic(JavaFxInitializer.class)) {
+            updateHandler[0].actionPerformed(null);
+        }
     }
 }

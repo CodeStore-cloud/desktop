@@ -47,7 +47,7 @@ class Updater {
     }
 
     private void downloadUpdate(ActionEvent event) {
-//        JavaFxInitializer.startJavaFxRuntime();
+        JavaFxInitializer.startJavaFxRuntime();
 
         try {
             UpdateDialog dialog = new UpdateDialog();

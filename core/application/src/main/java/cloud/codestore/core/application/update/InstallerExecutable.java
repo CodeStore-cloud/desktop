@@ -79,6 +79,7 @@ class InstallerExecutable {
     }
 
     void cancelDownload() {
+        LOGGER.info("Download cancelled");
         canceled = true;
     }
 
