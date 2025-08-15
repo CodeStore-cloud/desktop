@@ -26,11 +26,13 @@ class UpdaterTest {
     private LatestApplication latestApplication;
     @Mock
     private CodeStoreSystemTray tray;
+    @Mock
+    private ErrorReporter errorReporter;
     private Updater updater;
 
     @BeforeEach
     void setUp() {
-        updater = new Updater("1.0", latestApplication, tray);
+        updater = new Updater("1.0", latestApplication, tray, errorReporter);
         when(latestApplication.isNewerThan(anyString()))
                 .thenReturn(CompletableFuture.completedFuture(true));
     }
@@ -74,7 +76,7 @@ class UpdaterTest {
 
                 performUpdate();
 
-                UpdateDialog updateDialog = mockDialog.constructed().get(0);
+                UpdateDialog updateDialog = mockDialog.constructed().getFirst();
                 verify(updateDialog).onCancel(any());
                 verify(installer).setProgressListener(any());
                 verify(installer).download();
@@ -94,7 +96,7 @@ class UpdaterTest {
             try (MockedConstruction<UpdateDialog> mockDialog = Mockito.mockConstruction(UpdateDialog.class)) {
                 when(latestApplication.getInstaller()).thenReturn(installer);
                 performUpdate();
-                updateDialog = mockDialog.constructed().get(0);
+                updateDialog = mockDialog.constructed().getFirst();
             }
         }
 

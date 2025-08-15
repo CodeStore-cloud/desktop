@@ -17,7 +17,7 @@ import java.util.concurrent.ExecutionException;
  * The dialog that shows the progress of downloading the application.
  */
 public class UpdateDialog {
-    private static final String FXML_FILE_NAME = "updateDialog.fxml";
+    static final String FXML_FILE_NAME = "updateDialog.fxml";
 
     @FXML
     private ProgressBar progressBar;

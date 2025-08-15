@@ -21,16 +21,19 @@ class Updater {
     private final LatestApplication latestApplication;
     private final String currentVersion;
     private final CodeStoreSystemTray tray;
+    private final ErrorReporter errorReporter;
 
     @Autowired
     Updater(
             @Value("${application.version}") String currentVersion,
             LatestApplication latestApplication,
-            CodeStoreSystemTray tray
+            CodeStoreSystemTray tray,
+            ErrorReporter errorReporter
     ) {
         this.latestApplication = latestApplication;
         this.currentVersion = currentVersion;
         this.tray = tray;
+        this.errorReporter = errorReporter;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -63,7 +66,7 @@ class Updater {
             //TODO exit application
         } catch (Throwable error) {
             LOGGER.error("Failed to download update.", error);
-            new ErrorDialog(error).show();
+            new ErrorDialog(errorReporter, error).show();
         }
     }
 }

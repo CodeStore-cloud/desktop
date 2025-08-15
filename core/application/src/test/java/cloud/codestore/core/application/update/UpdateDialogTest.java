@@ -22,7 +22,7 @@ class UpdateDialogTest extends ApplicationTest {
     @Start
     public void start(Stage stage) throws Exception {
         ResourceBundle resourceBundle = ResourceBundle.getBundle("dialog-messages");
-        URL fxmlFile = getClass().getResource("updateDialog.fxml");
+        URL fxmlFile = getClass().getResource(UpdateDialog.FXML_FILE_NAME);
         FXMLLoader fxmlLoader = new FXMLLoader(fxmlFile, resourceBundle);
         fxmlLoader.setControllerFactory(controllerClass -> updateDialog);
         Stage window = fxmlLoader.load();

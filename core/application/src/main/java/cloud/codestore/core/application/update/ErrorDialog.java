@@ -7,6 +7,7 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
@@ -20,14 +21,16 @@ import java.util.ResourceBundle;
  */
 public class ErrorDialog {
     private static final Logger LOGGER = LoggerFactory.getLogger(ErrorDialog.class);
-    private static final String FXML_FILE_NAME = "errorDialog.fxml";
+    static final String FXML_FILE_NAME = "errorDialog.fxml";
 
     @FXML
     private Stage window;
-    private final Throwable exception;
+    private final ErrorReporter errorReporter;
+    private final Throwable error;
 
-    ErrorDialog(Throwable exception) {
-        this.exception = exception;
+    ErrorDialog(@Nonnull ErrorReporter errorReporter, @Nonnull Throwable error) {
+        this.errorReporter = errorReporter;
+        this.error = error;
     }
 
     /**
@@ -64,7 +67,7 @@ public class ErrorDialog {
 
     @FXML
     private void reportError() {
-        // TODO send error report
+        errorReporter.sendReport(error);
         window.close();
     }
 }
