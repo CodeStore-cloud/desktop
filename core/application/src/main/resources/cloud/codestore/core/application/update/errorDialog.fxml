@@ -11,7 +11,7 @@
 <?import javafx.stage.Stage?>
 <Stage xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1"
        fx:controller="cloud.codestore.core.application.update.ErrorDialog"
-       resizable="false" title="%dialog.error.title" fx:id="window">
+       resizable="false" title="%dialog.error.title">
     <scene>
         <Scene>
             <VBox spacing="10.0">

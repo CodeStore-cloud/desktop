@@ -21,9 +21,8 @@ import java.util.ResourceBundle;
  */
 public class ErrorDialog {
     private static final Logger LOGGER = LoggerFactory.getLogger(ErrorDialog.class);
-    static final String FXML_FILE_NAME = "errorDialog.fxml";
+    private static final String FXML_FILE_NAME = "errorDialog.fxml";
 
-    @FXML
     private Stage window;
     private final ErrorReporter errorReporter;
     private final Throwable error;

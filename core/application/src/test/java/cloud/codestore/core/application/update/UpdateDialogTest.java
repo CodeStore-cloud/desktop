@@ -1,6 +1,5 @@
 package cloud.codestore.core.application.update;
 
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ProgressBar;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.DisplayName;
@@ -8,8 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.testfx.framework.junit5.ApplicationTest;
 import org.testfx.framework.junit5.Start;
 
-import java.net.URL;
-import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.testfx.assertions.api.Assertions.assertThat;
@@ -21,12 +18,7 @@ class UpdateDialogTest extends ApplicationTest {
 
     @Start
     public void start(Stage stage) throws Exception {
-        ResourceBundle resourceBundle = ResourceBundle.getBundle("dialog-messages");
-        URL fxmlFile = getClass().getResource(UpdateDialog.FXML_FILE_NAME);
-        FXMLLoader fxmlLoader = new FXMLLoader(fxmlFile, resourceBundle);
-        fxmlLoader.setControllerFactory(controllerClass -> updateDialog);
-        Stage window = fxmlLoader.load();
-        window.show();
+        updateDialog.show();
     }
 
     @Test
