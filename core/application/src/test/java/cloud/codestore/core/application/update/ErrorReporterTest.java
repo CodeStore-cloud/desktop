@@ -56,7 +56,7 @@ class ErrorReporterTest {
         assertThat(receivedErrorReport).containsIgnoringWhitespaces("""
                 ==================================================
                 java.io.IOException: Something went wrong...
-                	at cloud.codestore.core.application.update.ErrorReporterTest.sendReports(ErrorReporterTest.java:49)
+                	at cloud.codestore.core.application.update.ErrorReporterTest.sendReports(ErrorReporterTest.java:48)
                 	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
                 	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
                 	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:728)""");
