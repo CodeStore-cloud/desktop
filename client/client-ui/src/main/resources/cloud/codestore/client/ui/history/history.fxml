@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
+<?import cloud.codestore.client.ui.IconButton?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
@@ -8,15 +8,15 @@
             fx:controller="cloud.codestore.client.ui.history.History"
             fx:id="historyPane" stylesheets="@history.css">
     <HBox>
-        <Button fx:id="prevSnippetButton" focusTraversable="false" onAction="#selectPreviousSnippet">
+        <IconButton fx:id="prevSnippetButton" focusTraversable="false" onAction="#selectPreviousSnippet">
             <tooltip>
                 <Tooltip text="%history.prev"/>
             </tooltip>
-        </Button>
-        <Button fx:id="nextSnippetButton" focusTraversable="false" onAction="#selectNextSnippet">
+        </IconButton>
+        <IconButton fx:id="nextSnippetButton" focusTraversable="false" onAction="#selectNextSnippet">
             <tooltip>
                 <Tooltip text="%history.next"/>
             </tooltip>
-        </Button>
+        </IconButton>
     </HBox>
 </AnchorPane>

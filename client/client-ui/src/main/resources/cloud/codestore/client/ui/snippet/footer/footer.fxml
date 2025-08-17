@@ -1,30 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
+<?import cloud.codestore.client.ui.IconButton?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <HBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
       fx:controller="cloud.codestore.client.ui.snippet.footer.SnippetFooter"
       fx:id="footer" stylesheets="@footer.css" styleClass="primarySpacing">
 
-    <Button fx:id="saveButton" styleClass="primary">
+    <IconButton fx:id="saveButton" styleClass="primary">
         <tooltip>
             <Tooltip text="%snippet.footer.save.tooltip"/>
         </tooltip>
-    </Button>
-    <Button fx:id="cancelButton" styleClass="primary">
+    </IconButton>
+    <IconButton fx:id="cancelButton" styleClass="primary">
         <tooltip>
             <Tooltip text="%snippet.footer.cancel.tooltip"/>
         </tooltip>
-    </Button>
+    </IconButton>
 
-    <Button fx:id="editButton" styleClass="primary">
+    <IconButton fx:id="editButton" styleClass="primary">
         <tooltip>
             <Tooltip text="%snippet.footer.edit.tooltip"/>
         </tooltip>
-    </Button>
-    <Button fx:id="deleteButton" styleClass="primary">
+    </IconButton>
+    <IconButton fx:id="deleteButton" styleClass="primary">
         <tooltip>
             <Tooltip text="%snippet.footer.delete.tooltip"/>
         </tooltip>
-    </Button>
+    </IconButton>
 </HBox>
