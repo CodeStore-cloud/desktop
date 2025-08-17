@@ -177,10 +177,15 @@ public class SnippetController {
 
         @Override
         public void delete() {
-            String snippetUri = currentSnippet.getUri();
-            deleteSnippetUseCase.deleteSnippet(snippetUri);
-            state = new DefaultState();
-            eventBus.post(new SnippetDeletedEvent(snippetUri));
+            new ConfirmationDialog("dialog.confirm.title", "dialog.confirm.deleteSnippet.message")
+                    .setCancellable(false)
+                    .onYes(() -> {
+                        String snippetUri = currentSnippet.getUri();
+                        deleteSnippetUseCase.deleteSnippet(snippetUri);
+                        state = new DefaultState();
+                        eventBus.post(new SnippetDeletedEvent(snippetUri));
+                    })
+                    .show();
         }
     }
 

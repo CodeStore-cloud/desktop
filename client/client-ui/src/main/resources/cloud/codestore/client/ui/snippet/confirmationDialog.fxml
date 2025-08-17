@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="cloud.codestore.client.ui.snippet.ConfirmationDialog"
+      stylesheets="@../global.css" styleClass="primarySpacing, primaryPadding">
+    <Label fx:id="label"/>
+    <ButtonBar>
+        <buttons>
+            <Button fx:id="yes" text="%dialog.confirm.yes" defaultButton="true" onAction="#close"/>
+            <Button fx:id="no" text="%dialog.confirm.no" onAction="#close"/>
+            <Button fx:id="cancel" text="%dialog.confirm.cancel" cancelButton="true" onAction="#close"/>
+        </buttons>
+    </ButtonBar>
+</VBox>

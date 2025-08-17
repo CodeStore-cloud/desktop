@@ -12,7 +12,7 @@ public class FXMLLoaderFactory {
         FXMLLoaderFactory.controllerFactory = controllerFactory;
     }
 
-    static FXMLLoader createFXMLLoader(URL fxmlFile) {
+    public static FXMLLoader createFXMLLoader(URL fxmlFile) {
         FXMLLoader fxmlLoader = new FXMLLoader(fxmlFile);
         fxmlLoader.setResources(UiMessages.bundle());
         fxmlLoader.setControllerFactory(controllerFactory);
