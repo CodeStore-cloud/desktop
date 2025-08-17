@@ -1,4 +1,4 @@
-package cloud.codestore.client.ui.icon;
+package cloud.codestore.client.ui;
 
 import javafx.scene.control.Label;
 

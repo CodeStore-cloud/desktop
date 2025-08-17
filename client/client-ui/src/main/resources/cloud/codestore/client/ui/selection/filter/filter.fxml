@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import cloud.codestore.client.ui.icon.Icon?>
+<?import cloud.codestore.client.ui.Icon?>
 <?import cloud.codestore.client.ui.separator.Separator?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
