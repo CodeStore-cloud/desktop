@@ -1,7 +1,6 @@
 package cloud.codestore.client.ui.history;
 
 import cloud.codestore.client.ui.FxController;
-import cloud.codestore.client.ui.selection.ClearSelectionEvent;
 import cloud.codestore.client.ui.selection.list.SnippetSelectedEvent;
 import cloud.codestore.client.ui.snippet.SnippetDeletedEvent;
 import com.google.common.eventbus.EventBus;
@@ -61,8 +60,6 @@ public class History {
             selectPreviousSnippet();
         } else if (hasNextSnippets()) {
             selectNextSnippet();
-        } else {
-            eventBus.post(new ClearSelectionEvent());
         }
     }
 

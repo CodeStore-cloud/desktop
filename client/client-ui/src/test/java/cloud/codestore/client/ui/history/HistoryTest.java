@@ -1,7 +1,6 @@
 package cloud.codestore.client.ui.history;
 
 import cloud.codestore.client.ui.AbstractUiTest;
-import cloud.codestore.client.ui.selection.ClearSelectionEvent;
 import cloud.codestore.client.ui.selection.list.SnippetSelectedEvent;
 import cloud.codestore.client.ui.snippet.SnippetDeletedEvent;
 import com.google.common.eventbus.EventBus;
@@ -56,18 +55,6 @@ class HistoryTest extends AbstractUiTest {
         void disableButtons() {
             assertThat(prevSnippetButton()).isDisabled();
             assertThat(nextSnippetButton()).isDisabled();
-        }
-
-        @Nested
-        @DisplayName("when deleting the snippet")
-        class DeleteSnippet {
-            @Test
-            @DisplayName("throws a ClearSelectionEvent")
-            void clearSelection() {
-                reset(eventBus);
-                eventBus.post(new SnippetDeletedEvent("1"));
-                verify(eventBus).post(new ClearSelectionEvent());
-            }
         }
     }
 
