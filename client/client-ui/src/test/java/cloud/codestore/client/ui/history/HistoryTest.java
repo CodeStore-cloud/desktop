@@ -1,6 +1,7 @@
 package cloud.codestore.client.ui.history;
 
 import cloud.codestore.client.ui.AbstractUiTest;
+import cloud.codestore.client.ui.selection.list.RequestSnippetSelectionEvent;
 import cloud.codestore.client.ui.selection.list.SnippetSelectedEvent;
 import cloud.codestore.client.ui.snippet.SnippetDeletedEvent;
 import com.google.common.eventbus.EventBus;
@@ -115,7 +116,7 @@ class HistoryTest extends AbstractUiTest {
             @Test
             @DisplayName("selects the next code snippet")
             void selectSnippet() {
-                verify(eventBus).post(new SnippetSelectedEvent("2"));
+                verify(eventBus).post(new RequestSnippetSelectionEvent("2"));
             }
 
             @Test
@@ -169,7 +170,7 @@ class HistoryTest extends AbstractUiTest {
 
             assertThat(prevSnippetButton()).isDisabled();
             assertThat(nextSnippetButton()).isEnabled();
-            verify(eventBus).post(new SnippetSelectedEvent("2"));
+            verify(eventBus).post(new RequestSnippetSelectionEvent("2"));
         }
     }
 

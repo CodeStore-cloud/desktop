@@ -6,6 +6,7 @@ import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.history.History;
 import cloud.codestore.client.ui.selection.list.CreateSnippetEvent;
+import cloud.codestore.client.ui.selection.list.RequestSnippetSelectionEvent;
 import cloud.codestore.client.ui.selection.list.SnippetSelectedEvent;
 import cloud.codestore.client.ui.snippet.code.SnippetCode;
 import cloud.codestore.client.ui.snippet.description.SnippetDescription;
@@ -19,6 +20,7 @@ import cloud.codestore.client.usecases.readsnippet.ReadSnippetUseCase;
 import cloud.codestore.client.usecases.updatesnippet.UpdateSnippetUseCase;
 import cloud.codestore.client.usecases.updatesnippet.UpdatedSnippetDto;
 import com.google.common.eventbus.EventBus;
+import javafx.application.Platform;
 import javafx.scene.layout.Pane;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,6 +30,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
+import org.testfx.framework.junit5.ApplicationTest;
+import org.testfx.util.WaitForAsyncUtils;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
@@ -41,9 +45,9 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("The snippet controller")
-class SnippetControllerTest {
+class SnippetControllerTest extends ApplicationTest {
     private static final String SNIPPET_ID = "1";
-    private static final String SNIPPET_URI = "http://localhost:8080/snippets/1";
+    private static final String SNIPPET_URI = "snippets/1";
     private static final Snippet EMPTY_SNIPPET = Snippet.builder().build();
 
     private ReadSnippetUseCase readSnippetUseCase = mock(ReadSnippetUseCase.class);
@@ -90,7 +94,7 @@ class SnippetControllerTest {
                              .permissions(Set.of(Permission.DELETE))
                              .build();
 
-        lenient().when(readSnippetUseCase.readSnippet(anyString())).thenReturn(testSnippet);
+        lenient().when(readSnippetUseCase.readSnippet(SNIPPET_URI)).thenReturn(testSnippet);
         callInitialize();
     }
 
@@ -102,7 +106,7 @@ class SnippetControllerTest {
         void loadSnippet() {
             clearInvocations();
 
-            selectSnippet();
+            requestSnippetSelection();
 
             verifyShowSnippetPane();
             verifyEditable(false);
@@ -123,12 +127,14 @@ class SnippetControllerTest {
         }
 
         @Test
-        @DisplayName("deletes the current snippet")
+        @DisplayName("deletes the current snippet after confirmation")
         void deleteSnippet() {
-            selectSnippet();
+            requestSnippetSelection();
             clearInvocations();
 
-            snippetFooterController.clickDeleteButton();
+            Platform.runLater(snippetFooterController::clickDeleteButton);
+            WaitForAsyncUtils.waitForFxEvents();
+            clickOn("#yes");
 
             verify(deleteSnippetUseCase).deleteSnippet(SNIPPET_URI);
             verifyVisit(EMPTY_SNIPPET);
@@ -137,24 +143,14 @@ class SnippetControllerTest {
         }
     }
 
-    private void selectSnippet() {
-        eventBus.post(new SnippetSelectedEvent(SNIPPET_URI));
-    }
-
     @Nested
     @DisplayName("when creating a new snippet")
     class NewSnippetState {
-        @Test
-        @DisplayName("clears the input when the edit is canceled")
-        void clearInput() {
+        @BeforeEach
+        void setUp() {
             eventBus.post(new CreateSnippetEvent());
             verifyEditable(true);
             clearInvocations();
-
-            snippetFooterController.clickCancelButton();
-
-            verifyVisit(EMPTY_SNIPPET);
-            verifyEditable(false);
         }
 
         @Test
@@ -170,9 +166,6 @@ class SnippetControllerTest {
             var dtoArgument = ArgumentCaptor.forClass(NewSnippetDto.class);
             when(createSnippetUseCase.create(any(NewSnippetDto.class))).thenReturn(createdSnippet);
 
-            eventBus.post(new CreateSnippetEvent());
-            clearInvocations();
-
             snippetFooterController.clickSaveButton();
 
             verify(createSnippetUseCase).create(dtoArgument.capture());
@@ -183,23 +176,70 @@ class SnippetControllerTest {
             verifyVisit(createdSnippet);
             verify(eventBus).post(new SnippetCreatedEvent(SNIPPET_URI));
         }
+
+        @Test
+        @DisplayName("clears the input when editing is canceled")
+        void clearInput() {
+            snippetFooterController.clickCancelButton();
+
+            verifyVisit(EMPTY_SNIPPET);
+            verifyEditable(false);
+        }
+
+        @Nested
+        @DisplayName("when another snippet is selected")
+        class RequestSnippetSelectionTest {
+            private static final String CREATED_SNIPPET_URI = SNIPPET_URI;
+            private static final String SELECTED_SNIPPET_URI = "snippets/2";
+
+            @BeforeEach
+            void setUp() {
+                Snippet selectedSnippet = Snippet.builder().uri(SELECTED_SNIPPET_URI).build();
+                when(readSnippetUseCase.readSnippet(SELECTED_SNIPPET_URI)).thenReturn(selectedSnippet);
+
+                Platform.runLater(() -> requestSnippetSelection(SELECTED_SNIPPET_URI));
+                WaitForAsyncUtils.waitForFxEvents();
+            }
+
+            @Test
+            @DisplayName("saves the current snippet and selects the new one when the user confirms saving")
+            void confirmSaving() {
+                Snippet createdSnippet = Snippet.builder().uri(CREATED_SNIPPET_URI).build();
+                when(createSnippetUseCase.create(any())).thenReturn(createdSnippet);
+
+                clickOn("#yes");
+
+                verify(eventBus).post(new SnippetCreatedEvent(CREATED_SNIPPET_URI));
+                verify(eventBus).post(new SnippetSelectedEvent(SELECTED_SNIPPET_URI));
+            }
+
+            @Test
+            @DisplayName("does not save the current snippet and selects the new one when the user rejected saving")
+            void rejectSaving() {
+                clickOn("#no");
+                verify(eventBus, never()).post(new SnippetCreatedEvent(CREATED_SNIPPET_URI));
+                verify(eventBus).post(new SnippetSelectedEvent(SELECTED_SNIPPET_URI));
+            }
+
+            @Test
+            @DisplayName("does nothing when the user cancels saving")
+            void cancelSaving() {
+                clickOn("#cancel");
+                verify(eventBus, never()).post(new SnippetCreatedEvent(CREATED_SNIPPET_URI));
+                verify(eventBus, never()).post(new SnippetSelectedEvent(SELECTED_SNIPPET_URI));
+            }
+        }
     }
 
     @Nested
     @DisplayName("when editing a snippet")
     class EditSnippetState {
-        @Test
-        @DisplayName("resets the input when the edit is canceled")
-        void clearInput() {
-            selectSnippet();
+        @BeforeEach
+        void setUp() {
+            requestSnippetSelection();
             snippetFooterController.clickEditButton();
             verifyEditable(true);
             clearInvocations();
-
-            snippetFooterController.clickCancelButton();
-
-            verifyVisit(testSnippet);
-            verifyEditable(false);
         }
 
         @Test
@@ -216,10 +256,6 @@ class SnippetControllerTest {
             var dtoArgument = ArgumentCaptor.forClass(UpdatedSnippetDto.class);
             when(updateSnippetUseCase.update(any(UpdatedSnippetDto.class))).thenReturn(updatedSnippet);
 
-            selectSnippet();
-            snippetFooterController.clickEditButton();
-            clearInvocations();
-
             snippetFooterController.clickSaveButton();
 
             verify(updateSnippetUseCase).update(dtoArgument.capture());
@@ -229,6 +265,61 @@ class SnippetControllerTest {
             verifyEditable(false);
             verifyVisit(updatedSnippet);
             verify(eventBus).post(new SnippetUpdatedEvent(SNIPPET_URI));
+        }
+
+        @Test
+        @DisplayName("resets the input when editing is canceled")
+        void clearInput() {
+            snippetFooterController.clickCancelButton();
+
+            verifyVisit(testSnippet);
+            verifyEditable(false);
+        }
+
+        @Nested
+        @DisplayName("when another snippet is selected")
+        class RequestSnippetSelectionTest {
+            private static final String CURRENT_SNIPPET_URI = SNIPPET_URI;
+            private static final String SELECTED_SNIPPET_URI = "snippets/2";
+
+            @BeforeEach
+            void setUp() {
+                Snippet selectedSnippet = Snippet.builder().uri(SELECTED_SNIPPET_URI).build();
+                when(readSnippetUseCase.readSnippet(SELECTED_SNIPPET_URI)).thenReturn(selectedSnippet);
+
+                Platform.runLater(() -> requestSnippetSelection(SELECTED_SNIPPET_URI));
+                WaitForAsyncUtils.waitForFxEvents();
+                clearInvocations();
+            }
+
+            @Test
+            @DisplayName("saves the current snippet and selects the new one when the user confirms saving")
+            void confirmSaving() {
+                Snippet updatedSnippet = Snippet.builder().uri(CURRENT_SNIPPET_URI).build();
+                when(updateSnippetUseCase.update(any())).thenReturn(updatedSnippet);
+
+                clickOn("#yes");
+
+                verify(eventBus).post(new SnippetUpdatedEvent(CURRENT_SNIPPET_URI));
+                verify(eventBus).post(new SnippetSelectedEvent(SELECTED_SNIPPET_URI));
+            }
+
+            @Test
+            @DisplayName("does not save the current snippet and selects the new one when the user rejected saving")
+            void rejectSaving() {
+                clickOn("#no");
+
+                verify(eventBus, never()).post(new SnippetUpdatedEvent(CURRENT_SNIPPET_URI));
+                verify(eventBus).post(new SnippetSelectedEvent(SELECTED_SNIPPET_URI));
+            }
+
+            @Test
+            @DisplayName("does nothing when the user cancels saving")
+            void cancelSaving() {
+                clickOn("#cancel");
+                verify(eventBus, never()).post(new SnippetUpdatedEvent(SNIPPET_URI));
+                verify(eventBus, never()).post(new SnippetSelectedEvent(SNIPPET_URI));
+            }
         }
     }
 
@@ -280,7 +371,8 @@ class SnippetControllerTest {
                 snippetCodeController,
                 snippetDetailsController,
                 snippetFooterController,
-                history
+                history,
+                eventBus
         );
     }
 
@@ -318,6 +410,14 @@ class SnippetControllerTest {
                       .language(language)
                       .tags(tags)
                       .build();
+    }
+
+    private void requestSnippetSelection() {
+        requestSnippetSelection(SNIPPET_URI);
+    }
+
+    private void requestSnippetSelection(String uri) {
+        eventBus.post(new RequestSnippetSelectionEvent(uri));
     }
 
     private static class TestFooter extends SnippetFooter {

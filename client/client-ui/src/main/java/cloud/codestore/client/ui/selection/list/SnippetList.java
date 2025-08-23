@@ -101,7 +101,7 @@ public class SnippetList implements ChangeListener<SnippetListItem> {
             currentSnippetUri = "";
         } else if (!Objects.equals(currentSnippetUri, newSelection.uri())) {
             currentSnippetUri = newSelection.uri();
-            eventBus.post(new SnippetSelectedEvent(newSelection.uri()));
+            eventBus.post(new RequestSnippetSelectionEvent(newSelection.uri()));
         }
     }
 

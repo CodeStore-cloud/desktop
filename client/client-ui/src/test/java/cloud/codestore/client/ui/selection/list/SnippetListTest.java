@@ -20,7 +20,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -66,20 +65,15 @@ class SnippetListTest extends AbstractUiTest {
     @Nested
     @DisplayName("when a snippet is selected")
     class SnippetSelected {
-        private ArgumentCaptor<SnippetSelectedEvent> eventCaptor;
-
         @BeforeEach
         void setUp() {
-            eventCaptor = ArgumentCaptor.forClass(SnippetSelectedEvent.class);
             interact(() -> listView().getSelectionModel().selectFirst());
         }
 
         @Test
-        @DisplayName("triggers a SnippetSelectedEvent")
+        @DisplayName("triggers a RequestSnippetSelectionEvent")
         void selectSnippet() {
-            verify(eventBus).post(eventCaptor.capture());
-            SnippetSelectedEvent event = eventCaptor.getValue();
-            assertThat(event.snippetUri()).isEqualTo(uri(1));
+            verify(eventBus).post(new RequestSnippetSelectionEvent(SNIPPET_URI));
         }
 
         @Test

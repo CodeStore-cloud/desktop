@@ -1,6 +1,7 @@
 package cloud.codestore.client.ui.history;
 
 import cloud.codestore.client.ui.FxController;
+import cloud.codestore.client.ui.selection.list.RequestSnippetSelectionEvent;
 import cloud.codestore.client.ui.selection.list.SnippetSelectedEvent;
 import cloud.codestore.client.ui.snippet.SnippetDeletedEvent;
 import com.google.common.eventbus.EventBus;
@@ -87,7 +88,7 @@ public class History {
             currentSnippet = nextSnippets.pop();
             updateButtonStates();
             handleSelection = false;
-            eventBus.post(new SnippetSelectedEvent(currentSnippet));
+            eventBus.post(new RequestSnippetSelectionEvent(currentSnippet));
         }
     }
 

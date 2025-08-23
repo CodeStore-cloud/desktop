@@ -5,6 +5,7 @@ import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.history.History;
 import cloud.codestore.client.ui.selection.list.CreateSnippetEvent;
+import cloud.codestore.client.ui.selection.list.RequestSnippetSelectionEvent;
 import cloud.codestore.client.ui.selection.list.SnippetSelectedEvent;
 import cloud.codestore.client.ui.snippet.code.SnippetCode;
 import cloud.codestore.client.ui.snippet.description.SnippetDescription;
@@ -90,14 +91,37 @@ public class SnippetController {
     }
 
     @Subscribe
-    private void snippetSelected(@Nonnull SnippetSelectedEvent event) {
-        Snippet snippet = readSnippetUseCase.readSnippet(event.snippetUri());
-        state = new ShowSnippetState(snippet);
+    private void requestSnippetSelection(@Nonnull RequestSnippetSelectionEvent event) {
+        Runnable selectSnippet = () -> {
+            Snippet snippet = readSnippetUseCase.readSnippet(event.snippetUri());
+            state = new ShowSnippetState(snippet);
+            eventBus.post(new SnippetSelectedEvent(snippet.getUri()));
+        };
+
+        if (state.isEditing()) {
+            requestSaving(selectSnippet);
+        } else {
+            selectSnippet.run();
+        }
     }
 
     @Subscribe
     private void createSnippet(@Nonnull CreateSnippetEvent event) {
-        state = new NewSnippetState();
+        if (state.isEditing()) {
+            requestSaving(() -> state = new NewSnippetState());
+        } else {
+            state = new NewSnippetState();
+        }
+    }
+
+    private void requestSaving(Runnable action) {
+        new ConfirmationDialog("dialog.confirm.saveSnippet.title", "dialog.confirm.saveSnippet.message")
+                .onYes(() -> {
+                    state.save();
+                    action.run();
+                })
+                .onNo(action)
+                .show();
     }
 
     private void setEditing(boolean editable) {
@@ -143,6 +167,13 @@ public class SnippetController {
          * Called whenever the user wants to edit the current snippet.
          */
         default void edit() {}
+
+        /**
+         * @return whether this state is a state in which the user is editing a code snippet.
+         */
+        default boolean isEditing() {
+            return false;
+        }
     }
 
     /**
@@ -227,6 +258,11 @@ public class SnippetController {
         public void cancel() {
             state = new DefaultState();
         }
+
+        @Override
+        public boolean isEditing() {
+            return true;
+        }
     }
 
     /**
@@ -264,6 +300,11 @@ public class SnippetController {
         @Override
         public void cancel() {
             state = new ShowSnippetState(currentSnippet);
+        }
+
+        @Override
+        public boolean isEditing() {
+            return true;
         }
     }
 }
