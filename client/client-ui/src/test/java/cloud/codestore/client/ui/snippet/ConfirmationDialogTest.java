@@ -1,6 +1,5 @@
 package cloud.codestore.client.ui.snippet;
 
-import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,7 +8,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.testfx.framework.junit5.ApplicationTest;
 import org.testfx.framework.junit5.Start;
-import org.testfx.util.WaitForAsyncUtils;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -103,8 +101,7 @@ class ConfirmationDialogTest extends ApplicationTest {
     }
 
     private void showDialog() {
-        Platform.runLater(dialog::show);
-        WaitForAsyncUtils.waitForFxEvents();
+        interact(dialog::show);
         assertThat(dialogWindow()).isShowing();
     }
 

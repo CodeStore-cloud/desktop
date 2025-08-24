@@ -20,7 +20,6 @@ import cloud.codestore.client.usecases.readsnippet.ReadSnippetUseCase;
 import cloud.codestore.client.usecases.updatesnippet.UpdateSnippetUseCase;
 import cloud.codestore.client.usecases.updatesnippet.UpdatedSnippetDto;
 import com.google.common.eventbus.EventBus;
-import javafx.application.Platform;
 import javafx.scene.layout.Pane;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,7 +30,6 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.testfx.framework.junit5.ApplicationTest;
-import org.testfx.util.WaitForAsyncUtils;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
@@ -132,8 +130,7 @@ class SnippetControllerTest extends ApplicationTest {
             requestSnippetSelection();
             clearInvocations();
 
-            Platform.runLater(snippetFooterController::clickDeleteButton);
-            WaitForAsyncUtils.waitForFxEvents();
+            interact(snippetFooterController::clickDeleteButton);
             clickOn("#yes");
 
             verify(deleteSnippetUseCase).deleteSnippet(SNIPPET_URI);
@@ -197,8 +194,7 @@ class SnippetControllerTest extends ApplicationTest {
                 Snippet selectedSnippet = Snippet.builder().uri(SELECTED_SNIPPET_URI).build();
                 when(readSnippetUseCase.readSnippet(SELECTED_SNIPPET_URI)).thenReturn(selectedSnippet);
 
-                Platform.runLater(() -> requestSnippetSelection(SELECTED_SNIPPET_URI));
-                WaitForAsyncUtils.waitForFxEvents();
+                interact(() -> requestSnippetSelection(SELECTED_SNIPPET_URI));
             }
 
             @Test
@@ -287,8 +283,7 @@ class SnippetControllerTest extends ApplicationTest {
                 Snippet selectedSnippet = Snippet.builder().uri(SELECTED_SNIPPET_URI).build();
                 when(readSnippetUseCase.readSnippet(SELECTED_SNIPPET_URI)).thenReturn(selectedSnippet);
 
-                Platform.runLater(() -> requestSnippetSelection(SELECTED_SNIPPET_URI));
-                WaitForAsyncUtils.waitForFxEvents();
+                interact(() -> requestSnippetSelection(SELECTED_SNIPPET_URI));
                 clearInvocations();
             }
 
