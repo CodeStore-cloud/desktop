@@ -36,7 +36,7 @@ import static org.testfx.assertions.api.Assertions.assertThat;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("The snippet list")
 class SnippetListTest extends AbstractUiTest {
-    private static final String SNIPPET_URI = "http://localhost:8080/snippets/1";
+    private static final String SNIPPET_URI = uri(1);
     private static final String NEXT_PAGE_URL = "http://localhost:8080/snippets?page[number]=2";
 
     @Mock
@@ -52,7 +52,6 @@ class SnippetListTest extends AbstractUiTest {
         SnippetList controller = new SnippetList(readSnippetsUseCase, eventBus);
         start(stage, "snippetList.fxml", controller);
         eventBus.post(new ApplicationReadyEvent());
-        clearInvocations(eventBus);
     }
 
     @Test
@@ -65,41 +64,36 @@ class SnippetListTest extends AbstractUiTest {
     @Nested
     @DisplayName("when a snippet is selected")
     class SnippetSelected {
+        private static final String PREVIOUSLY_SELECTED_SNIPPET_URI = uri(5);
+
         @BeforeEach
         void setUp() {
-            interact(() -> listView().getSelectionModel().selectFirst());
+            initSelection(PREVIOUSLY_SELECTED_SNIPPET_URI);
         }
 
         @Test
-        @DisplayName("triggers a RequestSnippetSelectionEvent")
+        @DisplayName("sends RequestSnippetSelectionEvent but keeps the current selection")
         void selectSnippet() {
+            interact(() -> listView().getSelectionModel().selectFirst());
             verify(eventBus).post(new RequestSnippetSelectionEvent(SNIPPET_URI));
+            assertSelected(PREVIOUSLY_SELECTED_SNIPPET_URI);
         }
 
         @Test
-        @DisplayName("ignores duplicate selection")
+        @DisplayName("ignores already selected snippets")
         void duplicateSelection() {
+            initSelection(SNIPPET_URI);
             clearInvocations(eventBus);
+
             interact(() -> listView().getSelectionModel().selectFirst());
-            verify(eventBus, never()).post(any(SnippetSelectedEvent.class));
+            verify(eventBus, never()).post(any(RequestSnippetSelectionEvent.class));
         }
 
-        @Nested
-        @DisplayName("by another component")
-        class OtherComponent {
-            @BeforeEach
-            void setUp() {
-                interact(() -> {
-                    listView().getSelectionModel().clearSelection();
-                    eventBus.post(new SnippetSelectedEvent(SNIPPET_URI));
-                });
-            }
-
-            @Test
-            @DisplayName("selects the snippet")
-            void selectSnippetExternally() {
-                assertSelected(SNIPPET_URI);
-            }
+        @Test
+        @DisplayName("applies the selection when confirmed via a SnippetSelectedEvent")
+        void snippetSelectionConfirmed() {
+            eventBus.post(new SnippetSelectedEvent(SNIPPET_URI));
+            assertSelected(SNIPPET_URI);
         }
     }
 
@@ -204,7 +198,7 @@ class SnippetListTest extends AbstractUiTest {
     class SnippetUpdated {
         @BeforeEach
         void setUp() {
-            interact(() -> listView().getSelectionModel().selectFirst());
+            initSelection(SNIPPET_URI);
             clearInvocations(readSnippetsUseCase);
             interact(() -> eventBus.post(new SnippetUpdatedEvent(SNIPPET_URI)));
         }
@@ -243,6 +237,11 @@ class SnippetListTest extends AbstractUiTest {
             eventBus.post(new FullTextSearchEvent("test"));
             assertThat(button.isVisible()).isTrue();
         });
+    }
+
+    private void initSelection(String uri) {
+        eventBus.post(new SnippetSelectedEvent(uri));
+        assertSelected(uri);
     }
 
     private void assertSelected(String uri) {

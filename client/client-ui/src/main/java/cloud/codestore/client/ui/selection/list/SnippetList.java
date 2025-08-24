@@ -100,7 +100,7 @@ public class SnippetList implements ChangeListener<SnippetListItem> {
         if (newSelection == null) {
             currentSnippetUri = "";
         } else if (!Objects.equals(currentSnippetUri, newSelection.uri())) {
-            currentSnippetUri = newSelection.uri();
+            updateSelection();
             eventBus.post(new RequestSnippetSelectionEvent(newSelection.uri()));
         }
     }
@@ -158,20 +158,17 @@ public class SnippetList implements ChangeListener<SnippetListItem> {
     }
 
     private void updateSelection() {
-        if (!currentSnippetUri.isEmpty()) {
-            int currentSnippetIndex = findSelectedSnippetIndex();
-            if (currentSnippetIndex >= 0) {
-                list.getSelectionModel().select(currentSnippetIndex);
-            }
-        }
+        list.getSelectionModel().select(findSelectedSnippetIndex());
     }
 
     private int findSelectedSnippetIndex() {
-        ObservableList<SnippetListItem> listItems = list.getItems();
-        for (int i = 0; i < listItems.size(); i++) {
-            SnippetListItem item = listItems.get(i);
-            if (Objects.equals(item.uri(), currentSnippetUri)) {
-                return i;
+        if (!currentSnippetUri.isEmpty()) {
+            ObservableList<SnippetListItem> listItems = list.getItems();
+            for (int i = 0; i < listItems.size(); i++) {
+                SnippetListItem item = listItems.get(i);
+                if (Objects.equals(item.uri(), currentSnippetUri)) {
+                    return i;
+                }
             }
         }
 
