@@ -74,7 +74,7 @@ public class History {
             currentSnippet = previousSnippets.pop();
             updateButtonStates();
             handleSelection = false;
-            eventBus.post(new SnippetSelectedEvent(currentSnippet));
+            eventBus.post(new RequestSnippetSelectionEvent(currentSnippet));
         }
     }
 

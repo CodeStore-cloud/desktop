@@ -87,7 +87,7 @@ class HistoryTest extends AbstractUiTest {
             @Test
             @DisplayName("selects the previous snippet")
             void selectPreviousSnippet() {
-                verify(eventBus).post(new SnippetSelectedEvent("1"));
+                verify(eventBus).post(new RequestSnippetSelectionEvent("1"));
             }
 
             @Test
@@ -155,7 +155,7 @@ class HistoryTest extends AbstractUiTest {
 
             assertThat(prevSnippetButton()).isDisabled();
             assertThat(nextSnippetButton()).isEnabled();
-            verify(eventBus).post(new SnippetSelectedEvent("1"));
+            verify(eventBus).post(new RequestSnippetSelectionEvent("1"));
         }
 
         @Test
