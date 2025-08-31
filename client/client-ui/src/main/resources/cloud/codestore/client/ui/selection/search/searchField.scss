@@ -1,9 +1,5 @@
 @use "../../size";
 
-.button.search {
+.search {
     -fx-background-image: url("search.png");
-}
-
-#inputField {
-    -fx-pref-height: size.$secondaryElementSize;
 }
