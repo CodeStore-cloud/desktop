@@ -1,44 +1,31 @@
 package cloud.codestore.client.ui.selection.search;
 
 import cloud.codestore.client.ui.AbstractUiTest;
-import com.google.common.eventbus.EventBus;
 import javafx.scene.control.Labeled;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.testfx.framework.junit5.Start;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
 
-@ExtendWith(MockitoExtension.class)
 @DisplayName("The full-text-search input field")
 class FullTextSearchTest extends AbstractUiTest {
-    @Mock
-    private EventBus eventBus;
+    private FullTextSearch controller = new FullTextSearch();
 
     @Start
     public void start(Stage stage) throws Exception {
-        FullTextSearch controller = new FullTextSearch(eventBus);
         start(stage, "searchField.fxml", controller);
     }
 
     @Test
     @DisplayName("triggers a FullTextSearchEvent when the input changes")
     void triggerFullTextSearch() {
-        var argument = ArgumentCaptor.forClass(FullTextSearchEvent.class);
-
+        assertThat(inputPropertyValue()).isEmpty();
         interact(() -> inputField().setText("test"));
-
-        verify(eventBus).post(argument.capture());
-        var event = argument.getValue();
-        assertThat(event.searchQuery()).isEqualTo("test");
+        assertThat(inputPropertyValue()).isEqualTo("test");
     }
 
     @Test
@@ -52,6 +39,7 @@ class FullTextSearchTest extends AbstractUiTest {
         press(KeyCode.ESCAPE);
 
         assertThat(inputField.getText()).isNotNull().isEmpty();
+        assertThat(inputPropertyValue()).isEmpty();
     }
 
     @Test
@@ -66,10 +54,15 @@ class FullTextSearchTest extends AbstractUiTest {
         clickOn(icon);
 
         assertThat(inputField.getText()).isNotNull().isEmpty();
+        assertThat(inputPropertyValue()).isEmpty();
     }
 
     private TextInputControl inputField() {
         return lookup("#inputField").queryTextInputControl();
+    }
+
+    private String inputPropertyValue() {
+        return controller.inputProperty().get();
     }
 
     private Labeled icon() {

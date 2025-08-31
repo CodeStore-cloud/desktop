@@ -1,7 +1,8 @@
 package cloud.codestore.client.ui.selection.search;
 
 import cloud.codestore.client.ui.FxController;
-import com.google.common.eventbus.EventBus;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
@@ -10,18 +11,11 @@ import java.util.Objects;
 
 @FxController
 public class FullTextSearch {
-    private final EventBus eventBus;
-
     @FXML
     private TextField inputField;
 
-    FullTextSearch(EventBus eventBus) {
-        this.eventBus = eventBus;
-    }
-
     @FXML
     public void initialize() {
-        inputField.textProperty().addListener((textField, oldValue, newValue) -> search(newValue));
         inputField.setOnKeyPressed(event -> {
             if (Objects.requireNonNull(event.getCode()) == KeyCode.ESCAPE) {
                 clearInput();
@@ -32,12 +26,14 @@ public class FullTextSearch {
         });
     }
 
-    @FXML
-    void clearInput() {
-        inputField.clear();
+    public StringProperty inputProperty() {
+        var inputProperty = new SimpleStringProperty();
+        inputProperty.bind(inputField.textProperty());
+        return inputProperty;
     }
 
-    private void search(String input) {
-        eventBus.post(new FullTextSearchEvent(input));
+    @FXML
+    private void clearInput() {
+        inputField.clear();
     }
 }

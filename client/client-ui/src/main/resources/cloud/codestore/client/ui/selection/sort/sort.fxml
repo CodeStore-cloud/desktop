@@ -11,6 +11,6 @@
     <Separator/>
     <HBox styleClass="secondarySpacing" alignment="CENTER_LEFT">
         <Label text="%sort.label"/>
-        <ComboBox fx:id="sortSelection" onAction="#triggerSortEvent"/>
+        <ComboBox fx:id="sortSelection" onAction="#sortChanged"/>
     </HBox>
 </VBox>

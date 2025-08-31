@@ -2,37 +2,25 @@ package cloud.codestore.client.ui.selection.sort;
 
 import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.UiMessages;
-import cloud.codestore.client.ui.selection.filter.ToggleFilterEvent;
-import cloud.codestore.client.ui.selection.search.FullTextSearchEvent;
 import cloud.codestore.client.usecases.listsnippets.SortProperties;
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.layout.Pane;
 
-import javax.annotation.Nonnull;
 import java.util.Arrays;
 
-import static cloud.codestore.client.usecases.listsnippets.SortProperties.SnippetProperty;
-import static cloud.codestore.client.usecases.listsnippets.SortProperties.SnippetProperty.*;
+import static cloud.codestore.client.usecases.listsnippets.SortProperties.SnippetProperty.RELEVANCE;
+import static cloud.codestore.client.usecases.listsnippets.SortProperties.SnippetProperty.TITLE;
 
 @FxController
 public class Sort {
-    private static final SnippetProperty DEFAULT_SORT_PROPERTY = new SortProperties().property();
-
     @FXML
     private Pane sortPanel;
     @FXML
     private ComboBox<SortItem> sortSelection;
-
-    private final EventBus eventBus;
-    private SortProperties.SnippetProperty previousSelection = DEFAULT_SORT_PROPERTY;
-
-    public Sort(EventBus eventBus) {
-        this.eventBus = eventBus;
-        eventBus.register(this);
-    }
+    private ObjectProperty<SortProperties> sortProperties = new SimpleObjectProperty<>();
 
     @FXML
     private void initialize() {
@@ -40,27 +28,24 @@ public class Sort {
         sortPanel.setVisible(false);
 
         fillDropdown();
-        select(DEFAULT_SORT_PROPERTY);
+        sortProperties.addListener((observable, oldValue, newValue) -> updateSelection());
+        sortProperties.set(new SortProperties());
     }
 
-    @Subscribe
-    private void search(@Nonnull FullTextSearchEvent event) {
-        select(event.searchQuery().isEmpty() ? previousSelection : RELEVANCE);
-        triggerSortEvent();
-    }
-
-    @Subscribe
-    private void toggle(@Nonnull ToggleSortEvent event) {
-        sortPanel.setVisible(!sortPanel.isVisible());
-    }
-
-    @Subscribe
-    private void toggle(@Nonnull ToggleFilterEvent event) {
+    public void hide() {
         sortPanel.setVisible(false);
     }
 
+    public void toggle() {
+        sortPanel.setVisible(!sortPanel.isVisible());
+    }
+
+    public ObjectProperty<SortProperties> sortProperties() {
+        return sortProperties;
+    }
+
     private void fillDropdown() {
-        var items = Arrays.stream(values())
+        var items = Arrays.stream(SortProperties.SnippetProperty.values())
                           .map(property -> {
                               String labelKey = String.format("sort.%s", property.name().toLowerCase());
                               return new SortItem(property, UiMessages.get(labelKey));
@@ -70,7 +55,8 @@ public class Sort {
         sortSelection.getItems().addAll(items);
     }
 
-    private void select(SnippetProperty property) {
+    private void updateSelection() {
+        var property = this.sortProperties.get().property();
         for (SortItem item : sortSelection.getItems()) {
             if (item.property() == property) {
                 sortSelection.getSelectionModel().select(item);
@@ -80,14 +66,9 @@ public class Sort {
     }
 
     @FXML
-    private void triggerSortEvent() {
+    private void sortChanged() {
         var selectedItem = sortSelection.getSelectionModel().getSelectedItem();
         var property = selectedItem.property();
-        var sortProperties = new SortProperties(property, property == RELEVANCE || property == TITLE);
-        eventBus.post(new SortEvent(sortProperties));
-
-        if (property != RELEVANCE) {
-            previousSelection = property;
-        }
+        this.sortProperties.set(new SortProperties(property, property == RELEVANCE || property == TITLE));
     }
 }

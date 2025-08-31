@@ -8,22 +8,20 @@ import com.google.common.eventbus.EventBus;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextInputControl;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.testfx.framework.junit5.Start;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.testfx.assertions.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("The filter controller")
@@ -32,9 +30,7 @@ class FilterTest extends AbstractUiTest {
 
     @Mock
     private ReadLanguagesUseCase readLanguagesUseCase;
-    @Spy
-    private EventBus eventBus;
-    @InjectMocks
+    private EventBus eventBus = new EventBus();
     private Filter controller;
 
     @Start
@@ -46,20 +42,38 @@ class FilterTest extends AbstractUiTest {
                 new Language("Kotlin", "4")
         ));
 
+        controller = new Filter(readLanguagesUseCase, eventBus);
         start(stage, "filter.fxml", controller);
         eventBus.post(new ApplicationReadyEvent());
-        eventBus.post(new ToggleFilterEvent());
-        clearInvocations(eventBus);
+        controller.toggle();
     }
 
     @Test
-    @DisplayName("triggers a FilterEvent when the tags changed")
+    @DisplayName("hides the filterPanel")
+    void hide() {
+        Pane pane = filterPane();
+        assertThat(pane).isVisible();
+        controller.hide();
+        assertThat(pane).isInvisible();
+    }
+
+    @Test
+    @DisplayName("toggles the filterPanel")
+    void toggle() {
+        Pane pane = filterPane();
+        assertThat(pane).isVisible();
+        controller.toggle();
+        assertThat(pane).isInvisible();
+        controller.toggle();
+        assertThat(pane).isVisible();
+    }
+
+    @Test
+    @DisplayName("updates the Property-Object when the tags changed")
     void tagsChanged() {
         tagsInput().setText("hello world");
 
-        var argument = ArgumentCaptor.forClass(FilterEvent.class);
-        verify(eventBus).post(argument.capture());
-        var filterProperties = argument.getValue().filterProperties();
+        var filterProperties = controller.filterProperties().get();
         assertThat(filterProperties.getTags()).isNotEmpty();
         assertThat(filterProperties.getTags().get()).containsExactlyInAnyOrder("hello", "world");
     }
@@ -69,28 +83,25 @@ class FilterTest extends AbstractUiTest {
     void ignoreDuplicateTags() {
         tagsInput().setText("abc def abc");
 
-        var argument = ArgumentCaptor.forClass(FilterEvent.class);
-        verify(eventBus).post(argument.capture());
-        var filterProperties = argument.getValue().filterProperties();
+        var filterProperties = controller.filterProperties().get();
         assertThat(filterProperties.getTags()).isNotEmpty();
         assertThat(filterProperties.getTags().get()).containsExactlyInAnyOrder("abc", "def");
     }
 
     @Test
-    @DisplayName("triggers a FilterEvent without tags when the tag input is empty")
+    @DisplayName("updates the Property-Object without tags when the tag input is cleared")
     void emptyTagInput() {
-        TextInputControl inputField = tagsInput();
-        inputField.setText("test");
-        inputField.setText("");
+        var inputField = tagsInput();
 
-        var argument = ArgumentCaptor.forClass(FilterEvent.class);
-        verify(eventBus, times(2)).post(argument.capture());
-        var filterProperties = argument.getValue().filterProperties(); // second call
-        assertThat(filterProperties.getTags()).isEmpty();
+        inputField.setText("test");
+        assertThat(controller.filterProperties().get().getTags()).isNotEmpty();
+
+        inputField.setText("");
+        assertThat(controller.filterProperties().get().getTags()).isEmpty();
     }
 
     @Test
-    @DisplayName("triggers a FilterEvent when the programming language changed")
+    @DisplayName("updates the Property-Object when the programming language changed")
     void languageChanged() {
         var comboBox = languageSelection();
         assertThat(comboBox.getItems()).hasSize(5);
@@ -98,9 +109,7 @@ class FilterTest extends AbstractUiTest {
 
         interact(() -> comboBox.getSelectionModel().select(3));
 
-        var argument = ArgumentCaptor.forClass(FilterEvent.class);
-        verify(eventBus).post(argument.capture());
-        var filterProperties = argument.getValue().filterProperties();
+        var filterProperties = controller.filterProperties().get();
         assertThat(filterProperties.getLanguage()).isNotEmpty();
         assertThat(filterProperties.getLanguage().get()).isEqualTo(JAVA);
     }
@@ -108,38 +117,38 @@ class FilterTest extends AbstractUiTest {
     @Test
     @DisplayName("clears all filter when pressing the 'clearFilter' button")
     void clearFilter() {
-        clearInvocations(eventBus);
         clickOn(clearFilterButton());
 
         assertThat(tagsInput().getText()).isEmpty();
         assertThat(languageSelection().getSelectionModel().getSelectedItem().language()).isNull();
-        var argument = ArgumentCaptor.forClass(FilterEvent.class);
-        verify(eventBus).post(argument.capture());
-        assertThat(argument.getValue().filterProperties().isEmpty()).isTrue();
+        var filterProperties = controller.filterProperties().get();
+        assertThat(filterProperties.isEmpty()).isTrue();
     }
 
     @Nested
-    @DisplayName("when recieving a QuickFilterEvent")
+    @DisplayName("when receiving a QuickFilterEvent")
     class QuickFilterTest {
+
         @Test
         @DisplayName("applies the language")
         void quickfilterLanguage() {
             interact(() -> eventBus.post(new QuickFilterEvent(JAVA)));
             assertThat(languageSelection().getSelectionModel().getSelectedItem().language()).isEqualTo(JAVA);
 
-            var argument = ArgumentCaptor.forClass(FilterEvent.class);
-            verify(eventBus).post(argument.capture());
-            var filterProperties = argument.getValue().filterProperties();
+            var filterProperties = controller.filterProperties().get();
             assertThat(filterProperties.getLanguage()).isNotEmpty();
             assertThat(filterProperties.getLanguage().get()).isEqualTo(JAVA);
         }
-
         @Test
         @DisplayName("adds the nested tag")
         void quickfilterTag() {
             tagsInput().setText("tag1 tag2");
-            interact(() -> eventBus.post(new QuickFilterEvent("another-tag")));
+            eventBus.post(new QuickFilterEvent("another-tag"));
+
             assertThat(tagsInput().getText()).isEqualTo("tag1 tag2 another-tag");
+            var filterProperties = controller.filterProperties().get();
+            assertThat(filterProperties.getTags()).isNotEmpty();
+            assertThat(filterProperties.getTags().get()).containsExactlyInAnyOrder("tag1", "tag2", "another-tag");
         }
 
         @Test
@@ -147,9 +156,18 @@ class FilterTest extends AbstractUiTest {
         void ignoreDuplicateTags() {
             String text = "tag1 tag2 tag3";
             tagsInput().setText(text);
+
             eventBus.post(new QuickFilterEvent("tag2"));
+
             assertThat(tagsInput().getText()).isEqualTo(text);
+            var filterProperties = controller.filterProperties().get();
+            assertThat(filterProperties.getTags()).isNotEmpty();
+            assertThat(filterProperties.getTags().get()).containsExactlyInAnyOrder("tag1", "tag2", "tag3");
         }
+    }
+
+    private Pane filterPane() {
+        return lookup("#filterPanel").queryAs(Pane.class);
     }
 
     private TextInputControl tagsInput() {

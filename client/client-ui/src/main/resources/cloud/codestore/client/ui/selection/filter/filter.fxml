@@ -20,7 +20,7 @@
             <Separator/>
             <HBox>
                 <Icon styleClass="language"/>
-                <ComboBox fx:id="languageSelection" onAction="#triggerEvent"/>
+                <ComboBox fx:id="languageSelection" onAction="#filterChanged"/>
             </HBox>
         </VBox>
         <IconButton fx:id="clearFilter" onAction="#clearFilter">

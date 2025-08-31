@@ -1,34 +1,32 @@
 package cloud.codestore.client.ui.selection.sort;
 
 import cloud.codestore.client.ui.AbstractUiTest;
-import cloud.codestore.client.ui.selection.search.FullTextSearchEvent;
 import cloud.codestore.client.usecases.listsnippets.SortProperties;
-import com.google.common.eventbus.EventBus;
 import javafx.scene.control.ComboBox;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.testfx.framework.junit5.Start;
 
-import static cloud.codestore.client.usecases.listsnippets.SortProperties.SnippetProperty.RELEVANCE;
-import static cloud.codestore.client.usecases.listsnippets.SortProperties.SnippetProperty.TITLE;
-import static org.mockito.Mockito.verify;
+import java.util.stream.Stream;
 
-@ExtendWith(MockitoExtension.class)
+import static cloud.codestore.client.usecases.listsnippets.SortProperties.SnippetProperty.*;
+import static org.testfx.assertions.api.Assertions.assertThat;
+
 @DisplayName("The sort controller")
 class SortTest extends AbstractUiTest {
-    @Spy
-    private EventBus eventBus = new EventBus();
+    private Sort controller = new Sort();
     private ComboBox<SortItem> comboBox;
 
     @Start
     public void start(Stage stage) throws Exception {
-        start(stage, "sort.fxml", new Sort(eventBus));
+        start(stage, "sort.fxml", controller);
         comboBox = lookup("#sortSelection").queryComboBox();
+        controller.toggle();
     }
 
     @Test
@@ -39,30 +37,48 @@ class SortTest extends AbstractUiTest {
     }
 
     @Test
-    @DisplayName("selects relevance when a search term is entered")
-    void relevanceSelection() {
-        interact(() -> eventBus.post(new FullTextSearchEvent("test")));
-        assertSelected(RELEVANCE);
+    @DisplayName("hides the sortPanel")
+    void hide() {
+        Pane pane = sortPane();
+        assertThat(pane).isVisible();
+        controller.hide();
+        assertThat(pane).isInvisible();
     }
 
     @Test
-    @DisplayName("selects previous option when the search is cleared")
-    void defaultNoSearch() {
-        interact(() -> {
-            select(TITLE);
-            eventBus.post(new FullTextSearchEvent("test"));
-            assertSelected(RELEVANCE);
-            eventBus.post(new FullTextSearchEvent(""));
-            assertSelected(TITLE);
-        });
+    @DisplayName("toggles the sortPanel")
+    void toggle() {
+        Pane pane = sortPane();
+        assertThat(pane).isVisible();
+        controller.toggle();
+        assertThat(pane).isInvisible();
+        controller.toggle();
+        assertThat(pane).isVisible();
     }
 
-    @Test
-    @DisplayName("triggers a SortEvent if the sort selection was changed")
-    void triggerEventOnSelection() {
-        interact(() -> select(TITLE));
-        var expectedEvent = new SortEvent(new SortProperties(TITLE, true));
-        verify(eventBus).post(expectedEvent);
+    @ParameterizedTest
+    @MethodSource("sortProperties")
+    @DisplayName("updates the Property-Object when the sort selection was changed")
+    void updatePropertyOnSelection(SortProperties expectedSortProperties) {
+        interact(() -> select(expectedSortProperties.property()));
+        assertThat(controller.sortProperties().get()).isEqualTo(expectedSortProperties);
+    }
+
+    @ParameterizedTest
+    @MethodSource("sortProperties")
+    @DisplayName("updates the dropdown menu when the Property-Object is changed from outside")
+    void updateSelection(SortProperties value) {
+        interact(() -> controller.sortProperties().set(value));
+        assertSelected(value.property());
+    }
+
+    private static Stream<Arguments> sortProperties() {
+        return Stream.of(
+                Arguments.of(new SortProperties(RELEVANCE, true)),
+                Arguments.of(new SortProperties(TITLE, true)),
+                Arguments.of(new SortProperties(CREATED, false)),
+                Arguments.of(new SortProperties(MODIFIED, false))
+        );
     }
 
     private void select(SortProperties.SnippetProperty property) {
@@ -76,6 +92,10 @@ class SortTest extends AbstractUiTest {
 
     private void assertSelected(SortProperties.SnippetProperty property) {
         SortItem selectedItem = comboBox.getSelectionModel().getSelectedItem();
-        Assertions.assertThat(selectedItem.property()).isEqualTo(property);
+        assertThat(selectedItem.property()).isEqualTo(property);
+    }
+
+    private Pane sortPane() {
+        return lookup("#sortPanel").queryAs(Pane.class);
     }
 }

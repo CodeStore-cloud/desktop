@@ -1,17 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import cloud.codestore.client.ui.IconButton?>
 <?import cloud.codestore.client.ui.separator.Separator?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" styleClass="primarySpacing">
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="cloud.codestore.client.ui.selection.SelectionController"
+      styleClass="primarySpacing">
     <HBox>
-        <fx:include source="./search/searchField.fxml" HBox.hgrow="ALWAYS"/>
+        <fx:include source="./search/searchField.fxml" fx:id="search" HBox.hgrow="ALWAYS"/>
         <Separator styleClass="vertical"/>
-        <fx:include source="./filter/toggleFilterButton.fxml"/>
-        <fx:include source="./sort/toggleSortButton.fxml"/>
+        <IconButton stylesheets="@filter/filter.css" styleClass="filter" fx:id="filterButton" onAction="#toggleFilter">
+            <tooltip>
+                <Tooltip text="%filter.toggleButton.tooltip"/>
+            </tooltip>
+        </IconButton>
+        <IconButton stylesheets="@sort/sort.css" styleClass="sort" onAction="#toggleSort">
+            <tooltip>
+                <Tooltip text="%sort.toggleButton.tooltip"/>
+            </tooltip>
+        </IconButton>
     </HBox>
-    <fx:include source="./sort/sort.fxml"/>
-    <fx:include source="./filter/filter.fxml"/>
+    <fx:include source="./sort/sort.fxml" fx:id="sort"/>
+    <fx:include source="./filter/filter.fxml" fx:id="filter"/>
     <Separator/>
-    <fx:include source="./list/snippetList.fxml" VBox.vgrow="ALWAYS"/>
+    <fx:include source="./list/snippetList.fxml" fx:id="snippetList" VBox.vgrow="ALWAYS"/>
 </VBox>

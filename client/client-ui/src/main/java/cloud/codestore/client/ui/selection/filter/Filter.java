@@ -4,11 +4,12 @@ import cloud.codestore.client.Language;
 import cloud.codestore.client.ui.ApplicationReadyEvent;
 import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.UiMessages;
-import cloud.codestore.client.ui.selection.sort.ToggleSortEvent;
 import cloud.codestore.client.usecases.listsnippets.FilterProperties;
 import cloud.codestore.client.usecases.readlanguages.ReadLanguagesUseCase;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
@@ -20,13 +21,6 @@ import java.util.*;
 @FxController
 public class Filter {
     private final ReadLanguagesUseCase readLanguagesUseCase;
-    private final EventBus eventBus;
-
-    public Filter(ReadLanguagesUseCase readLanguagesUseCase, EventBus eventBus) {
-        this.readLanguagesUseCase = readLanguagesUseCase;
-        this.eventBus = eventBus;
-        eventBus.register(this);
-    }
 
     @FXML
     private Pane filterPanel;
@@ -34,28 +28,45 @@ public class Filter {
     private TextField tagsInput;
     @FXML
     private ComboBox<LanguageItem> languageSelection;
-    private boolean filterEventEnabled = true;
+    private boolean updatePropertiesEnabled = true;
+    private ObjectProperty<FilterProperties> filterProperties = new SimpleObjectProperty<>(new FilterProperties());
+
+    public Filter(ReadLanguagesUseCase readLanguagesUseCase, EventBus eventBus) {
+        this.readLanguagesUseCase = readLanguagesUseCase;
+        eventBus.register(this);
+    }
 
     @FXML
     private void initialize() {
         filterPanel.managedProperty().bind(filterPanel.visibleProperty());
         filterPanel.setVisible(false);
-        handleTagInput();
+        tagsInput.textProperty().addListener((field, oldValue, newValue) -> filterChanged());
     }
 
-    @Subscribe
-    private void toggle(@Nonnull ToggleFilterEvent event) {
-        filterPanel.setVisible(!filterPanel.isVisible());
-    }
-
-    @Subscribe
-    private void toggle(@Nonnull ToggleSortEvent event) {
+    public void hide() {
         filterPanel.setVisible(false);
     }
 
+    public void toggle() {
+        filterPanel.setVisible(!filterPanel.isVisible());
+    }
+
+    public ObjectProperty<FilterProperties> filterProperties() {
+        return filterProperties;
+    }
+
     @Subscribe
-    private void applicationReady(@Nonnull ApplicationReadyEvent event) {
-        fillLanguageSelection();
+    private void fillLanguageSelection(@Nonnull ApplicationReadyEvent event) {
+        LanguageItem all = new LanguageItem(null, UiMessages.get("filter.language.all"));
+        languageSelection.getItems().add(all);
+
+        List<Language> languages = readLanguagesUseCase.readLanguages();
+        for (Language language : languages) {
+            LanguageItem item = new LanguageItem(language, language.name());
+            languageSelection.getItems().add(item);
+        }
+
+        languageSelection.getSelectionModel().selectFirst(); // default selection - does not call filterChanged()
     }
 
     @Subscribe
@@ -79,49 +90,23 @@ public class Filter {
         }
     }
 
-    private void handleTagInput() {
-        tagsInput.textProperty().addListener((field, oldValue, newValue) -> triggerEvent());
-    }
-
-    private void fillLanguageSelection() {
-        LanguageItem all = new LanguageItem(null, UiMessages.get("filter.language.all"));
-        languageSelection.getItems().add(all);
-
-        List<Language> languages = readLanguagesUseCase.readLanguages();
-        for (Language language : languages) {
-            LanguageItem item = new LanguageItem(language, language.name());
-            languageSelection.getItems().add(item);
-        }
-
-        languageSelection.getSelectionModel().selectFirst(); // default selection - does not trigger filter event
-    }
-
     @FXML
-    void triggerEvent() {
-        if (filterEventEnabled) {
+    void filterChanged() {
+        if (updatePropertiesEnabled) {
             String tagsInput = this.tagsInput.getText();
             Set<String> tags = tagsInput.isEmpty() ? null : new HashSet<>(List.of(tagsInput.split(" ")));
             Language language = languageSelection.getValue().language();
-            FilterProperties filterProperties = new FilterProperties(tags, language);
-            eventBus.post(new FilterEvent(filterProperties));
+            filterProperties.set(new FilterProperties(tags, language));
         }
     }
 
     @FXML
-    void clearFilter() {
-        doWithoutFiringFilterEvent(() -> {
-            this.tagsInput.clear();
-            this.languageSelection.getSelectionModel().selectFirst();
-        });
-        eventBus.post(new FilterEvent(new FilterProperties()));
-    }
+    private void clearFilter() {
+        updatePropertiesEnabled = false;
+        this.tagsInput.clear();
+        this.languageSelection.getSelectionModel().selectFirst();
+        updatePropertiesEnabled = true;
 
-    private void doWithoutFiringFilterEvent(Runnable runnable) {
-        try {
-            filterEventEnabled = false;
-            runnable.run();
-        } finally {
-            filterEventEnabled = true;
-        }
+        filterProperties.set(new FilterProperties());
     }
 }

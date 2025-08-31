@@ -2,14 +2,9 @@ package cloud.codestore.client.ui.selection.list;
 
 import cloud.codestore.client.Permission;
 import cloud.codestore.client.ui.AbstractUiTest;
-import cloud.codestore.client.ui.ApplicationReadyEvent;
-import cloud.codestore.client.ui.selection.filter.FilterEvent;
-import cloud.codestore.client.ui.selection.search.FullTextSearchEvent;
-import cloud.codestore.client.ui.selection.sort.SortEvent;
-import cloud.codestore.client.ui.snippet.SnippetCreatedEvent;
-import cloud.codestore.client.ui.snippet.SnippetDeletedEvent;
-import cloud.codestore.client.ui.snippet.SnippetUpdatedEvent;
-import cloud.codestore.client.usecases.listsnippets.*;
+import cloud.codestore.client.usecases.listsnippets.ReadSnippetsUseCase;
+import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
+import cloud.codestore.client.usecases.listsnippets.SnippetPage;
 import com.google.common.eventbus.EventBus;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -29,7 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.testfx.assertions.api.Assertions.assertThat;
 
@@ -43,15 +38,16 @@ class SnippetListTest extends AbstractUiTest {
     private ReadSnippetsUseCase readSnippetsUseCase;
     @Spy
     private EventBus eventBus = new EventBus();
+    private SnippetList controller;
 
     @Start
     public void start(Stage stage) throws Exception {
         var firstPage = new SnippetPage(testItems(), NEXT_PAGE_URL, Collections.emptySet());
-        when(readSnippetsUseCase.getPage(anyString(), any(), any())).thenReturn(firstPage);
+        lenient().when(readSnippetsUseCase.getPage(any(), any(), any())).thenReturn(firstPage);
 
-        SnippetList controller = new SnippetList(readSnippetsUseCase, eventBus);
+        controller = new SnippetList(readSnippetsUseCase, eventBus);
         start(stage, "snippetList.fxml", controller);
-        eventBus.post(new ApplicationReadyEvent());
+        updateList();
     }
 
     @Test
@@ -98,7 +94,7 @@ class SnippetListTest extends AbstractUiTest {
     }
 
     @Test
-    @DisplayName("triggers a CreateSnippetEvent if the create-snippet button was clicked")
+    @DisplayName("fires a CreateSnippetEvent if the create-snippet button was clicked")
     void createSnippetEvent() {
         Button createSnippetButton = createSnippetButton();
         createSnippetButton.setVisible(true);
@@ -133,110 +129,21 @@ class SnippetListTest extends AbstractUiTest {
     }
 
     @Test
-    @DisplayName("reloads the snippets when a FullTextSearchEvent is triggered")
-    void searchSnippets() {
-        var page = page(reducedSnippetList());
-        when(readSnippetsUseCase.getPage(eq("test"), any(), any())).thenReturn(page);
-
-        var listView = listView();
-        assertThat(listView.getItems()).hasSize(10);
-
-        interact(() -> {
-            eventBus.post(new FullTextSearchEvent("test"));
-            assertThat(listView.getItems()).hasSize(3);
-        });
-    }
-
-    @Test
-    @DisplayName("reloads the snippets when a FilterEvent is triggered")
-    void filterSnippets() {
-        var filterProperties = new FilterProperties(Set.of("hello", "world"), null);
-        var page = page(reducedSnippetList());
-        when(readSnippetsUseCase.getPage(anyString(), eq(filterProperties), any())).thenReturn(page);
-
-        var listView = listView();
-        assertThat(listView.getItems()).hasSize(10);
-
-        interact(() -> {
-            eventBus.post(new FilterEvent(filterProperties));
-            assertThat(listView.getItems()).hasSize(3);
-        });
-    }
-
-    @Test
-    @DisplayName("reloads the snippets when a SortEvent is triggered")
-    void sortSnippets() {
-        var sortProperties = new SortProperties(SortProperties.SnippetProperty.TITLE, true);
-        interact(() -> eventBus.post(new SortEvent(sortProperties)));
-        verify(readSnippetsUseCase).getPage(anyString(), any(), eq(sortProperties));
-    }
-
-    @Nested
-    @DisplayName("when a new snippet is created")
-    class SnippetCreated {
-        @BeforeEach
-        void setUp() {
-            clearInvocations(readSnippetsUseCase);
-            interact(() -> eventBus.post(new SnippetCreatedEvent(SNIPPET_URI)));
-        }
-
-        @Test
-        @DisplayName("reloads the snippets")
-        void snippetCreated() {
-            verify(readSnippetsUseCase).getPage(anyString(), any(), any());
-        }
-
-        @Test
-        @DisplayName("selects the new code snippet")
-        void selectSnippet() {
-            assertSelected(SNIPPET_URI);
-        }
-    }
-
-    @Nested
-    @DisplayName("when a snippet is updated")
-    class SnippetUpdated {
-        @BeforeEach
-        void setUp() {
-            initSelection(SNIPPET_URI);
-            clearInvocations(readSnippetsUseCase);
-            interact(() -> eventBus.post(new SnippetUpdatedEvent(SNIPPET_URI)));
-        }
-
-        @Test
-        @DisplayName("reloads the snippets")
-        void snippetUpdated() {
-            verify(readSnippetsUseCase).getPage(anyString(), any(), any());
-        }
-
-        @Test
-        @DisplayName("keeps current selection")
-        void selectSnippet() {
-            assertSelected(SNIPPET_URI);
-        }
-    }
-
-    @Test
-    @DisplayName("reloads the snippets when a SnippetDeletedEvent is triggered")
-    void snippetDeleted() {
-        clearInvocations(readSnippetsUseCase);
-        interact(() -> eventBus.post(new SnippetDeletedEvent(SNIPPET_URI)));
-        verify(readSnippetsUseCase).getPage(anyString(), any(), any());
+    @DisplayName("keeps the current selection when an update is requested")
+    void keepSelection() {
+        initSelection(SNIPPET_URI);
+        updateList();
+        assertSelected(SNIPPET_URI);
     }
 
     @Test
     @DisplayName("shows the create-snippet button if permitted")
     void createSnippetButtonVisibility() {
-        var button = createSnippetButton();
-        assertThat(button.isVisible()).isFalse();
-
         when(readSnippetsUseCase.getPage(any(), any(), any()))
                 .thenReturn(new SnippetPage(Collections.emptyList(), "", Set.of(Permission.CREATE)));
 
-        interact(() -> {
-            eventBus.post(new FullTextSearchEvent("test"));
-            assertThat(button.isVisible()).isTrue();
-        });
+        updateList();
+        assertThat(createSnippetButton()).isVisible();
     }
 
     private void initSelection(String uri) {
@@ -298,15 +205,11 @@ class SnippetListTest extends AbstractUiTest {
         return new SnippetPage(items, "", Collections.emptySet());
     }
 
-    private static List<SnippetListItem> reducedSnippetList() {
-        return List.of(
-                new SnippetListItem(uri(31), "Snippet test #31"),
-                new SnippetListItem(uri(32), "Snippet test #32"),
-                new SnippetListItem(uri(33), "Snippet test #33")
-        );
-    }
-
     private static String uri(int snippetId) {
         return "http://localhost:8080/snippets/" + snippetId;
+    }
+
+    private void updateList() {
+        interact(() -> controller.update(null, null, null));
     }
 }
