@@ -1,6 +1,9 @@
 package cloud.codestore.core.api.snippets;
 
+import cloud.codestore.core.Permission;
 import cloud.codestore.core.Snippet;
+import cloud.codestore.core.api.Operation;
+import cloud.codestore.core.api.ResourceMetaInfo;
 import cloud.codestore.core.api.UriFactory;
 import cloud.codestore.core.api.languages.LanguageResource;
 import cloud.codestore.core.api.tags.TagCollectionResource;
@@ -9,9 +12,14 @@ import cloud.codestore.jsonapi.resource.ResourceObject;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.http.HttpMethod;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 public class SnippetResource extends ResourceObject {
     public static final String RESOURCE_TYPE = "snippet";
@@ -27,6 +35,7 @@ public class SnippetResource extends ResourceObject {
     SnippetResource(@Nonnull Snippet snippet) {
         super(RESOURCE_TYPE, snippet.getId());
         setSelfLink(getLink(getId()));
+        setMeta(createPermissionsMetaInfo(snippet.getPermissions()));
 
         this.title = snippet.getTitle();
         this.description = snippet.getDescription();
@@ -90,7 +99,21 @@ public class SnippetResource extends ResourceObject {
      * @param snippetId the id of a snippet.
      * @return the URI to the corresponding snippet resource.
      */
-    private static String getLink(@Nonnull String snippetId) {
+    private String getLink(@Nonnull String snippetId) {
         return UriFactory.createUri(SnippetCollectionResource.PATH + "/" + snippetId);
+    }
+
+    @Nullable
+    private ResourceMetaInfo createPermissionsMetaInfo(Set<Permission> permissions) {
+        List<Operation> operations = new ArrayList<>();
+        for (Permission permission : permissions) {
+            if (permission == Permission.UPDATE) {
+                operations.add(new Operation("updateSnippet", HttpMethod.PATCH.name(), getSelfLink()));
+            } else if (permission == Permission.DELETE) {
+                operations.add(new Operation("deleteSnippet", HttpMethod.DELETE.name(), getSelfLink()));
+            }
+        }
+
+        return operations.isEmpty() ? null : new ResourceMetaInfo(operations);
     }
 }

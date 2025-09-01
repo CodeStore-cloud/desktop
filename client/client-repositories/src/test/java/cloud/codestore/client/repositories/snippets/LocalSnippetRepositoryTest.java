@@ -127,11 +127,11 @@ class LocalSnippetRepositoryTest {
     @DisplayName("reads the permissions of a single code snippet")
     void snippetPermissions() {
         var resource = testSnippet(1, "title", "", "Hello, World!");
-        var document = new SingleResourceDocument<>(resource);
-        document.setMeta(new ResourceMetaInfo(
+        resource.setMeta(new ResourceMetaInfo(
                 new Operation("deleteSnippet"),
                 new Operation("updateSnippet")
         ));
+        var document = new SingleResourceDocument<>(resource);
         when(client.get(SNIPPET_URI, SnippetResource.class)).thenReturn(document);
 
         Snippet snippet = repository.readSnippet(SNIPPET_URI);

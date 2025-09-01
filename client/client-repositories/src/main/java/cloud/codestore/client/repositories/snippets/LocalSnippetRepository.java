@@ -19,7 +19,6 @@ import cloud.codestore.client.usecases.updatesnippet.UpdateSnippetUseCase;
 import cloud.codestore.client.usecases.updatesnippet.UpdatedSnippetDto;
 import cloud.codestore.jsonapi.document.SingleResourceDocument;
 import cloud.codestore.jsonapi.link.Link;
-import cloud.codestore.jsonapi.meta.MetaInformation;
 import cloud.codestore.jsonapi.relationship.ToManyRelationship;
 import cloud.codestore.jsonapi.relationship.ToOneRelationship;
 import cloud.codestore.jsonapi.resource.ResourceIdentifierObject;
@@ -99,7 +98,7 @@ class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase,
     @Override
     public Snippet readSnippet(String snippetUri) {
         SingleResourceDocument<SnippetResource> document = client.get(snippetUri, SnippetResource.class);
-        return convertToSnippet(document.getData(), document.getMeta());
+        return convertToSnippet(document.getData());
     }
 
     @Override
@@ -121,7 +120,7 @@ class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase,
         );
 
         var document = client.post(client.getSnippetCollectionUrl(), resource);
-        return convertToSnippet(document.getData(), document.getMeta());
+        return convertToSnippet(document.getData());
     }
 
     @Override
@@ -139,7 +138,7 @@ class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase,
         );
 
         var document = client.patch(snippetDto.uri(), resource);
-        return convertToSnippet(document.getData(), document.getMeta());
+        return convertToSnippet(document.getData());
     }
 
     @Nonnull
@@ -152,10 +151,10 @@ class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase,
                    .toList();
     }
 
-    private Snippet convertToSnippet(SnippetResource snippetResource, MetaInformation meta) {
+    private Snippet convertToSnippet(SnippetResource snippetResource) {
         String tagsUri = snippetResource.getTags().getRelatedResourceLink();
         String languageUri = snippetResource.getLanguage().getRelatedResourceLink();
-        Set<Permission> permissions = getPermissions((ResourceMetaInfo) meta);
+        Set<Permission> permissions = getPermissions((ResourceMetaInfo) snippetResource.getMeta());
         return Snippet.builder()
                       .id(snippetResource.getId())
                       .uri(snippetResource.getSelfLink())

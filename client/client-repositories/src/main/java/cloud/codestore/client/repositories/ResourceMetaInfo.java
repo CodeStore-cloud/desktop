@@ -26,7 +26,7 @@ public class ResourceMetaInfo implements MetaInformation {
     public static class ResourceMetaInfoDeserializer implements MetaDeserializer {
         @Override
         public Class<? extends MetaInformation> getClass(String jsonPointer) {
-            return "/meta".equals(jsonPointer) ? ResourceMetaInfo.class : null;
+            return "/meta".equals(jsonPointer) || "/data/meta".equals(jsonPointer) ? ResourceMetaInfo.class : null;
         }
     }
 }

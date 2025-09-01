@@ -82,7 +82,11 @@ class CreateSnippetTest extends SnippetControllerTest {
                      .andExpect(jsonPath("$.data.attributes.code", is(testSnippet.getCode())))
                      .andExpect(jsonPath("$.data.attributes.created", is(testSnippet.getCreated().toString())))
                      .andExpect(jsonPath("$.data.relationships.language.links.related", is("http://localhost:8080/languages/18")))
-                     .andExpect(jsonPath("$.data.links.self", is("http://localhost:8080/snippets/" + testSnippet.getId())));
+                     .andExpect(jsonPath("$.data.links.self", is("http://localhost:8080/snippets/" + testSnippet.getId())))
+                     .andExpect(jsonPath("$.data.meta.operations").isArray())
+                     .andExpect(jsonPath("$.data.meta.operations.length()", is(2)))
+                     .andExpect(jsonPath("$.data.meta.operations[0].operation", is("updateSnippet")))
+                     .andExpect(jsonPath("$.data.meta.operations[1].operation", is("deleteSnippet")));
     }
 
     @Test

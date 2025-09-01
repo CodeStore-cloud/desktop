@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 @Component
-class SnippetDeserializationHelper {
+public class SnippetDeserializationHelper {
     private ReadLanguage readLanguageUseCase;
 
     @Autowired
