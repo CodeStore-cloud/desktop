@@ -53,7 +53,9 @@ public class SnippetList {
             SnippetPage page = readSnippetsUseCase.getPage(searchQuery, filterProperties, sortProperties);
             createSnippet.setVisible(page.permissions().contains(Permission.CREATE));
             showSnippets(page);
-            updateSelection();
+
+            int snippetIndex = updateSelection();
+            list.scrollTo(snippetIndex);
         } finally {
             handleSelectionChanges = true;
         }
@@ -124,8 +126,14 @@ public class SnippetList {
         }
     }
 
-    private void updateSelection() {
-        list.getSelectionModel().select(findSelectedSnippetIndex());
+    /**
+     * Sets the selected element in the list to the one defined by {@code selectedSnippetUri}.
+     * @return the index of the snippet in the list.
+     */
+    private int updateSelection() {
+        int index = findSelectedSnippetIndex();
+        list.getSelectionModel().select(index);
+        return index;
     }
 
     private int findSelectedSnippetIndex() {
