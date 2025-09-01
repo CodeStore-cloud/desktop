@@ -1,7 +1,5 @@
 package cloud.codestore.client.ui.history;
 
-import cloud.codestore.client.Snippet;
-import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.selection.list.RequestSnippetSelectionEvent;
 import cloud.codestore.client.ui.selection.list.SnippetSelectedEvent;
@@ -99,12 +97,6 @@ public class History implements SnippetForm {
     public void setEditing(boolean editing) {
         historyPane.setVisible(!editing);
     }
-
-    @Override
-    public void visit(@Nonnull Snippet snippet) {}
-
-    @Override
-    public void visit(@Nonnull SnippetBuilder builder) {}
 
     private boolean hasPreviousSnippets() {
         return !previousSnippets.isEmpty();

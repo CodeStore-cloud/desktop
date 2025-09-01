@@ -11,19 +11,22 @@ import javax.annotation.Nonnull;
 public interface SnippetForm {
     /**
      * Enables or disables editing of this form.
+     *
      * @param editing whether this form should be editable.
      */
     void setEditing(boolean editing);
 
     /**
      * Shows the content of the given code snippet in this form.
+     *
      * @param snippet a code snippet.
      */
-    void visit(@Nonnull Snippet snippet);
+    default void visit(@Nonnull Snippet snippet) {}
 
     /**
      * Fills the provided {@link SnippetBuilder} with the content of this form.
+     *
      * @param builder a snippet builder.
      */
-    void visit(@Nonnull SnippetBuilder builder);
+    default void visit(@Nonnull SnippetBuilder builder) {}
 }

@@ -83,11 +83,10 @@ public class SnippetController {
                 snippetFooterController
         };
 
-        // State instance is dynamic! Do not change to method reference!
-        snippetFooterController.onSave(() -> state.save());
-        snippetFooterController.onCancel(() -> state.cancel());
-        snippetFooterController.onEdit(() -> state.edit());
-        snippetFooterController.onDelete(() -> state.delete());
+        snippetFooterController.onSave(event -> state.save());
+        snippetFooterController.onCancel(event -> state.cancel());
+        snippetFooterController.onEdit(event -> state.edit());
+        snippetFooterController.onDelete(event -> state.delete());
 
         state = new DefaultState();
     }

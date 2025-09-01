@@ -2,9 +2,10 @@ package cloud.codestore.client.ui.snippet.footer;
 
 import cloud.codestore.client.Permission;
 import cloud.codestore.client.Snippet;
-import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.snippet.SnippetForm;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 
@@ -47,22 +48,19 @@ public class SnippetFooter implements SnippetForm {
         permissions = snippet.getPermissions();
     }
 
-    @Override
-    public void visit(@Nonnull SnippetBuilder builder) {}
-
-    public void onSave(Runnable callback) {
-        saveButton.setOnAction(event -> callback.run());
+    public void onSave(EventHandler<ActionEvent> handler) {
+        saveButton.setOnAction(handler);
     }
 
-    public void onCancel(Runnable callback) {
-        cancelButton.setOnAction(event -> callback.run());
+    public void onCancel(EventHandler<ActionEvent> handler) {
+        cancelButton.setOnAction(handler);
     }
 
-    public void onEdit(Runnable callback) {
-        editButton.setOnAction(event -> callback.run());
+    public void onEdit(EventHandler<ActionEvent> handler) {
+        editButton.setOnAction(handler);
     }
 
-    public void onDelete(Runnable callback) {
-        deleteButton.setOnAction(event -> callback.run());
+    public void onDelete(EventHandler<ActionEvent> handler) {
+        deleteButton.setOnAction(handler);
     }
 }
