@@ -7,29 +7,44 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 
-import java.util.Objects;
+import javax.annotation.Nonnull;
+import java.util.HashMap;
+import java.util.Map;
 
 @FxController
 public class FullTextSearch {
     @FXML
     private TextField inputField;
+    private final Map<KeyCode, Runnable> keyCodeHandlers = new HashMap<>();
 
     @FXML
     public void initialize() {
         inputField.setOnKeyPressed(event -> {
-            if (Objects.requireNonNull(event.getCode()) == KeyCode.ESCAPE) {
+            KeyCode keyCode = event.getCode();
+            if (keyCode == KeyCode.ESCAPE) {
                 clearInput();
-                //                case TAB -> showFilter();
-                //                case DOWN -> selectNext();
-                //                case UP -> selectPrevious();
+            } else if (keyCodeHandlers.containsKey(keyCode)) {
+                keyCodeHandlers.get(keyCode).run();
             }
         });
     }
 
+    /**
+     * @return a {@link StringProperty} to read the content of the input field.
+     */
     public StringProperty inputProperty() {
         var inputProperty = new SimpleStringProperty();
         inputProperty.bind(inputField.textProperty());
         return inputProperty;
+    }
+
+    /**
+     * Registers a function to be called whenever the specified key is pressed.
+     * @param keyCode the key-code of a key.
+     * @param runnable the function to be called.
+     */
+    public void registerKeyHandler(@Nonnull KeyCode keyCode, @Nonnull Runnable runnable) {
+        keyCodeHandlers.put(keyCode, runnable);
     }
 
     @FXML

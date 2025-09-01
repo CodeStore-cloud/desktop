@@ -19,6 +19,7 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Button;
+import javafx.scene.input.KeyCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -30,14 +31,15 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import static cloud.codestore.client.usecases.listsnippets.SortProperties.SnippetProperty.RELEVANCE;
 import static cloud.codestore.client.usecases.listsnippets.SortProperties.SnippetProperty.TITLE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("The selection controller")
@@ -64,12 +66,19 @@ class SelectionControllerTest {
     private StringProperty searchInputProperty = new SimpleStringProperty();
     private ObjectProperty<SortProperties> sortProperties = new SimpleObjectProperty<>();
     private ObjectProperty<FilterProperties> filterProperties = new SimpleObjectProperty<>();
+    private final Map<KeyCode, Runnable> keyCodeHandlers = new HashMap<>();
 
     @BeforeEach
     void setUp() throws Exception {
         when(searchController.inputProperty()).thenReturn(searchInputProperty);
         when(filterController.filterProperties()).thenReturn(filterProperties);
         when(sortController.sortProperties()).thenReturn(sortProperties);
+
+        doAnswer(invocation -> {
+            keyCodeHandlers.put(invocation.getArgument(0), invocation.getArgument(1));
+            return null;
+        }).when(searchController).registerKeyHandler(any(KeyCode.class), any(Runnable.class));
+
         callInitialize();
     }
 
@@ -104,6 +113,20 @@ class SelectionControllerTest {
 
         filterProperties.set(new FilterProperties());
         assertThat(styleClass).isEmpty();
+    }
+
+    @Test
+    @DisplayName("selects the next code snippet when 'DOWN' is pressed")
+    void selectNextSnippet() {
+        keyCodeHandlers.get(KeyCode.DOWN).run();
+        verify(snippetListController).selectNextSnippet();
+    }
+
+    @Test
+    @DisplayName("selects the next code snippet when 'UP' is pressed")
+    void selectPreviousSnippet() {
+        keyCodeHandlers.get(KeyCode.UP).run();
+        verify(snippetListController).selectPreviousSnippet();
     }
 
     @Nested

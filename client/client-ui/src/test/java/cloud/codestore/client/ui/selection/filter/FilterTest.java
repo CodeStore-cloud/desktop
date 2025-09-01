@@ -62,10 +62,13 @@ class FilterTest extends AbstractUiTest {
     void toggle() {
         Pane pane = filterPane();
         assertThat(pane).isVisible();
-        controller.toggle();
+
+        interact(controller::toggle);
         assertThat(pane).isInvisible();
-        controller.toggle();
+
+        interact(controller::toggle);
         assertThat(pane).isVisible();
+        assertThat(tagsInput()).isFocused();
     }
 
     @Test

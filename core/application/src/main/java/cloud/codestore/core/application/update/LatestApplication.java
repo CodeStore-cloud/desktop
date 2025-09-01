@@ -52,9 +52,12 @@ class LatestApplication {
                                 return 0;
                             })
                             .thenApply(latestVersion -> {
-                                boolean updateAvailable = latestVersion > currentVersionAsInt;
-                                LOGGER.info(updateAvailable ? "Update available" : "Application up to date");
-                                return updateAvailable;
+                                if (latestVersion > 0) {
+                                    boolean updateAvailable = latestVersion > currentVersionAsInt;
+                                    LOGGER.info(updateAvailable ? "Update available" : "Application up to date");
+                                    return updateAvailable;
+                                }
+                                return false;
                             });
     }
 

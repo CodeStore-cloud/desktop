@@ -59,6 +59,20 @@ public class SnippetList {
         }
     }
 
+    public void selectNextSnippet() {
+        int nextSnippetIndex = findSelectedSnippetIndex() + 1;
+        if (nextSnippetIndex < list.getItems().size()) {
+            list.getSelectionModel().select(nextSnippetIndex);
+        }
+    }
+
+    public void selectPreviousSnippet() {
+        int previousSnippetIndex = findSelectedSnippetIndex() - 1;
+        if (previousSnippetIndex >= 0) {
+            list.getSelectionModel().select(previousSnippetIndex);
+        }
+    }
+
     private void handleNextPageVisibility() {
         nextPage.managedProperty().bind(nextPage.visibleProperty());
         nextPage.visibleProperty().bind(nextPageUrl.isNotEmpty());

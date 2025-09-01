@@ -146,6 +146,34 @@ class SnippetListTest extends AbstractUiTest {
         assertThat(createSnippetButton()).isVisible();
     }
 
+    @Test
+    @DisplayName("selects the next snippet")
+    void selectNextSnippet() {
+        initSelection(uri(1));
+        controller.selectNextSnippet();
+        verify(eventBus).post(new RequestSnippetSelectionEvent(uri(2)));
+
+        clearInvocations(eventBus);
+        initSelection(uri(10));
+
+        controller.selectNextSnippet();
+        verify(eventBus, never()).post(new RequestSnippetSelectionEvent(anyString()));
+    }
+
+    @Test
+    @DisplayName("selects the previous snippet")
+    void selectPreviousSnippet() {
+        initSelection(uri(5));
+        controller.selectPreviousSnippet();
+        verify(eventBus).post(new RequestSnippetSelectionEvent(uri(4)));
+
+        clearInvocations(eventBus);
+        initSelection(uri(1));
+
+        controller.selectPreviousSnippet();
+        verify(eventBus, never()).post(new RequestSnippetSelectionEvent(anyString()));
+    }
+
     private void initSelection(String uri) {
         eventBus.post(new SnippetSelectedEvent(uri));
         assertSelected(uri);

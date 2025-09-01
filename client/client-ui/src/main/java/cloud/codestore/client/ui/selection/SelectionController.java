@@ -18,6 +18,7 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.input.KeyCode;
 
 import javax.annotation.Nonnull;
 
@@ -62,6 +63,13 @@ public class SelectionController {
 
         sortProperties = sortController.sortProperties();
         sortProperties.addListener(((observable, oldValue, newValue) -> onSort()));
+
+        registerControlKeyHandlers();
+    }
+
+    private void registerControlKeyHandlers() {
+        searchController.registerKeyHandler(KeyCode.DOWN, snippetListController::selectNextSnippet);
+        searchController.registerKeyHandler(KeyCode.UP, snippetListController::selectPreviousSnippet);
     }
 
     @FXML

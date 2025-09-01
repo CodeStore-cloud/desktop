@@ -49,6 +49,9 @@ public class Filter {
 
     public void toggle() {
         filterPanel.setVisible(!filterPanel.isVisible());
+        if (filterPanel.isVisible()) {
+            tagsInput.requestFocus();
+        }
     }
 
     public ObjectProperty<FilterProperties> filterProperties() {
