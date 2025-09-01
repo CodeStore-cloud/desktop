@@ -20,8 +20,8 @@ public class SnippetDescription implements SnippetForm {
     }
 
     @Override
-    public void setEditing(boolean editable) {
-        snippetDescription.setEditable(editable);
+    public void setEditing(boolean editing) {
+        snippetDescription.setEditable(editing);
     }
 
     @Override

@@ -15,8 +15,8 @@ public class SnippetTitle implements SnippetForm {
     private TextField snippetTitle;
 
     @Override
-    public void setEditing(boolean editable) {
-        snippetTitle.setEditable(editable);
+    public void setEditing(boolean editing) {
+        snippetTitle.setEditable(editing);
     }
 
     @Override

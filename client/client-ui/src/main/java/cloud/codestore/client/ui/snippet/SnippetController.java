@@ -60,7 +60,7 @@ public class SnippetController {
     SnippetController(
             @Nonnull ReadSnippetUseCase readSnippetUseCase,
             @Nonnull CreateSnippetUseCase createSnippetUseCase,
-            UpdateSnippetUseCase updateSnippetUseCase,
+            @Nonnull UpdateSnippetUseCase updateSnippetUseCase,
             @Nonnull DeleteSnippetUseCase deleteSnippetUseCase,
             @Nonnull EventBus eventBus
     ) {
@@ -75,6 +75,7 @@ public class SnippetController {
     @FXML
     private void initialize() {
         forms = new SnippetForm[]{
+                historyController,
                 snippetTitleController,
                 snippetDescriptionController,
                 snippetCodeController,
@@ -82,6 +83,7 @@ public class SnippetController {
                 snippetFooterController
         };
 
+        // State instance is dynamic! Do not change to method reference!
         snippetFooterController.onSave(() -> state.save());
         snippetFooterController.onCancel(() -> state.cancel());
         snippetFooterController.onEdit(() -> state.edit());
@@ -124,10 +126,9 @@ public class SnippetController {
                 .show();
     }
 
-    private void setEditing(boolean editable) {
-        historyController.setVisible(!editable);
+    private void setEditing(boolean editing) {
         for (SnippetForm form : forms) {
-            form.setEditing(editable);
+            form.setEditing(editing);
         }
     }
 

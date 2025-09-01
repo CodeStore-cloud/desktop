@@ -67,9 +67,9 @@ public class SnippetDetails implements SnippetForm {
     }
 
     @Override
-    public void setEditing(boolean editable) {
-        tagsInput.setVisible(editable);
-        quickFilterTags.setVisible(!editable);
+    public void setEditing(boolean editing) {
+        tagsInput.setVisible(editing);
+        quickFilterTags.setVisible(!editing);
     }
 
     @Override

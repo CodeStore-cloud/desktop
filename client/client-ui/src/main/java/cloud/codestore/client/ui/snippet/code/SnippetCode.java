@@ -80,10 +80,10 @@ public class SnippetCode implements SnippetForm {
     }
 
     @Override
-    public void setEditing(boolean editable) {
-        languageSelection.setVisible(editable);
-        languageQuickfilter.setVisible(!editable);
-        editor.setEditing(editable);
+    public void setEditing(boolean editing) {
+        languageSelection.setVisible(editing);
+        languageQuickfilter.setVisible(!editing);
+        editor.setEditing(editing);
     }
 
     @Override

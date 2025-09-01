@@ -11,9 +11,9 @@ import javax.annotation.Nonnull;
 public interface SnippetForm {
     /**
      * Enables or disables editing of this form.
-     * @param editable whether this form should be editable.
+     * @param editing whether this form should be editable.
      */
-    void setEditing(boolean editable);
+    void setEditing(boolean editing);
 
     /**
      * Shows the content of the given code snippet in this form.

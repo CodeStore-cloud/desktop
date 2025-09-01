@@ -1,9 +1,12 @@
 package cloud.codestore.client.ui.history;
 
+import cloud.codestore.client.Snippet;
+import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.selection.list.RequestSnippetSelectionEvent;
 import cloud.codestore.client.ui.selection.list.SnippetSelectedEvent;
 import cloud.codestore.client.ui.snippet.SnippetDeletedEvent;
+import cloud.codestore.client.ui.snippet.SnippetForm;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import javafx.fxml.FXML;
@@ -14,7 +17,7 @@ import javax.annotation.Nonnull;
 import java.util.Stack;
 
 @FxController
-public class History {
+public class History implements SnippetForm {
     /** Used to avoid handling SnippetSelectedEvents triggered by this class itself. */
     private boolean handleSelection = true;
     private String currentSnippet;
@@ -92,9 +95,16 @@ public class History {
         }
     }
 
-    public void setVisible(boolean visible) {
-        historyPane.setVisible(visible);
+    @Override
+    public void setEditing(boolean editing) {
+        historyPane.setVisible(!editing);
     }
+
+    @Override
+    public void visit(@Nonnull Snippet snippet) {}
+
+    @Override
+    public void visit(@Nonnull SnippetBuilder builder) {}
 
     private boolean hasPreviousSnippets() {
         return !previousSnippets.isEmpty();
