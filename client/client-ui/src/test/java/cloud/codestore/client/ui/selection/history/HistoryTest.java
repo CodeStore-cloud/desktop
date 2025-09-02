@@ -1,4 +1,4 @@
-package cloud.codestore.client.ui.history;
+package cloud.codestore.client.ui.selection.history;
 
 import cloud.codestore.client.ui.AbstractUiTest;
 import cloud.codestore.client.ui.selection.list.RequestSnippetSelectionEvent;

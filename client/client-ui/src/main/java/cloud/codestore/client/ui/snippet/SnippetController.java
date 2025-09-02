@@ -3,7 +3,7 @@ package cloud.codestore.client.ui.snippet;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.FxController;
-import cloud.codestore.client.ui.history.History;
+import cloud.codestore.client.ui.selection.history.History;
 import cloud.codestore.client.ui.selection.list.CreateSnippetEvent;
 import cloud.codestore.client.ui.selection.list.RequestSnippetSelectionEvent;
 import cloud.codestore.client.ui.selection.list.SnippetSelectedEvent;

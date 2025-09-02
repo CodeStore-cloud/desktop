@@ -1,4 +1,4 @@
-package cloud.codestore.client.ui.history;
+package cloud.codestore.client.ui.selection.history;
 
 import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.selection.list.RequestSnippetSelectionEvent;
@@ -14,6 +14,10 @@ import javafx.scene.layout.Pane;
 import javax.annotation.Nonnull;
 import java.util.Stack;
 
+/**
+ * The history component to navigate between the recently selected code snippets.
+ * The history is logically part of the selection but the UI component is located in the snippet editor.
+ */
 @FxController
 public class History implements SnippetForm {
     /** Used to avoid handling SnippetSelectedEvents triggered by this class itself. */

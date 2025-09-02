@@ -4,7 +4,7 @@ import cloud.codestore.client.Language;
 import cloud.codestore.client.Permission;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
-import cloud.codestore.client.ui.history.History;
+import cloud.codestore.client.ui.selection.history.History;
 import cloud.codestore.client.ui.selection.list.CreateSnippetEvent;
 import cloud.codestore.client.ui.selection.list.RequestSnippetSelectionEvent;
 import cloud.codestore.client.ui.selection.list.SnippetSelectedEvent;
@@ -20,6 +20,8 @@ import cloud.codestore.client.usecases.readsnippet.ReadSnippetUseCase;
 import cloud.codestore.client.usecases.updatesnippet.UpdateSnippetUseCase;
 import cloud.codestore.client.usecases.updatesnippet.UpdatedSnippetDto;
 import com.google.common.eventbus.EventBus;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.layout.Pane;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -63,7 +65,7 @@ class SnippetControllerTest extends ApplicationTest {
     @Mock
     private SnippetDetails snippetDetailsController;
     @Spy
-    private TestFooter snippetFooterController = new TestFooter();
+    private DummyFooter snippetFooterController = new DummyFooter();
 
     @Mock
     private Pane snippetPane;
@@ -324,7 +326,7 @@ class SnippetControllerTest extends ApplicationTest {
         verify(snippetCodeController).setEditing(editable);
         verify(snippetDetailsController).setEditing(editable);
         verify(snippetFooterController).setEditing(editable);
-        verify(history).setVisible(!editable);
+        verify(history).setEditing(editable);
     }
 
     private void verifyShowSnippetPane() {
@@ -415,46 +417,46 @@ class SnippetControllerTest extends ApplicationTest {
         eventBus.post(new RequestSnippetSelectionEvent(uri));
     }
 
-    private static class TestFooter extends SnippetFooter {
-        private Runnable onSave;
-        private Runnable onCancel;
-        private Runnable onEdit;
-        private Runnable onDelete;
+    private static class DummyFooter extends SnippetFooter {
+        private EventHandler<ActionEvent> onSave;
+        private EventHandler<ActionEvent> onCancel;
+        private EventHandler<ActionEvent> onEdit;
+        private EventHandler<ActionEvent> onDelete;
 
         @Override
-        public void onSave(Runnable callback) {
+        public void onSave(EventHandler<ActionEvent> callback) {
             onSave = callback;
         }
 
         @Override
-        public void onCancel(Runnable callback) {
+        public void onCancel(EventHandler<ActionEvent> callback) {
             onCancel = callback;
         }
 
         @Override
-        public void onEdit(Runnable callback) {
+        public void onEdit(EventHandler<ActionEvent> callback) {
             onEdit = callback;
         }
 
         @Override
-        public void onDelete(Runnable callback) {
+        public void onDelete(EventHandler<ActionEvent> callback) {
             onDelete = callback;
         }
 
         void clickSaveButton() {
-            onSave.run();
+            onSave.handle(null);
         }
 
         void clickCancelButton() {
-            onCancel.run();
+            onCancel.handle(null);
         }
 
         void clickEditButton() {
-            onEdit.run();
+            onEdit.handle(null);
         }
 
         void clickDeleteButton() {
-            onDelete.run();
+            onDelete.handle(null);
         }
 
         @Override

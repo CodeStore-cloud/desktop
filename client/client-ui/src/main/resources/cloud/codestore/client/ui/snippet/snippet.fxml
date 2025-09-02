@@ -25,7 +25,8 @@
 
         <HBox GridPane.rowIndex="0">
             <fx:include source="./title/title.fxml" fx:id="snippetTitle" HBox.hgrow="ALWAYS"/>
-            <fx:include source="../history/history.fxml" fx:id="history" HBox.hgrow="NEVER"/>
+            <!-- The history is logically part of the selection but the UI component is located in the snippet editor. -->
+            <fx:include source="../selection/history/history.fxml" fx:id="history" HBox.hgrow="NEVER"/>
         </HBox>
         <Separator GridPane.rowIndex="1"/>
         <fx:include source="./description/description.fxml" fx:id="snippetDescription" GridPane.rowIndex="2"/>
