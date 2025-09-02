@@ -2,6 +2,7 @@ package cloud.codestore.client.ui.selection;
 
 import cloud.codestore.client.ui.ApplicationReadyEvent;
 import cloud.codestore.client.ui.selection.filter.Filter;
+import cloud.codestore.client.ui.selection.history.History;
 import cloud.codestore.client.ui.selection.list.SnippetList;
 import cloud.codestore.client.ui.selection.search.FullTextSearch;
 import cloud.codestore.client.ui.selection.sort.Sort;
@@ -58,10 +59,12 @@ class SelectionControllerTest {
     @Mock
     private Sort sortController;
     @Mock
+    private History historyController;
+    @Mock
     private SnippetList snippetListController;
     private EventBus eventBus = new EventBus();
     @InjectMocks
-    private SelectionController selectionController = new SelectionController(eventBus);
+    private SelectionController selectionController = new SelectionController(eventBus, historyController);
 
     private StringProperty searchInputProperty = new SimpleStringProperty();
     private ObjectProperty<SortProperties> sortProperties = new SimpleObjectProperty<>();

@@ -5,8 +5,6 @@ import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.selection.history.History;
 import cloud.codestore.client.ui.selection.list.CreateSnippetEvent;
-import cloud.codestore.client.ui.selection.list.RequestSnippetSelectionEvent;
-import cloud.codestore.client.ui.selection.list.SnippetSelectedEvent;
 import cloud.codestore.client.ui.snippet.code.SnippetCode;
 import cloud.codestore.client.ui.snippet.description.SnippetDescription;
 import cloud.codestore.client.ui.snippet.details.SnippetDetails;
@@ -20,6 +18,7 @@ import cloud.codestore.client.usecases.updatesnippet.UpdateSnippetUseCase;
 import cloud.codestore.client.usecases.updatesnippet.UpdatedSnippetDto;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.layout.Pane;
 
@@ -34,6 +33,7 @@ public class SnippetController {
     private final UpdateSnippetUseCase updateSnippetUseCase;
     private final DeleteSnippetUseCase deleteSnippetUseCase;
     private final EventBus eventBus;
+    private final AsyncStringProperty selectedSnippetProperty = new AsyncStringProperty();
 
     private Snippet currentSnippet;
     private ControllerState state;
@@ -89,21 +89,31 @@ public class SnippetController {
         snippetFooterController.onDelete(event -> state.delete());
 
         state = new DefaultState();
+        registerSelectionHandler();
     }
 
-    @Subscribe
-    private void requestSnippetSelection(@Nonnull RequestSnippetSelectionEvent event) {
-        Runnable selectSnippet = () -> {
-            Snippet snippet = readSnippetUseCase.readSnippet(event.snippetUri());
-            state = new ShowSnippetState(snippet);
-            eventBus.post(new SnippetSelectedEvent(snippet.getUri()));
-        };
+    /**
+     * @return a Property-Object that contains the URI of the currently selected code snippet.
+     */
+    @Nonnull
+    public StringProperty selectedSnippetProperty() {
+        return selectedSnippetProperty;
+    }
 
-        if (state.isEditing()) {
-            requestSaving(selectSnippet);
-        } else {
-            selectSnippet.run();
-        }
+    private void registerSelectionHandler() {
+        selectedSnippetProperty.onChangeRequested(snippetUri -> {
+            Runnable selectSnippet = () -> {
+                Snippet snippet = readSnippetUseCase.readSnippet(snippetUri);
+                state = new ShowSnippetState(snippet);
+                selectedSnippetProperty.setFinally(snippet.getUri());
+            };
+
+            if (state.isEditing()) {
+                requestSaving(selectSnippet);
+            } else {
+                selectSnippet.run();
+            }
+        });
     }
 
     @Subscribe
@@ -133,6 +143,7 @@ public class SnippetController {
 
     private void accept(Snippet snippet) {
         currentSnippet = snippet;
+        selectedSnippetProperty.setFinally(snippet.getUri());
         for (SnippetForm form : forms) {
             form.visit(snippet);
         }

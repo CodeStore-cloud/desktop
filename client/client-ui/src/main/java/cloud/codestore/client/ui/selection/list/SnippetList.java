@@ -4,7 +4,6 @@ import cloud.codestore.client.Permission;
 import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.usecases.listsnippets.*;
 import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -23,7 +22,7 @@ public class SnippetList {
     private final ReadSnippetsUseCase readSnippetsUseCase;
     private final EventBus eventBus;
     private final StringProperty nextPageUrl = new SimpleStringProperty();
-    private String selectedSnippetUri = "";
+    private StringProperty selectedSnippet = new SimpleStringProperty("");
     private boolean handleSelectionChanges = true;
 
     @FXML
@@ -44,6 +43,11 @@ public class SnippetList {
         createSnippet.managedProperty().bind(createSnippet.visibleProperty());
         handleNextPageVisibility();
         handleSnippetSelection();
+    }
+
+    public void setSelectedSnippetProperty(@Nonnull StringProperty selectedSnippet) {
+        this.selectedSnippet = selectedSnippet;
+        selectedSnippet.addListener((observable, oldValue, newValue) -> updateSelection());
     }
 
     public void update(String searchQuery, FilterProperties filterProperties, SortProperties sortProperties) {
@@ -111,18 +115,15 @@ public class SnippetList {
 
     private void selectionChanged(SnippetListItem newSelection) {
         if (newSelection == null) {
-            selectedSnippetUri = "";
-        } else if (!Objects.equals(selectedSnippetUri, newSelection.uri())) {
-            updateSelection();
-            eventBus.post(new RequestSnippetSelectionEvent(newSelection.uri()));
-        }
-    }
-
-    @Subscribe
-    private void snippetSelected(@Nonnull SnippetSelectedEvent event) {
-        if (!Objects.equals(selectedSnippetUri, event.snippetUri())) {
-            selectedSnippetUri = event.snippetUri();
-            updateSelection();
+            selectedSnippet.set("");
+        } else if (!Objects.equals(selectedSnippet.get(), newSelection.uri())) {
+            try {
+                handleSelectionChanges = false;
+                updateSelection();
+                selectedSnippet.set(newSelection.uri());
+            } finally {
+                handleSelectionChanges = true;
+            }
         }
     }
 
@@ -137,6 +138,7 @@ public class SnippetList {
     }
 
     private int findSelectedSnippetIndex() {
+        String selectedSnippetUri =  selectedSnippet.get();
         if (!selectedSnippetUri.isEmpty()) {
             ObservableList<SnippetListItem> listItems = list.getItems();
             for (int i = 0; i < listItems.size(); i++) {

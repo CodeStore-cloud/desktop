@@ -1,12 +1,11 @@
 package cloud.codestore.client.ui.selection.history;
 
 import cloud.codestore.client.ui.FxController;
-import cloud.codestore.client.ui.selection.list.RequestSnippetSelectionEvent;
-import cloud.codestore.client.ui.selection.list.SnippetSelectedEvent;
 import cloud.codestore.client.ui.snippet.SnippetDeletedEvent;
 import cloud.codestore.client.ui.snippet.SnippetForm;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
@@ -20,12 +19,13 @@ import java.util.Stack;
  */
 @FxController
 public class History implements SnippetForm {
-    /** Used to avoid handling SnippetSelectedEvents triggered by this class itself. */
+    /**
+     * Used to avoid handling snippet selection caused by this class itself.
+     */
     private boolean handleSelection = true;
-    private String currentSnippet;
     private Stack<String> previousSnippets = new Stack<>();
     private Stack<String> nextSnippets = new Stack<>();
-    private EventBus eventBus;
+    private StringProperty selectedSnippetProperty;
 
     @FXML
     private Pane historyPane;
@@ -35,7 +35,6 @@ public class History implements SnippetForm {
     private Button nextSnippetButton;
 
     History(EventBus eventBus) {
-        this.eventBus = eventBus;
         eventBus.register(this);
     }
 
@@ -44,57 +43,68 @@ public class History implements SnippetForm {
         updateButtonStates();
     }
 
-    @Subscribe
-    private void addSnippet(@Nonnull SnippetSelectedEvent event) {
-        if (handleSelection) {
-            if (currentSnippet != null) {
-                previousSnippets.push(currentSnippet);
-            }
+    public void setSelectedSnippetProperty(@Nonnull StringProperty selectedSnippetProperty) {
+        this.selectedSnippetProperty = selectedSnippetProperty;
+        selectedSnippetProperty.addListener((observable, previousSnippetUri, currentSnippetUri) -> {
+            if (handleSelection) {
+                if (previousSnippetUri != null && !previousSnippetUri.isEmpty()) {
+                    previousSnippets.push(previousSnippetUri);
+                }
 
-            currentSnippet = event.snippetUri();
-            nextSnippets.clear();
-            updateButtonStates();
-        }
-        handleSelection = true;
+                nextSnippets.clear();
+                updateButtonStates();
+            }
+            handleSelection = true;
+        });
     }
 
     @Subscribe
     private void removeSnippet(@Nonnull SnippetDeletedEvent event) {
-        currentSnippet = null;
-
         if (hasPreviousSnippets()) {
-            selectPreviousSnippet();
+            selectPreviousSnippetWithoutAddingCurrentSnippetToHistory();
         } else if (hasNextSnippets()) {
-            selectNextSnippet();
+            selectNextSnippetWithoutAddingCurrentSnippetToHistory();
+        } else {
+            selectedSnippetProperty.set("");
         }
     }
 
     @FXML
-    void selectPreviousSnippet() {
+    private void selectPreviousSnippet() {
         if (hasPreviousSnippets()) {
-            if (currentSnippet != null) {
+            String currentSnippet = selectedSnippetProperty.get();
+            if (!currentSnippet.isEmpty()) {
                 nextSnippets.push(currentSnippet);
             }
 
-            currentSnippet = previousSnippets.pop();
-            updateButtonStates();
-            handleSelection = false;
-            eventBus.post(new RequestSnippetSelectionEvent(currentSnippet));
+            selectPreviousSnippetWithoutAddingCurrentSnippetToHistory();
         }
     }
 
+    private void selectPreviousSnippetWithoutAddingCurrentSnippetToHistory() {
+        String previousSnippet = previousSnippets.pop();
+        updateButtonStates();
+        handleSelection = false;
+        selectedSnippetProperty.set(previousSnippet);
+    }
+
     @FXML
-    void selectNextSnippet() {
+    private void selectNextSnippet() {
         if (hasNextSnippets()) {
-            if (currentSnippet != null) {
+            String currentSnippet = selectedSnippetProperty.get();
+            if (!currentSnippet.isEmpty()) {
                 previousSnippets.push(currentSnippet);
             }
 
-            currentSnippet = nextSnippets.pop();
-            updateButtonStates();
-            handleSelection = false;
-            eventBus.post(new RequestSnippetSelectionEvent(currentSnippet));
+            selectNextSnippetWithoutAddingCurrentSnippetToHistory();
         }
+    }
+
+    private void selectNextSnippetWithoutAddingCurrentSnippetToHistory() {
+        String nextSnippet = nextSnippets.pop();
+        updateButtonStates();
+        handleSelection = false;
+        selectedSnippetProperty.set(nextSnippet);
     }
 
     @Override

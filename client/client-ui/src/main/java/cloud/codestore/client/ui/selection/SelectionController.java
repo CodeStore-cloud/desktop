@@ -3,6 +3,7 @@ package cloud.codestore.client.ui.selection;
 import cloud.codestore.client.ui.ApplicationReadyEvent;
 import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.selection.filter.Filter;
+import cloud.codestore.client.ui.selection.history.History;
 import cloud.codestore.client.ui.selection.list.SnippetList;
 import cloud.codestore.client.ui.selection.search.FullTextSearch;
 import cloud.codestore.client.ui.selection.sort.Sort;
@@ -42,6 +43,7 @@ public class SelectionController {
     private Sort sortController;
     @FXML
     private SnippetList snippetListController;
+    private History historyController;
 
     private StringProperty searchInputProperty;
     private ObjectProperty<SortProperties> sortProperties;
@@ -49,8 +51,14 @@ public class SelectionController {
     private ObjectProperty<FilterProperties> filterProperties;
     private boolean updateSnippetListEnabled = true;
 
-    public SelectionController(@Nonnull EventBus eventBus) {
+    public SelectionController(@Nonnull EventBus eventBus, @Nonnull History historyController) {
         eventBus.register(this);
+        this.historyController = historyController;
+    }
+
+    public void setSelectedSnippetProperty(@Nonnull StringProperty selectedSnippetProperty) {
+        snippetListController.setSelectedSnippetProperty(selectedSnippetProperty);
+        historyController.setSelectedSnippetProperty(selectedSnippetProperty);
     }
 
     @FXML

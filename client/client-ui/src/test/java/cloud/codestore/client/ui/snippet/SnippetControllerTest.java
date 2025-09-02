@@ -6,8 +6,6 @@ import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.selection.history.History;
 import cloud.codestore.client.ui.selection.list.CreateSnippetEvent;
-import cloud.codestore.client.ui.selection.list.RequestSnippetSelectionEvent;
-import cloud.codestore.client.ui.selection.list.SnippetSelectedEvent;
 import cloud.codestore.client.ui.snippet.code.SnippetCode;
 import cloud.codestore.client.ui.snippet.description.SnippetDescription;
 import cloud.codestore.client.ui.snippet.details.SnippetDetails;
@@ -208,7 +206,7 @@ class SnippetControllerTest extends ApplicationTest {
                 clickOn("#yes");
 
                 verify(eventBus).post(new SnippetCreatedEvent(CREATED_SNIPPET_URI));
-                verify(eventBus).post(new SnippetSelectedEvent(SELECTED_SNIPPET_URI));
+                assertThat(snippetController.selectedSnippetProperty().get()).isEqualTo(SELECTED_SNIPPET_URI);
             }
 
             @Test
@@ -216,7 +214,7 @@ class SnippetControllerTest extends ApplicationTest {
             void rejectSaving() {
                 clickOn("#no");
                 verify(eventBus, never()).post(new SnippetCreatedEvent(CREATED_SNIPPET_URI));
-                verify(eventBus).post(new SnippetSelectedEvent(SELECTED_SNIPPET_URI));
+                assertThat(snippetController.selectedSnippetProperty().get()).isEqualTo(SELECTED_SNIPPET_URI);
             }
 
             @Test
@@ -224,7 +222,7 @@ class SnippetControllerTest extends ApplicationTest {
             void cancelSaving() {
                 clickOn("#cancel");
                 verify(eventBus, never()).post(new SnippetCreatedEvent(CREATED_SNIPPET_URI));
-                verify(eventBus, never()).post(new SnippetSelectedEvent(SELECTED_SNIPPET_URI));
+                assertThat(snippetController.selectedSnippetProperty().get()).isEmpty();
             }
         }
     }
@@ -298,7 +296,7 @@ class SnippetControllerTest extends ApplicationTest {
                 clickOn("#yes");
 
                 verify(eventBus).post(new SnippetUpdatedEvent(CURRENT_SNIPPET_URI));
-                verify(eventBus).post(new SnippetSelectedEvent(SELECTED_SNIPPET_URI));
+                assertThat(snippetController.selectedSnippetProperty().get()).isEqualTo(SELECTED_SNIPPET_URI);
             }
 
             @Test
@@ -307,7 +305,7 @@ class SnippetControllerTest extends ApplicationTest {
                 clickOn("#no");
 
                 verify(eventBus, never()).post(new SnippetUpdatedEvent(CURRENT_SNIPPET_URI));
-                verify(eventBus).post(new SnippetSelectedEvent(SELECTED_SNIPPET_URI));
+                assertThat(snippetController.selectedSnippetProperty().get()).isEqualTo(SELECTED_SNIPPET_URI);
             }
 
             @Test
@@ -315,7 +313,7 @@ class SnippetControllerTest extends ApplicationTest {
             void cancelSaving() {
                 clickOn("#cancel");
                 verify(eventBus, never()).post(new SnippetUpdatedEvent(SNIPPET_URI));
-                verify(eventBus, never()).post(new SnippetSelectedEvent(SNIPPET_URI));
+                assertThat(snippetController.selectedSnippetProperty().get()).isEqualTo(SNIPPET_URI);
             }
         }
     }
@@ -414,7 +412,7 @@ class SnippetControllerTest extends ApplicationTest {
     }
 
     private void requestSnippetSelection(String uri) {
-        eventBus.post(new RequestSnippetSelectionEvent(uri));
+        snippetController.selectedSnippetProperty().set(uri);
     }
 
     private static class DummyFooter extends SnippetFooter {

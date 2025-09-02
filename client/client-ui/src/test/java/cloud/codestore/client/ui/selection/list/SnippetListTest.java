@@ -6,6 +6,8 @@ import cloud.codestore.client.usecases.listsnippets.ReadSnippetsUseCase;
 import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
 import cloud.codestore.client.usecases.listsnippets.SnippetPage;
 import com.google.common.eventbus.EventBus;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
@@ -39,6 +41,7 @@ class SnippetListTest extends AbstractUiTest {
     @Spy
     private EventBus eventBus = new EventBus();
     private SnippetList controller;
+    private StringProperty selectedSnippet = new SimpleStringProperty("");
 
     @Start
     public void start(Stage stage) throws Exception {
@@ -46,6 +49,7 @@ class SnippetListTest extends AbstractUiTest {
         lenient().when(readSnippetsUseCase.getPage(any(), any(), any())).thenReturn(firstPage);
 
         controller = new SnippetList(readSnippetsUseCase, eventBus);
+        controller.setSelectedSnippetProperty(selectedSnippet);
         start(stage, "snippetList.fxml", controller);
         updateList();
     }
@@ -68,28 +72,34 @@ class SnippetListTest extends AbstractUiTest {
         }
 
         @Test
-        @DisplayName("sends RequestSnippetSelectionEvent but keeps the current selection")
+        @DisplayName("requests the selection of the snippet but keeps the current selection")
         void selectSnippet() {
+            final String[] requestedSnippetUri = new String[1];
+            controller.setSelectedSnippetProperty(new SimpleStringProperty(PREVIOUSLY_SELECTED_SNIPPET_URI) {
+                @Override
+                public void set(String newValue) {
+                    requestedSnippetUri[0] = newValue;
+                }
+            });
+
             interact(() -> listView().getSelectionModel().selectFirst());
-            verify(eventBus).post(new RequestSnippetSelectionEvent(SNIPPET_URI));
-            assertSelected(PREVIOUSLY_SELECTED_SNIPPET_URI);
+            assertThat(requestedSnippetUri[0]).isEqualTo(SNIPPET_URI);
+            assertSelectedInList(PREVIOUSLY_SELECTED_SNIPPET_URI);
         }
 
         @Test
         @DisplayName("ignores already selected snippets")
         void duplicateSelection() {
             initSelection(SNIPPET_URI);
-            clearInvocations(eventBus);
-
             interact(() -> listView().getSelectionModel().selectFirst());
-            verify(eventBus, never()).post(any(RequestSnippetSelectionEvent.class));
+            assertThat(selectedSnippet.get()).isEqualTo(SNIPPET_URI);
         }
 
         @Test
-        @DisplayName("applies the selection when confirmed via a SnippetSelectedEvent")
+        @DisplayName("applies the selection when the value of the Property-Object changes")
         void snippetSelectionConfirmed() {
-            eventBus.post(new SnippetSelectedEvent(SNIPPET_URI));
-            assertSelected(SNIPPET_URI);
+            selectedSnippet.set(SNIPPET_URI);
+            assertSelectedInList(SNIPPET_URI);
         }
     }
 
@@ -133,7 +143,7 @@ class SnippetListTest extends AbstractUiTest {
     void keepSelection() {
         initSelection(SNIPPET_URI);
         updateList();
-        assertSelected(SNIPPET_URI);
+        assertSelectedInList(SNIPPET_URI);
     }
 
     @Test
@@ -151,13 +161,12 @@ class SnippetListTest extends AbstractUiTest {
     void selectNextSnippet() {
         initSelection(uri(1));
         controller.selectNextSnippet();
-        verify(eventBus).post(new RequestSnippetSelectionEvent(uri(2)));
+        assertThat(selectedSnippet.get()).isEqualTo(uri(2));
 
-        clearInvocations(eventBus);
         initSelection(uri(10));
 
         controller.selectNextSnippet();
-        verify(eventBus, never()).post(new RequestSnippetSelectionEvent(anyString()));
+        assertThat(selectedSnippet.get()).isEqualTo(uri(10));
     }
 
     @Test
@@ -165,21 +174,20 @@ class SnippetListTest extends AbstractUiTest {
     void selectPreviousSnippet() {
         initSelection(uri(5));
         controller.selectPreviousSnippet();
-        verify(eventBus).post(new RequestSnippetSelectionEvent(uri(4)));
+        assertThat(selectedSnippet.get()).isEqualTo(uri(4));
 
-        clearInvocations(eventBus);
         initSelection(uri(1));
 
         controller.selectPreviousSnippet();
-        verify(eventBus, never()).post(new RequestSnippetSelectionEvent(anyString()));
+        assertThat(selectedSnippet.get()).isEqualTo(uri(1));
     }
 
     private void initSelection(String uri) {
-        eventBus.post(new SnippetSelectedEvent(uri));
-        assertSelected(uri);
+        selectedSnippet.set(uri);
+        assertSelectedInList(uri);
     }
 
-    private void assertSelected(String uri) {
+    private void assertSelectedInList(String uri) {
         SnippetListItem selectedItem = listView().getSelectionModel().getSelectedItem();
         assertThat(selectedItem).isNotNull();
         assertThat(selectedItem.uri()).isEqualTo(uri);

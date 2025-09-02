@@ -1,10 +1,10 @@
 package cloud.codestore.client.ui.selection.history;
 
 import cloud.codestore.client.ui.AbstractUiTest;
-import cloud.codestore.client.ui.selection.list.RequestSnippetSelectionEvent;
-import cloud.codestore.client.ui.selection.list.SnippetSelectedEvent;
 import cloud.codestore.client.ui.snippet.SnippetDeletedEvent;
 import com.google.common.eventbus.EventBus;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,23 +12,21 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.testfx.framework.junit5.Start;
 
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
 import static org.testfx.assertions.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("The history")
 class HistoryTest extends AbstractUiTest {
-    @Spy
+    private StringProperty selectedSnippet = new SimpleStringProperty("");
     private EventBus eventBus = new EventBus();
 
     @Start
     public void start(Stage stage) throws Exception {
         History controller = new History(eventBus);
+        controller.setSelectedSnippetProperty(selectedSnippet);
         start(stage, "history.fxml", controller);
     }
 
@@ -48,7 +46,7 @@ class HistoryTest extends AbstractUiTest {
     class HistoryContainingOneSnippet {
         @BeforeEach
         void setUp() {
-            eventBus.post(new SnippetSelectedEvent("1"));
+            selectedSnippet.set("1");
         }
 
         @Test
@@ -64,8 +62,8 @@ class HistoryTest extends AbstractUiTest {
     class HistoryContainingMultipleSnippets {
         @BeforeEach
         void setUp() {
-            eventBus.post(new SnippetSelectedEvent("1"));
-            eventBus.post(new SnippetSelectedEvent("2"));
+            selectedSnippet.set("1");
+            selectedSnippet.set("2");
         }
 
         @Test
@@ -80,14 +78,13 @@ class HistoryTest extends AbstractUiTest {
         class HistoryBack {
             @BeforeEach
             void setUp() {
-                reset(eventBus);
                 clickOn(prevSnippetButton());
             }
 
             @Test
             @DisplayName("selects the previous snippet")
             void selectPreviousSnippet() {
-                verify(eventBus).post(new RequestSnippetSelectionEvent("1"));
+                assertThat(selectedSnippet.get()).isEqualTo("1");
             }
 
             @Test
@@ -109,14 +106,13 @@ class HistoryTest extends AbstractUiTest {
             @BeforeEach
             void setUp() {
                 clickOn(prevSnippetButton());
-                reset(eventBus);
                 clickOn(nextSnippetButton());
             }
 
             @Test
             @DisplayName("selects the next code snippet")
             void selectSnippet() {
-                verify(eventBus).post(new RequestSnippetSelectionEvent("2"));
+                assertThat(selectedSnippet.get()).isEqualTo("2");
             }
 
             @Test
@@ -138,9 +134,9 @@ class HistoryTest extends AbstractUiTest {
     class DeleteSnippet {
         @BeforeEach
         void setUp() {
-            eventBus.post(new SnippetSelectedEvent("1"));
-            eventBus.post(new SnippetSelectedEvent("2")); // current snippet
-            eventBus.post(new SnippetSelectedEvent("3"));
+            selectedSnippet.set("1");
+            selectedSnippet.set("2"); // current snippet
+            selectedSnippet.set("3");
             clickOn(prevSnippetButton());
         }
 
@@ -149,13 +145,12 @@ class HistoryTest extends AbstractUiTest {
         void deleteSnippetAndSelectPrevious() {
             assertThat(prevSnippetButton()).isEnabled();
             assertThat(nextSnippetButton()).isEnabled();
-            reset(eventBus);
 
             eventBus.post(new SnippetDeletedEvent("2"));
 
             assertThat(prevSnippetButton()).isDisabled();
             assertThat(nextSnippetButton()).isEnabled();
-            verify(eventBus).post(new RequestSnippetSelectionEvent("1"));
+            assertThat(selectedSnippet.get()).isEqualTo("1");
         }
 
         @Test
@@ -164,13 +159,12 @@ class HistoryTest extends AbstractUiTest {
             clickOn(prevSnippetButton());
             assertThat(prevSnippetButton()).isDisabled();
             assertThat(nextSnippetButton()).isEnabled();
-            reset(eventBus);
 
             eventBus.post(new SnippetDeletedEvent("1"));
 
             assertThat(prevSnippetButton()).isDisabled();
             assertThat(nextSnippetButton()).isEnabled();
-            verify(eventBus).post(new RequestSnippetSelectionEvent("2"));
+            assertThat(selectedSnippet.get()).isEqualTo("2");
         }
     }
 
