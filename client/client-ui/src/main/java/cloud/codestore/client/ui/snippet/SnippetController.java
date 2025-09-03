@@ -226,7 +226,7 @@ public class SnippetController {
                         // No explicit state change at this point.
                         // The history decides which snippet to select next
                         historyController.removeCurrentSnippet();
-                        snippetPane.fireEvent(new SnippetsChangedEvent(SnippetsChangedEvent.SNIPPET_DELETED, snippetUri));
+                        snippetPane.fireEvent(new SnippetsChangedEvent(SnippetsChangedEvent.SNIPPET_DELETED));
                     })
                     .show();
         }
@@ -257,7 +257,7 @@ public class SnippetController {
 
             Snippet createdSnippet = createSnippetUseCase.create(dto);
             state = new ShowSnippetState(createdSnippet);
-            snippetPane.fireEvent(new SnippetsChangedEvent(SnippetsChangedEvent.SNIPPET_CREATED, createdSnippet.getUri()));
+            snippetPane.fireEvent(new SnippetsChangedEvent(SnippetsChangedEvent.SNIPPET_CREATED));
         }
 
         private Snippet collectSnippetData() {
@@ -300,7 +300,7 @@ public class SnippetController {
 
             Snippet updatedSnippet = updateSnippetUseCase.update(dto);
             state = new ShowSnippetState(updatedSnippet);
-            snippetPane.fireEvent(new SnippetsChangedEvent(SnippetsChangedEvent.SNIPPET_UPDATED, updatedSnippet.getUri()));
+            snippetPane.fireEvent(new SnippetsChangedEvent(SnippetsChangedEvent.SNIPPET_UPDATED));
         }
 
         private Snippet collectSnippetData() {

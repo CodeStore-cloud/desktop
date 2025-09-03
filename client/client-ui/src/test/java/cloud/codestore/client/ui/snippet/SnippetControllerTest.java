@@ -4,6 +4,7 @@ import cloud.codestore.client.Language;
 import cloud.codestore.client.Permission;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
+import cloud.codestore.client.ui.AbstractUiTest;
 import cloud.codestore.client.ui.ChangeSnippetsEvent;
 import cloud.codestore.client.ui.SnippetsChangedEvent;
 import cloud.codestore.client.ui.selection.history.History;
@@ -32,7 +33,6 @@ import org.mockito.stubbing.Answer;
 import org.testfx.framework.junit5.ApplicationTest;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -92,7 +92,7 @@ class SnippetControllerTest extends ApplicationTest {
                              .build();
 
         lenient().when(readSnippetUseCase.readSnippet(SNIPPET_URI)).thenReturn(testSnippet);
-        callInitialize();
+        AbstractUiTest.callInitialize(snippetController);
     }
 
     @Nested
@@ -115,7 +115,7 @@ class SnippetControllerTest extends ApplicationTest {
         void newSnippet() {
             clearInvocations();
 
-            snippetController.createSnippet(null);
+            snippetController.createSnippet();
 
             verify(readSnippetUseCase, never()).readSnippet(anyString());
             verifyShowSnippetPane();
@@ -126,6 +126,10 @@ class SnippetControllerTest extends ApplicationTest {
         @Test
         @DisplayName("deletes the current snippet after confirmation")
         void deleteSnippet() {
+            doAnswer(invocation -> {
+                snippetController.selectedSnippetProperty().set("");
+                return null;
+            }).when(history).removeCurrentSnippet();
             requestSnippetSelection(SNIPPET_URI);
             clearInvocations();
 
@@ -135,7 +139,7 @@ class SnippetControllerTest extends ApplicationTest {
             verify(deleteSnippetUseCase).deleteSnippet(SNIPPET_URI);
             verifyVisit(EMPTY_SNIPPET);
             verifyEditable(false);
-            verifyEventFired(SnippetsChangedEvent.SNIPPET_DELETED, SNIPPET_URI);
+            verifyEventFired(SnippetsChangedEvent.SNIPPET_DELETED);
         }
     }
 
@@ -144,7 +148,7 @@ class SnippetControllerTest extends ApplicationTest {
     class NewSnippetState {
         @BeforeEach
         void setUp() {
-            snippetController.createSnippet(null);
+            snippetController.createSnippet();
             verifyEditable(true);
             clearInvocations();
         }
@@ -170,7 +174,7 @@ class SnippetControllerTest extends ApplicationTest {
 
             verifyEditable(false);
             verifyVisit(createdSnippet);
-            verifyEventFired(SnippetsChangedEvent.SNIPPET_CREATED, SNIPPET_URI);
+            verifyEventFired(SnippetsChangedEvent.SNIPPET_CREATED);
         }
 
         @Test
@@ -204,7 +208,7 @@ class SnippetControllerTest extends ApplicationTest {
 
                 clickOn("#yes");
 
-                verifyEventFired(SnippetsChangedEvent.SNIPPET_CREATED, CREATED_SNIPPET_URI);
+                verifyEventFired(SnippetsChangedEvent.SNIPPET_CREATED);
                 assertThat(snippetController.selectedSnippetProperty().get()).isEqualTo(SELECTED_SNIPPET_URI);
             }
 
@@ -259,7 +263,7 @@ class SnippetControllerTest extends ApplicationTest {
 
             verifyEditable(false);
             verifyVisit(updatedSnippet);
-            verifyEventFired(SnippetsChangedEvent.SNIPPET_UPDATED, SNIPPET_URI);
+            verifyEventFired(SnippetsChangedEvent.SNIPPET_UPDATED);
         }
 
         @Test
@@ -294,7 +298,7 @@ class SnippetControllerTest extends ApplicationTest {
 
                 clickOn("#yes");
 
-                verifyEventFired(SnippetsChangedEvent.SNIPPET_UPDATED, SNIPPET_URI);
+                verifyEventFired(SnippetsChangedEvent.SNIPPET_UPDATED);
                 assertThat(snippetController.selectedSnippetProperty().get()).isEqualTo(SELECTED_SNIPPET_URI);
             }
 
@@ -369,12 +373,6 @@ class SnippetControllerTest extends ApplicationTest {
         );
     }
 
-    private void callInitialize() throws Exception {
-        Method method = SnippetController.class.getDeclaredMethod("initialize");
-        method.setAccessible(true);
-        method.invoke(snippetController);
-    }
-
     private Snippet prepareDataCollection(
             String title,
             String description,
@@ -409,18 +407,12 @@ class SnippetControllerTest extends ApplicationTest {
         snippetController.selectedSnippetProperty().set(uri);
     }
 
-    private void verifyEventFired(EventType<SnippetsChangedEvent> expectedEventType, String expectedUri) {
-        verify(snippetPane).fireEvent(
-                argThat((SnippetsChangedEvent event) ->
-                        event.getEventType() == expectedEventType &&
-                        Objects.equals(event.getSnippetUri(), expectedUri)
-                ));
+    private void verifyEventFired(EventType<SnippetsChangedEvent> expectedEventType) {
+        verify(snippetPane).fireEvent(argThat(event -> event.getEventType() == expectedEventType));
     }
 
     private void verifyEventNotFired(EventType<SnippetsChangedEvent> expectedEventType) {
-        verify(snippetPane, never()).fireEvent(
-                argThat((SnippetsChangedEvent event) -> event.getEventType() == expectedEventType)
-        );
+        verify(snippetPane, never()).fireEvent(argThat(event -> event.getEventType() == expectedEventType));
     }
 
     private class DummyFooter extends SnippetFooter {

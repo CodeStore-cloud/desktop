@@ -1,5 +1,6 @@
 package cloud.codestore.client.ui.selection;
 
+import cloud.codestore.client.ui.AbstractUiTest;
 import cloud.codestore.client.ui.selection.filter.Filter;
 import cloud.codestore.client.ui.selection.list.SnippetList;
 import cloud.codestore.client.ui.selection.search.FullTextSearch;
@@ -25,7 +26,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -73,7 +73,7 @@ class SelectionControllerTest {
             return null;
         }).when(searchController).registerKeyHandler(any(KeyCode.class), any(Runnable.class));
 
-        callInitialize();
+        AbstractUiTest.callInitialize(selectionController);
     }
 
     @Test
@@ -150,11 +150,5 @@ class SelectionControllerTest {
         private void assertSnippetListUpdated() {
             verify(snippetListController).update(any(), any(), any());
         }
-    }
-
-    private void callInitialize() throws Exception {
-        Method method = SelectionController.class.getDeclaredMethod("initialize");
-        method.setAccessible(true);
-        method.invoke(selectionController);
     }
 }

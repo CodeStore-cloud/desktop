@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.testfx.framework.junit5.ApplicationTest;
 
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -24,5 +25,11 @@ public class AbstractUiTest extends ApplicationTest {
 
         stage.setScene(new Scene(parent));
         stage.show();
+    }
+
+    public static void callInitialize(Object controller) throws Exception {
+        Method method = controller.getClass().getDeclaredMethod("initialize");
+        method.setAccessible(true);
+        method.invoke(controller);
     }
 }
