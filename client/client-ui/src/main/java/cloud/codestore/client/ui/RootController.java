@@ -30,6 +30,7 @@ public class RootController {
         selectionController.setSelectedSnippetProperty(snippetController.selectedSnippetProperty());
         root.addEventHandler(ChangeSnippetsEvent.CREATE_SNIPPET, event -> snippetController.createSnippet());
         root.addEventHandler(SnippetsChangedEvent.ANY, event -> selectionController.reloadSnippets());
+        root.addEventHandler(QuickFilterEvent.ANY, selectionController::addFilter);
     }
 
     @Subscribe

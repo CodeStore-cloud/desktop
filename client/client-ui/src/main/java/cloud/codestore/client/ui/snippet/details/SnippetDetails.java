@@ -3,9 +3,8 @@ package cloud.codestore.client.ui.snippet.details;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.FxController;
-import cloud.codestore.client.ui.selection.filter.QuickFilterEvent;
+import cloud.codestore.client.ui.QuickFilterEvent;
 import cloud.codestore.client.ui.snippet.SnippetForm;
-import com.google.common.eventbus.EventBus;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -44,12 +43,6 @@ public class SnippetDetails implements SnippetForm {
     @FXML
     private Label modificationTime;
 
-    private final EventBus eventBus;
-
-    SnippetDetails(EventBus eventBus) {
-        this.eventBus = eventBus;
-    }
-
     static {
         String pattern = DateTimeFormatterBuilder.getLocalizedDateTimePattern(
                 FormatStyle.MEDIUM,
@@ -80,7 +73,7 @@ public class SnippetDetails implements SnippetForm {
         quickFilterTags.getChildren().clear();
         for (String tag :  snippet.getTags()) {
             Label tagLabel = new Label(tag);
-            tagLabel.setOnMouseClicked(event -> eventBus.post(new QuickFilterEvent(tag)));
+            tagLabel.setOnMouseClicked(event -> details.fireEvent(new QuickFilterEvent(tag)));
             quickFilterTags.getChildren().add(tagLabel);
         }
 

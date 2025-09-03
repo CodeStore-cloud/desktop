@@ -3,6 +3,7 @@ package cloud.codestore.client.ui.selection.filter;
 import cloud.codestore.client.Language;
 import cloud.codestore.client.ui.ApplicationReadyEvent;
 import cloud.codestore.client.ui.FxController;
+import cloud.codestore.client.ui.QuickFilterEvent;
 import cloud.codestore.client.ui.UiMessages;
 import cloud.codestore.client.usecases.listsnippets.FilterProperties;
 import cloud.codestore.client.usecases.readlanguages.ReadLanguagesUseCase;
@@ -74,25 +75,23 @@ public class Filter {
         updatePropertiesEnabled = true;
     }
 
-    @Subscribe
-    private void quickfilter(@Nonnull QuickFilterEvent event) {
-        String tag = event.tag();
-        if (tag != null) {
+    public void addFilter(@Nonnull QuickFilterEvent event) {
+        event.getLanguage()
+             .flatMap(language -> languageSelection
+                     .getItems()
+                     .stream()
+                     .filter(item -> Objects.equals(item.language(), language))
+                     .findFirst()
+             )
+             .ifPresent(item -> languageSelection.getSelectionModel().select(item));
+
+        event.getTag().ifPresent(tag -> {
             List<String> tags = new ArrayList<>(List.of(tagsInput.getText().split(" ")));
             if (!tags.contains(tag)) {
                 tags.add(tag);
-                tagsInput.setText(String.join(" ",  tags));
+                tagsInput.setText(String.join(" ", tags));
             }
-        }
-
-        Language language = event.language();
-        if (language != null) {
-            languageSelection.getItems()
-                             .stream()
-                             .filter(item -> Objects.equals(item.language(), language))
-                             .findFirst()
-                             .ifPresent(item -> languageSelection.getSelectionModel().select(item));
-        }
+        });
     }
 
     @FXML

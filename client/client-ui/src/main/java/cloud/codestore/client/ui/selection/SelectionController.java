@@ -1,6 +1,7 @@
 package cloud.codestore.client.ui.selection;
 
 import cloud.codestore.client.ui.FxController;
+import cloud.codestore.client.ui.QuickFilterEvent;
 import cloud.codestore.client.ui.selection.filter.Filter;
 import cloud.codestore.client.ui.selection.list.SnippetList;
 import cloud.codestore.client.ui.selection.search.FullTextSearch;
@@ -50,13 +51,14 @@ public class SelectionController {
         snippetListController.setSelectedSnippetProperty(selectedSnippetProperty);
     }
 
-    /**
-     * Reloads the snippet list in case of a change.
-     */
     public void reloadSnippets() {
         if (updateSnippetListEnabled) {
             snippetListController.update(searchInputProperty.get(), filterProperties.get(), sortProperties.get());
         }
+    }
+
+    public void addFilter(QuickFilterEvent event) {
+        filterController.addFilter(event);
     }
 
     @FXML

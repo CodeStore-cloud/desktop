@@ -3,6 +3,7 @@ package cloud.codestore.client.ui.selection.filter;
 import cloud.codestore.client.Language;
 import cloud.codestore.client.ui.AbstractUiTest;
 import cloud.codestore.client.ui.ApplicationReadyEvent;
+import cloud.codestore.client.ui.QuickFilterEvent;
 import cloud.codestore.client.usecases.readlanguages.ReadLanguagesUseCase;
 import com.google.common.eventbus.EventBus;
 import javafx.scene.control.Button;
@@ -135,7 +136,7 @@ class FilterTest extends AbstractUiTest {
         @Test
         @DisplayName("applies the language")
         void quickfilterLanguage() {
-            interact(() -> eventBus.post(new QuickFilterEvent(JAVA)));
+            interact(() -> controller.addFilter(new QuickFilterEvent(JAVA)));
             assertThat(languageSelection().getSelectionModel().getSelectedItem().language()).isEqualTo(JAVA);
 
             var filterProperties = controller.filterProperties().get();
@@ -146,7 +147,7 @@ class FilterTest extends AbstractUiTest {
         @DisplayName("adds the nested tag")
         void quickfilterTag() {
             tagsInput().setText("tag1 tag2");
-            eventBus.post(new QuickFilterEvent("another-tag"));
+            controller.addFilter(new QuickFilterEvent("another-tag"));
 
             assertThat(tagsInput().getText()).isEqualTo("tag1 tag2 another-tag");
             var filterProperties = controller.filterProperties().get();
@@ -160,7 +161,7 @@ class FilterTest extends AbstractUiTest {
             String text = "tag1 tag2 tag3";
             tagsInput().setText(text);
 
-            eventBus.post(new QuickFilterEvent("tag2"));
+            controller.addFilter(new QuickFilterEvent("tag2"));
 
             assertThat(tagsInput().getText()).isEqualTo(text);
             var filterProperties = controller.filterProperties().get();

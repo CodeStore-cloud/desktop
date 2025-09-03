@@ -5,7 +5,7 @@ import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.ApplicationReadyEvent;
 import cloud.codestore.client.ui.FxController;
-import cloud.codestore.client.ui.selection.filter.QuickFilterEvent;
+import cloud.codestore.client.ui.QuickFilterEvent;
 import cloud.codestore.client.ui.snippet.SnippetForm;
 import cloud.codestore.client.usecases.readlanguages.ReadLanguagesUseCase;
 import com.google.common.eventbus.EventBus;
@@ -31,7 +31,6 @@ public class SnippetCode implements SnippetForm {
     private static final Logger LOGGER = LogManager.getLogger(SnippetCode.class);
 
     private final ReadLanguagesUseCase readLanguagesUseCase;
-    private final EventBus eventBus;
 
     @FXML
     private ComboBox<Language> languageSelection;
@@ -43,7 +42,6 @@ public class SnippetCode implements SnippetForm {
 
     SnippetCode(ReadLanguagesUseCase readLanguagesUseCase, EventBus eventBus) {
         this.readLanguagesUseCase = readLanguagesUseCase;
-        this.eventBus = eventBus;
         eventBus.register(this);
     }
 
@@ -76,7 +74,7 @@ public class SnippetCode implements SnippetForm {
     @FXML
     private void quickfilterLanguage() {
         Language language = languageSelection.getSelectionModel().getSelectedItem();
-        eventBus.post(new QuickFilterEvent(language));
+        languageQuickfilter.fireEvent(new QuickFilterEvent(language));
     }
 
     @Override

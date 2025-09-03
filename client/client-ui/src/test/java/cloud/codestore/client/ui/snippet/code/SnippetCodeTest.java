@@ -5,7 +5,7 @@ import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.AbstractUiTest;
 import cloud.codestore.client.ui.ApplicationReadyEvent;
-import cloud.codestore.client.ui.selection.filter.QuickFilterEvent;
+import cloud.codestore.client.ui.QuickFilterEvent;
 import cloud.codestore.client.usecases.readlanguages.ReadLanguagesUseCase;
 import com.google.common.eventbus.EventBus;
 import javafx.scene.control.ComboBox;
@@ -21,8 +21,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.testfx.framework.junit5.Start;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testfx.assertions.api.Assertions.assertThat;
 
@@ -120,9 +120,15 @@ class SnippetCodeTest extends AbstractUiTest {
     @Test
     @DisplayName("fires a QuickFilterEvent when pressing the quickfilterLanguage button")
     void quickfilterLanguage() {
+        AtomicReference<QuickFilterEvent> capturedEvent = new AtomicReference<>();
+        languageQuickfilterButton().addEventFilter(QuickFilterEvent.ANY, capturedEvent::set);
+
         Snippet snippet = showTestSnippet();
         clickOn(languageQuickfilterButton());
-        verify(eventBus).post(new QuickFilterEvent(snippet.getLanguage()));
+
+        QuickFilterEvent event = capturedEvent.get();
+        assertThat(event).isNotNull();
+        assertThat(event.getLanguage()).isPresent().get().isEqualTo(snippet.getLanguage());
     }
 
     private Snippet showTestSnippet() {

@@ -3,8 +3,7 @@ package cloud.codestore.client.ui.snippet.details;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.AbstractUiTest;
-import cloud.codestore.client.ui.selection.filter.QuickFilterEvent;
-import com.google.common.eventbus.EventBus;
+import cloud.codestore.client.ui.QuickFilterEvent;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -16,26 +15,22 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.testfx.framework.junit5.Start;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
-import static org.mockito.Mockito.verify;
 import static org.testfx.assertions.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("The details controller")
 class SnippetDetailsTest extends AbstractUiTest {
-    @Spy
-    private EventBus eventBus = new EventBus();
     private SnippetDetails controller;
 
     @Start
     public void start(Stage stage) throws Exception {
-        controller = new SnippetDetails(eventBus);
+        controller = new SnippetDetails();
         start(stage, "details.fxml", controller);
     }
 
@@ -92,14 +87,16 @@ class SnippetDetailsTest extends AbstractUiTest {
         @Test
         @DisplayName("fires a QuickFilterEvent when clicking on a tag")
         void triggerTagQuickFilterEvent() {
+            AtomicReference<QuickFilterEvent> capturedEvent = new AtomicReference<>();
+            Pane pane = lookup("#details").queryAs(Pane.class);
+            pane.addEventFilter(QuickFilterEvent.ANY, capturedEvent::set);
+
             Label quickFilterNode = firstQuickFilterNode();
             clickOn(quickFilterNode);
 
-            var argument = ArgumentCaptor.forClass(QuickFilterEvent.class);
-            verify(eventBus).post(argument.capture());
-            QuickFilterEvent event = argument.getValue();
+            QuickFilterEvent event = capturedEvent.get();
             assertThat(event).isNotNull();
-            assertThat(event.tag()).isEqualTo(quickFilterNode.getText());
+            assertThat(event.getTag()).isPresent().get().isEqualTo(quickFilterNode.getText());
         }
 
         private List<String> collectTagLabels(ObservableList<Node> tagNodes) {

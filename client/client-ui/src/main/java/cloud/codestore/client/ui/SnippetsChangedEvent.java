@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
  * This event is a confirmation of a preceded {@link ChangeSnippetsEvent}.
  */
 public class SnippetsChangedEvent extends Event {
-    static final EventType<SnippetsChangedEvent> ANY = new EventType<>(Event.ANY, "ANY");
+    static final EventType<SnippetsChangedEvent> ANY = new EventType<>(Event.ANY, "ANY_SNIPPET_CHANGE");
 
     /**
      * A new code snippet has been created.
