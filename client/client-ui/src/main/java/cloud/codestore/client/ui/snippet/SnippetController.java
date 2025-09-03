@@ -8,6 +8,7 @@ import cloud.codestore.client.ui.selection.history.History;
 import cloud.codestore.client.ui.snippet.code.SnippetCode;
 import cloud.codestore.client.ui.snippet.description.SnippetDescription;
 import cloud.codestore.client.ui.snippet.details.SnippetDetails;
+import cloud.codestore.client.ui.snippet.footer.ControlEvent;
 import cloud.codestore.client.ui.snippet.footer.SnippetFooter;
 import cloud.codestore.client.ui.snippet.title.SnippetTitle;
 import cloud.codestore.client.usecases.createsnippet.CreateSnippetUseCase;
@@ -82,8 +83,8 @@ public class SnippetController {
                 snippetFooterController
         };
 
-        snippetFooterController.onSave(event -> state.save());
-        snippetFooterController.onCancel(event -> state.cancel());
+        snippetPane.addEventHandler(ControlEvent.SAVE, event -> state.save());
+        snippetPane.addEventHandler(ControlEvent.CANCEL, event -> state.cancel());
         snippetFooterController.onEdit(event -> state.edit());
         snippetFooterController.onDelete(event -> state.delete());
 

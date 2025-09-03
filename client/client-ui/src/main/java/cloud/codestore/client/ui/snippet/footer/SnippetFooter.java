@@ -33,6 +33,9 @@ public class SnippetFooter implements SnippetForm {
         cancelButton.managedProperty().bind(cancelButton.visibleProperty());
         editButton.managedProperty().bind(editButton.visibleProperty());
         deleteButton.managedProperty().bind(deleteButton.visibleProperty());
+
+        saveButton.setOnAction(event -> saveButton.fireEvent(new ControlEvent(ControlEvent.SAVE)));
+        cancelButton.setOnAction(event -> cancelButton.fireEvent(new ControlEvent(ControlEvent.CANCEL)));
     }
 
     @Override
@@ -46,14 +49,6 @@ public class SnippetFooter implements SnippetForm {
     @Override
     public void visit(@Nonnull Snippet snippet) {
         permissions = snippet.getPermissions();
-    }
-
-    public void onSave(EventHandler<ActionEvent> handler) {
-        saveButton.setOnAction(handler);
-    }
-
-    public void onCancel(EventHandler<ActionEvent> handler) {
-        cancelButton.setOnAction(handler);
     }
 
     public void onEdit(EventHandler<ActionEvent> handler) {

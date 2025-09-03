@@ -122,7 +122,13 @@ class SnippetFooterTest extends ApplicationTest {
     }
 
     void assertVisibleIfPermitted(Button button, Permission permission) {
+        controller.visit(snippet(permission));
+        controller.setEditing(false);
+        assertThat(button).isVisible();
 
+        controller.visit(snippet());
+        controller.setEditing(false);
+        assertThat(button).isInvisible();
     }
 
     void assertVisibleIfEditing(Button button) {

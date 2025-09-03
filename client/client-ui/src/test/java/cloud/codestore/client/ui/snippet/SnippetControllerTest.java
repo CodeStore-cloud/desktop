@@ -8,6 +8,7 @@ import cloud.codestore.client.ui.selection.history.History;
 import cloud.codestore.client.ui.snippet.code.SnippetCode;
 import cloud.codestore.client.ui.snippet.description.SnippetDescription;
 import cloud.codestore.client.ui.snippet.details.SnippetDetails;
+import cloud.codestore.client.ui.snippet.footer.ControlEvent;
 import cloud.codestore.client.ui.snippet.footer.SnippetFooter;
 import cloud.codestore.client.ui.snippet.title.SnippetTitle;
 import cloud.codestore.client.usecases.createsnippet.CreateSnippetUseCase;
@@ -64,8 +65,8 @@ class SnippetControllerTest extends ApplicationTest {
     @Spy
     private DummyFooter snippetFooterController = new DummyFooter();
 
-    @Mock
-    private Pane snippetPane;
+    @Spy
+    private Pane snippetPane = new Pane();
     @Mock
     private Pane noSnippetLabel;
     @Mock
@@ -103,7 +104,7 @@ class SnippetControllerTest extends ApplicationTest {
         void loadSnippet() {
             clearInvocations();
 
-            requestSnippetSelection();
+            requestSnippetSelection(SNIPPET_URI);
 
             verifyShowSnippetPane();
             verifyEditable(false);
@@ -126,7 +127,7 @@ class SnippetControllerTest extends ApplicationTest {
         @Test
         @DisplayName("deletes the current snippet after confirmation")
         void deleteSnippet() {
-            requestSnippetSelection();
+            requestSnippetSelection(SNIPPET_URI);
             clearInvocations();
 
             interact(snippetFooterController::clickDeleteButton);
@@ -231,7 +232,7 @@ class SnippetControllerTest extends ApplicationTest {
     class EditSnippetState {
         @BeforeEach
         void setUp() {
-            requestSnippetSelection();
+            requestSnippetSelection(SNIPPET_URI);
             snippetFooterController.clickEditButton();
             verifyEditable(true);
             clearInvocations();
@@ -406,29 +407,13 @@ class SnippetControllerTest extends ApplicationTest {
                       .build();
     }
 
-    private void requestSnippetSelection() {
-        requestSnippetSelection(SNIPPET_URI);
-    }
-
     private void requestSnippetSelection(String uri) {
         snippetController.selectedSnippetProperty().set(uri);
     }
 
-    private static class DummyFooter extends SnippetFooter {
-        private EventHandler<ActionEvent> onSave;
-        private EventHandler<ActionEvent> onCancel;
+    private class DummyFooter extends SnippetFooter {
         private EventHandler<ActionEvent> onEdit;
         private EventHandler<ActionEvent> onDelete;
-
-        @Override
-        public void onSave(EventHandler<ActionEvent> callback) {
-            onSave = callback;
-        }
-
-        @Override
-        public void onCancel(EventHandler<ActionEvent> callback) {
-            onCancel = callback;
-        }
 
         @Override
         public void onEdit(EventHandler<ActionEvent> callback) {
@@ -441,11 +426,11 @@ class SnippetControllerTest extends ApplicationTest {
         }
 
         void clickSaveButton() {
-            onSave.handle(null);
+            snippetPane.fireEvent(new ControlEvent(ControlEvent.SAVE));
         }
 
         void clickCancelButton() {
-            onCancel.handle(null);
+            snippetPane.fireEvent(new ControlEvent(ControlEvent.CANCEL));
         }
 
         void clickEditButton() {
