@@ -88,6 +88,7 @@ public class SnippetController {
         snippetFooterController.onEdit(event -> state.edit());
         snippetFooterController.onDelete(event -> state.delete());
 
+        historyController.setSelectedSnippetProperty(selectedSnippetProperty);
         state = new DefaultState();
         registerSelectionHandler();
     }
@@ -105,7 +106,6 @@ public class SnippetController {
             Runnable selectSnippet = () -> {
                 Snippet snippet = readSnippetUseCase.readSnippet(snippetUri);
                 state = new ShowSnippetState(snippet);
-                selectedSnippetProperty.setFinally(snippet.getUri());
             };
 
             if (state.isEditing()) {

@@ -69,7 +69,9 @@ public class Filter {
             languageSelection.getItems().add(item);
         }
 
-        languageSelection.getSelectionModel().selectFirst(); // default selection - does not call filterChanged()
+        updatePropertiesEnabled = false;
+        languageSelection.getSelectionModel().selectFirst(); // default selection - calls filterChanged()
+        updatePropertiesEnabled = true;
     }
 
     @Subscribe
