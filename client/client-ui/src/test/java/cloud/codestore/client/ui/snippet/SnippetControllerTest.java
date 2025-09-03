@@ -5,7 +5,6 @@ import cloud.codestore.client.Permission;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.selection.history.History;
-import cloud.codestore.client.ui.selection.list.CreateSnippetEvent;
 import cloud.codestore.client.ui.snippet.code.SnippetCode;
 import cloud.codestore.client.ui.snippet.description.SnippetDescription;
 import cloud.codestore.client.ui.snippet.details.SnippetDetails;
@@ -112,11 +111,11 @@ class SnippetControllerTest extends ApplicationTest {
         }
 
         @Test
-        @DisplayName("clears all values when a CreateSnippetEvent is triggered")
+        @DisplayName("clears all values when a new code snippet should be created")
         void newSnippet() {
             clearInvocations();
 
-            eventBus.post(new CreateSnippetEvent());
+            snippetController.createSnippet(null);
 
             verify(readSnippetUseCase, never()).readSnippet(anyString());
             verifyShowSnippetPane();
@@ -145,7 +144,7 @@ class SnippetControllerTest extends ApplicationTest {
     class NewSnippetState {
         @BeforeEach
         void setUp() {
-            eventBus.post(new CreateSnippetEvent());
+            snippetController.createSnippet(null);
             verifyEditable(true);
             clearInvocations();
         }

@@ -1,9 +1,9 @@
 package cloud.codestore.client.ui.selection.list;
 
 import cloud.codestore.client.Permission;
+import cloud.codestore.client.ui.ChangeSnippetsEvent;
 import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.usecases.listsnippets.*;
-import com.google.common.eventbus.EventBus;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -20,7 +20,6 @@ import java.util.Objects;
 @FxController
 public class SnippetList {
     private final ReadSnippetsUseCase readSnippetsUseCase;
-    private final EventBus eventBus;
     private final StringProperty nextPageUrl = new SimpleStringProperty();
     private StringProperty selectedSnippet = new SimpleStringProperty("");
     private boolean handleSelectionChanges = true;
@@ -32,10 +31,8 @@ public class SnippetList {
     @FXML
     private Node nextPage;
 
-    SnippetList(@Nonnull ReadSnippetsUseCase readSnippetsUseCase, @Nonnull EventBus eventBus) {
+    SnippetList(@Nonnull ReadSnippetsUseCase readSnippetsUseCase) {
         this.readSnippetsUseCase = readSnippetsUseCase;
-        this.eventBus = eventBus;
-        eventBus.register(this);
     }
 
     @FXML
@@ -110,7 +107,7 @@ public class SnippetList {
 
     @FXML
     private void createNewSnippet() {
-        eventBus.post(new CreateSnippetEvent());
+        createSnippet.fireEvent(new ChangeSnippetsEvent(ChangeSnippetsEvent.CREATE_SNIPPET, ""));
     }
 
     private void selectionChanged(SnippetListItem newSelection) {

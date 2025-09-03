@@ -2,9 +2,9 @@ package cloud.codestore.client.ui.snippet;
 
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
+import cloud.codestore.client.ui.ChangeSnippetsEvent;
 import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.selection.history.History;
-import cloud.codestore.client.ui.selection.list.CreateSnippetEvent;
 import cloud.codestore.client.ui.snippet.code.SnippetCode;
 import cloud.codestore.client.ui.snippet.description.SnippetDescription;
 import cloud.codestore.client.ui.snippet.details.SnippetDetails;
@@ -17,7 +17,6 @@ import cloud.codestore.client.usecases.readsnippet.ReadSnippetUseCase;
 import cloud.codestore.client.usecases.updatesnippet.UpdateSnippetUseCase;
 import cloud.codestore.client.usecases.updatesnippet.UpdatedSnippetDto;
 import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.layout.Pane;
@@ -94,11 +93,19 @@ public class SnippetController {
     }
 
     /**
-     * @return a Property-Object that contains the URI of the currently selected code snippet.
+     * @return a {@link StringProperty} that contains the URI of the currently selected code snippet.
      */
     @Nonnull
     public StringProperty selectedSnippetProperty() {
         return selectedSnippetProperty;
+    }
+
+    public void createSnippet(ChangeSnippetsEvent event) {
+        if (state.isEditing()) {
+            requestSaving(() -> state = new NewSnippetState());
+        } else {
+            state = new NewSnippetState();
+        }
     }
 
     private void registerSelectionHandler() {
@@ -114,15 +121,6 @@ public class SnippetController {
                 selectSnippet.run();
             }
         });
-    }
-
-    @Subscribe
-    private void createSnippet(@Nonnull CreateSnippetEvent event) {
-        if (state.isEditing()) {
-            requestSaving(() -> state = new NewSnippetState());
-        } else {
-            state = new NewSnippetState();
-        }
     }
 
     private void requestSaving(Runnable action) {

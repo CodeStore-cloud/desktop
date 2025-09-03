@@ -2,10 +2,10 @@ package cloud.codestore.client.ui.selection.list;
 
 import cloud.codestore.client.Permission;
 import cloud.codestore.client.ui.AbstractUiTest;
+import cloud.codestore.client.ui.ChangeSnippetsEvent;
 import cloud.codestore.client.usecases.listsnippets.ReadSnippetsUseCase;
 import cloud.codestore.client.usecases.listsnippets.SnippetListItem;
 import cloud.codestore.client.usecases.listsnippets.SnippetPage;
-import com.google.common.eventbus.EventBus;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.Node;
@@ -18,16 +18,17 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.testfx.framework.junit5.Start;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 import static org.testfx.assertions.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,8 +39,6 @@ class SnippetListTest extends AbstractUiTest {
 
     @Mock
     private ReadSnippetsUseCase readSnippetsUseCase;
-    @Spy
-    private EventBus eventBus = new EventBus();
     private SnippetList controller;
     private StringProperty selectedSnippet = new SimpleStringProperty("");
 
@@ -48,7 +47,7 @@ class SnippetListTest extends AbstractUiTest {
         var firstPage = new SnippetPage(testItems(), NEXT_PAGE_URL, Collections.emptySet());
         lenient().when(readSnippetsUseCase.getPage(any(), any(), any())).thenReturn(firstPage);
 
-        controller = new SnippetList(readSnippetsUseCase, eventBus);
+        controller = new SnippetList(readSnippetsUseCase);
         controller.setSelectedSnippetProperty(selectedSnippet);
         start(stage, "snippetList.fxml", controller);
         updateList();
@@ -104,12 +103,15 @@ class SnippetListTest extends AbstractUiTest {
     }
 
     @Test
-    @DisplayName("fires a CreateSnippetEvent if the create-snippet button was clicked")
+    @DisplayName("fires a ChangeSnippetsEvent if the create-snippet button was clicked")
     void createSnippetEvent() {
         Button createSnippetButton = createSnippetButton();
         createSnippetButton.setVisible(true);
+        AtomicBoolean eventFired = new AtomicBoolean(false);
+        createSnippetButton.addEventHandler(ChangeSnippetsEvent.CREATE_SNIPPET, event -> eventFired.set(true));
+
         clickOn(createSnippetButton);
-        verify(eventBus).post(new CreateSnippetEvent());
+        assertThat(eventFired.get()).isTrue();
     }
 
     @Test
