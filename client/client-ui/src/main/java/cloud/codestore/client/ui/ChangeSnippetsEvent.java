@@ -24,22 +24,10 @@ public class ChangeSnippetsEvent extends Event {
      */
     public static final EventType<ChangeSnippetsEvent> DELETE_SNIPPET = new EventType<>(ANY, "DELETE_SNIPPET");
 
-    private final String snippetUri;
-
     /**
      * @param eventType an event type.
-     * @param snippetUri the URI of the affected code snippet.
      */
-    public ChangeSnippetsEvent(@Nonnull EventType<? extends Event> eventType, @Nonnull String snippetUri) {
+    public ChangeSnippetsEvent(@Nonnull EventType<? extends Event> eventType) {
         super(eventType);
-        this.snippetUri = snippetUri;
-    }
-
-    /**
-     * @return the URI of the affected code snippet.
-     */
-    @Nonnull
-    public String getSnippetUri() {
-        return snippetUri;
     }
 }

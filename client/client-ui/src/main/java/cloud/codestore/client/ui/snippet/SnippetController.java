@@ -85,8 +85,8 @@ public class SnippetController {
 
         snippetPane.addEventHandler(ControlEvent.SAVE, event -> state.save());
         snippetPane.addEventHandler(ControlEvent.CANCEL, event -> state.cancel());
-        snippetFooterController.onEdit(event -> state.edit());
-        snippetFooterController.onDelete(event -> state.delete());
+        snippetPane.addEventHandler(ChangeSnippetsEvent.UPDATE_SNIPPET, event -> state.edit());
+        snippetPane.addEventHandler(ChangeSnippetsEvent.DELETE_SNIPPET, event -> state.delete());
 
         historyController.setSelectedSnippetProperty(selectedSnippetProperty);
         state = new DefaultState();

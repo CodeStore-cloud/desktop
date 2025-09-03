@@ -107,7 +107,7 @@ public class SnippetList {
 
     @FXML
     private void createNewSnippet() {
-        createSnippet.fireEvent(new ChangeSnippetsEvent(ChangeSnippetsEvent.CREATE_SNIPPET, ""));
+        createSnippet.fireEvent(new ChangeSnippetsEvent(ChangeSnippetsEvent.CREATE_SNIPPET));
     }
 
     private void selectionChanged(SnippetListItem newSelection) {

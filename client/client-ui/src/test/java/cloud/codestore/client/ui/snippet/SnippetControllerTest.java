@@ -4,6 +4,7 @@ import cloud.codestore.client.Language;
 import cloud.codestore.client.Permission;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
+import cloud.codestore.client.ui.ChangeSnippetsEvent;
 import cloud.codestore.client.ui.selection.history.History;
 import cloud.codestore.client.ui.snippet.code.SnippetCode;
 import cloud.codestore.client.ui.snippet.description.SnippetDescription;
@@ -18,8 +19,6 @@ import cloud.codestore.client.usecases.readsnippet.ReadSnippetUseCase;
 import cloud.codestore.client.usecases.updatesnippet.UpdateSnippetUseCase;
 import cloud.codestore.client.usecases.updatesnippet.UpdatedSnippetDto;
 import com.google.common.eventbus.EventBus;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.layout.Pane;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -412,19 +411,6 @@ class SnippetControllerTest extends ApplicationTest {
     }
 
     private class DummyFooter extends SnippetFooter {
-        private EventHandler<ActionEvent> onEdit;
-        private EventHandler<ActionEvent> onDelete;
-
-        @Override
-        public void onEdit(EventHandler<ActionEvent> callback) {
-            onEdit = callback;
-        }
-
-        @Override
-        public void onDelete(EventHandler<ActionEvent> callback) {
-            onDelete = callback;
-        }
-
         void clickSaveButton() {
             snippetPane.fireEvent(new ControlEvent(ControlEvent.SAVE));
         }
@@ -434,11 +420,11 @@ class SnippetControllerTest extends ApplicationTest {
         }
 
         void clickEditButton() {
-            onEdit.handle(null);
+            snippetPane.fireEvent(new ChangeSnippetsEvent(ChangeSnippetsEvent.UPDATE_SNIPPET));
         }
 
         void clickDeleteButton() {
-            onDelete.handle(null);
+            snippetPane.fireEvent(new ChangeSnippetsEvent(ChangeSnippetsEvent.DELETE_SNIPPET));
         }
 
         @Override
