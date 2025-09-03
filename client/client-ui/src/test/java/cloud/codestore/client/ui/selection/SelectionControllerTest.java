@@ -1,13 +1,13 @@
 package cloud.codestore.client.ui.selection;
 
 import cloud.codestore.client.ui.AbstractUiTest;
+import cloud.codestore.client.ui.JavaFxInitializationExtension;
 import cloud.codestore.client.ui.selection.filter.Filter;
 import cloud.codestore.client.ui.selection.list.SnippetList;
 import cloud.codestore.client.ui.selection.search.FullTextSearch;
 import cloud.codestore.client.ui.selection.sort.Sort;
 import cloud.codestore.client.usecases.listsnippets.FilterProperties;
 import cloud.codestore.client.usecases.listsnippets.SortProperties;
-import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -36,14 +36,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class, JavaFxInitializationExtension.class})
 @DisplayName("The selection controller")
 class SelectionControllerTest {
-
-    static {
-        Platform.startup(() -> {});
-    }
-
     @Spy
     private Button filterButton = new Button();
     @Mock

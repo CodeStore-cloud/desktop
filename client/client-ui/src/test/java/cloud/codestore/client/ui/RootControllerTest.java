@@ -12,13 +12,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.testfx.framework.junit5.ApplicationTest;
 
 import static org.mockito.Mockito.verify;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class, JavaFxInitializationExtension.class})
 @DisplayName("The root controller")
-class RootControllerTest extends ApplicationTest {
+class RootControllerTest {
     @Spy
     private Pane root = new Pane();
     @Mock

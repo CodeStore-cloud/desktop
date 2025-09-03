@@ -6,6 +6,7 @@ import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.AbstractUiTest;
 import cloud.codestore.client.ui.ChangeSnippetsEvent;
+import cloud.codestore.client.ui.JavaFxInitializationExtension;
 import cloud.codestore.client.ui.SnippetsChangedEvent;
 import cloud.codestore.client.ui.selection.history.History;
 import cloud.codestore.client.ui.snippet.code.SnippetCode;
@@ -41,7 +42,7 @@ import java.util.function.Consumer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class, JavaFxInitializationExtension.class})
 @DisplayName("The snippet controller")
 class SnippetControllerTest extends ApplicationTest {
     private static final String SNIPPET_ID = "1";
