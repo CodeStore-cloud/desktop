@@ -4,6 +4,7 @@ import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.ChangeSnippetsEvent;
 import cloud.codestore.client.ui.FxController;
+import cloud.codestore.client.ui.SnippetsChangedEvent;
 import cloud.codestore.client.ui.selection.history.History;
 import cloud.codestore.client.ui.snippet.code.SnippetCode;
 import cloud.codestore.client.ui.snippet.description.SnippetDescription;
@@ -17,7 +18,6 @@ import cloud.codestore.client.usecases.deletesnippet.DeleteSnippetUseCase;
 import cloud.codestore.client.usecases.readsnippet.ReadSnippetUseCase;
 import cloud.codestore.client.usecases.updatesnippet.UpdateSnippetUseCase;
 import cloud.codestore.client.usecases.updatesnippet.UpdatedSnippetDto;
-import com.google.common.eventbus.EventBus;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.layout.Pane;
@@ -32,7 +32,6 @@ public class SnippetController {
     private final CreateSnippetUseCase createSnippetUseCase;
     private final UpdateSnippetUseCase updateSnippetUseCase;
     private final DeleteSnippetUseCase deleteSnippetUseCase;
-    private final EventBus eventBus;
     private final AsyncStringProperty selectedSnippetProperty = new AsyncStringProperty();
 
     private Snippet currentSnippet;
@@ -61,15 +60,12 @@ public class SnippetController {
             @Nonnull ReadSnippetUseCase readSnippetUseCase,
             @Nonnull CreateSnippetUseCase createSnippetUseCase,
             @Nonnull UpdateSnippetUseCase updateSnippetUseCase,
-            @Nonnull DeleteSnippetUseCase deleteSnippetUseCase,
-            @Nonnull EventBus eventBus
+            @Nonnull DeleteSnippetUseCase deleteSnippetUseCase
     ) {
         this.readSnippetUseCase = readSnippetUseCase;
         this.createSnippetUseCase = createSnippetUseCase;
         this.updateSnippetUseCase = updateSnippetUseCase;
         this.deleteSnippetUseCase = deleteSnippetUseCase;
-        this.eventBus = eventBus;
-        eventBus.register(this);
     }
 
     @FXML
@@ -101,7 +97,7 @@ public class SnippetController {
         return selectedSnippetProperty;
     }
 
-    public void createSnippet(ChangeSnippetsEvent event) {
+    public void createSnippet() {
         if (state.isEditing()) {
             requestSaving(() -> state = new NewSnippetState());
         } else {
@@ -111,15 +107,19 @@ public class SnippetController {
 
     private void registerSelectionHandler() {
         selectedSnippetProperty.onChangeRequested(snippetUri -> {
-            Runnable selectSnippet = () -> {
-                Snippet snippet = readSnippetUseCase.readSnippet(snippetUri);
-                state = new ShowSnippetState(snippet);
-            };
-
-            if (state.isEditing()) {
-                requestSaving(selectSnippet);
+            if (snippetUri.isEmpty()) {
+                state = new DefaultState();
             } else {
-                selectSnippet.run();
+                Runnable selectSnippet = () -> {
+                    Snippet snippet = readSnippetUseCase.readSnippet(snippetUri);
+                    state = new ShowSnippetState(snippet);
+                };
+
+                if (state.isEditing()) {
+                    requestSaving(selectSnippet);
+                } else {
+                    selectSnippet.run();
+                }
             }
         });
     }
@@ -223,8 +223,10 @@ public class SnippetController {
                     .onYes(() -> {
                         String snippetUri = currentSnippet.getUri();
                         deleteSnippetUseCase.deleteSnippet(snippetUri);
-                        state = new DefaultState();
-                        eventBus.post(new SnippetDeletedEvent(snippetUri));
+                        // No explicit state change at this point.
+                        // The history decides which snippet to select next
+                        historyController.removeCurrentSnippet();
+                        snippetPane.fireEvent(new SnippetsChangedEvent(SnippetsChangedEvent.SNIPPET_DELETED, snippetUri));
                     })
                     .show();
         }
@@ -255,7 +257,7 @@ public class SnippetController {
 
             Snippet createdSnippet = createSnippetUseCase.create(dto);
             state = new ShowSnippetState(createdSnippet);
-            eventBus.post(new SnippetCreatedEvent(createdSnippet.getUri()));
+            snippetPane.fireEvent(new SnippetsChangedEvent(SnippetsChangedEvent.SNIPPET_CREATED, createdSnippet.getUri()));
         }
 
         private Snippet collectSnippetData() {
@@ -298,7 +300,7 @@ public class SnippetController {
 
             Snippet updatedSnippet = updateSnippetUseCase.update(dto);
             state = new ShowSnippetState(updatedSnippet);
-            eventBus.post(new SnippetUpdatedEvent(updatedSnippet.getUri()));
+            snippetPane.fireEvent(new SnippetsChangedEvent(SnippetsChangedEvent.SNIPPET_UPDATED, updatedSnippet.getUri()));
         }
 
         private Snippet collectSnippetData() {

@@ -1,8 +1,6 @@
 package cloud.codestore.client.ui.selection.history;
 
 import cloud.codestore.client.ui.AbstractUiTest;
-import cloud.codestore.client.ui.snippet.SnippetDeletedEvent;
-import com.google.common.eventbus.EventBus;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.control.Button;
@@ -21,11 +19,11 @@ import static org.testfx.assertions.api.Assertions.assertThat;
 @DisplayName("The history")
 class HistoryTest extends AbstractUiTest {
     private StringProperty selectedSnippet = new SimpleStringProperty("");
-    private EventBus eventBus = new EventBus();
+    private History controller;
 
     @Start
     public void start(Stage stage) throws Exception {
-        History controller = new History(eventBus);
+        controller = new History();
         controller.setSelectedSnippetProperty(selectedSnippet);
         start(stage, "history.fxml", controller);
     }
@@ -146,7 +144,7 @@ class HistoryTest extends AbstractUiTest {
             assertThat(prevSnippetButton()).isEnabled();
             assertThat(nextSnippetButton()).isEnabled();
 
-            eventBus.post(new SnippetDeletedEvent("2"));
+            controller.removeCurrentSnippet();
 
             assertThat(prevSnippetButton()).isDisabled();
             assertThat(nextSnippetButton()).isEnabled();
@@ -160,7 +158,8 @@ class HistoryTest extends AbstractUiTest {
             assertThat(prevSnippetButton()).isDisabled();
             assertThat(nextSnippetButton()).isEnabled();
 
-            eventBus.post(new SnippetDeletedEvent("1"));
+
+            controller.removeCurrentSnippet();
 
             assertThat(prevSnippetButton()).isDisabled();
             assertThat(nextSnippetButton()).isEnabled();

@@ -1,18 +1,12 @@
 package cloud.codestore.client.ui.selection;
 
-import cloud.codestore.client.ui.ApplicationReadyEvent;
 import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.selection.filter.Filter;
 import cloud.codestore.client.ui.selection.list.SnippetList;
 import cloud.codestore.client.ui.selection.search.FullTextSearch;
 import cloud.codestore.client.ui.selection.sort.Sort;
-import cloud.codestore.client.ui.snippet.SnippetCreatedEvent;
-import cloud.codestore.client.ui.snippet.SnippetDeletedEvent;
-import cloud.codestore.client.ui.snippet.SnippetUpdatedEvent;
 import cloud.codestore.client.usecases.listsnippets.FilterProperties;
 import cloud.codestore.client.usecases.listsnippets.SortProperties;
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
@@ -49,15 +43,20 @@ public class SelectionController {
     private ObjectProperty<FilterProperties> filterProperties;
     private boolean updateSnippetListEnabled = true;
 
-    SelectionController(@Nonnull EventBus eventBus) {
-        eventBus.register(this);
-    }
-
     /**
      * @param selectedSnippetProperty a {@link StringProperty} that contains the URI if the currently selected code snippet.
      */
     public void setSelectedSnippetProperty(@Nonnull StringProperty selectedSnippetProperty) {
         snippetListController.setSelectedSnippetProperty(selectedSnippetProperty);
+    }
+
+    /**
+     * Reloads the snippet list in case of a change.
+     */
+    public void reloadSnippets() {
+        if (updateSnippetListEnabled) {
+            snippetListController.update(searchInputProperty.get(), filterProperties.get(), sortProperties.get());
+        }
     }
 
     @FXML
@@ -71,10 +70,6 @@ public class SelectionController {
         sortProperties = sortController.sortProperties();
         sortProperties.addListener(((observable, oldValue, newValue) -> onSort()));
 
-        registerControlKeyHandlers();
-    }
-
-    private void registerControlKeyHandlers() {
         searchController.registerKeyHandler(KeyCode.DOWN, snippetListController::selectNextSnippet);
         searchController.registerKeyHandler(KeyCode.UP, snippetListController::selectPreviousSnippet);
     }
@@ -109,7 +104,7 @@ public class SelectionController {
             updateSnippetListEnabled = true;
         }
 
-        updateSnippetList();
+        reloadSnippets();
     }
 
     /**
@@ -123,7 +118,7 @@ public class SelectionController {
             classes.add(FILLED_FILTER_BUTTON_STYLE);
         }
 
-        updateSnippetList();
+        reloadSnippets();
     }
 
     private void onSort() {
@@ -132,32 +127,6 @@ public class SelectionController {
             previousSortProperties = sortProperties;
         }
 
-        updateSnippetList();
-    }
-
-    @Subscribe
-    private void snippetCreated(@Nonnull SnippetCreatedEvent event) {
-        updateSnippetList();
-    }
-
-    @Subscribe
-    private void snippetUpdated(@Nonnull SnippetUpdatedEvent event) {
-        updateSnippetList();
-    }
-
-    @Subscribe
-    private void snippetDeleted(@Nonnull SnippetDeletedEvent event) {
-        updateSnippetList();
-    }
-
-    @Subscribe
-    private void applicationReady(@Nonnull ApplicationReadyEvent event) {
-        updateSnippetList();
-    }
-
-    private void updateSnippetList() {
-        if (updateSnippetListEnabled) {
-            snippetListController.update(searchInputProperty.get(), filterProperties.get(), sortProperties.get());
-        }
+        reloadSnippets();
     }
 }

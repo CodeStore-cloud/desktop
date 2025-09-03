@@ -1,10 +1,7 @@
 package cloud.codestore.client.ui.selection.history;
 
 import cloud.codestore.client.ui.FxController;
-import cloud.codestore.client.ui.snippet.SnippetDeletedEvent;
 import cloud.codestore.client.ui.snippet.SnippetForm;
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -34,10 +31,6 @@ public class History implements SnippetForm {
     @FXML
     private Button nextSnippetButton;
 
-    History(EventBus eventBus) {
-        eventBus.register(this);
-    }
-
     @FXML
     private void initialize() {
         updateButtonStates();
@@ -58,8 +51,11 @@ public class History implements SnippetForm {
         });
     }
 
-    @Subscribe
-    private void removeSnippet(@Nonnull SnippetDeletedEvent event) {
+    /**
+     * Removes the current snippet from the history.
+     * If a previous or next snippet exists, it will be selected.
+     */
+    public void removeCurrentSnippet() {
         if (hasPreviousSnippets()) {
             selectPreviousSnippetWithoutAddingCurrentSnippetToHistory();
         } else if (hasNextSnippets()) {

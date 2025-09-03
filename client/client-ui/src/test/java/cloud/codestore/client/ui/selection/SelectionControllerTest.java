@@ -1,16 +1,11 @@
 package cloud.codestore.client.ui.selection;
 
-import cloud.codestore.client.ui.ApplicationReadyEvent;
 import cloud.codestore.client.ui.selection.filter.Filter;
 import cloud.codestore.client.ui.selection.list.SnippetList;
 import cloud.codestore.client.ui.selection.search.FullTextSearch;
 import cloud.codestore.client.ui.selection.sort.Sort;
-import cloud.codestore.client.ui.snippet.SnippetCreatedEvent;
-import cloud.codestore.client.ui.snippet.SnippetDeletedEvent;
-import cloud.codestore.client.ui.snippet.SnippetUpdatedEvent;
 import cloud.codestore.client.usecases.listsnippets.FilterProperties;
 import cloud.codestore.client.usecases.listsnippets.SortProperties;
-import com.google.common.eventbus.EventBus;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -59,9 +54,8 @@ class SelectionControllerTest {
     private Sort sortController;
     @Mock
     private SnippetList snippetListController;
-    private EventBus eventBus = new EventBus();
     @InjectMocks
-    private SelectionController selectionController = new SelectionController(eventBus);
+    private SelectionController selectionController = new SelectionController();
 
     private StringProperty searchInputProperty = new SimpleStringProperty();
     private ObjectProperty<SortProperties> sortProperties = new SimpleObjectProperty<>();
@@ -150,34 +144,6 @@ class SelectionControllerTest {
         @DisplayName("when a filter was changed")
         void updateSnippetListOnFilter() {
             filterProperties.set(new FilterProperties(Set.of("tag1"), null));
-            assertSnippetListUpdated();
-        }
-
-        @Test
-        @DisplayName("when receiving a SnippetCreatedEvent")
-        void updateSnippetListOnSnippetCreatedEvent() {
-            eventBus.post(new SnippetCreatedEvent(""));
-            assertSnippetListUpdated();
-        }
-
-        @Test
-        @DisplayName("when receiving a SnippetUpdatedEvent")
-        void updateSnippetListOnSnippetUpdatedEvent() {
-            eventBus.post(new SnippetUpdatedEvent(""));
-            assertSnippetListUpdated();
-        }
-
-        @Test
-        @DisplayName("when receiving a SnippetDeletedEvent")
-        void updateSnippetListOnSnippetDeletedEvent() {
-            eventBus.post(new SnippetDeletedEvent(""));
-            assertSnippetListUpdated();
-        }
-
-        @Test
-        @DisplayName("when receiving an ApplicationReadyEvent")
-        void updateSnippetListOnApplicationReadyEvent() {
-            eventBus.post(new ApplicationReadyEvent());
             assertSnippetListUpdated();
         }
 

@@ -5,6 +5,7 @@ import cloud.codestore.client.Permission;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.ChangeSnippetsEvent;
+import cloud.codestore.client.ui.SnippetsChangedEvent;
 import cloud.codestore.client.ui.selection.history.History;
 import cloud.codestore.client.ui.snippet.code.SnippetCode;
 import cloud.codestore.client.ui.snippet.description.SnippetDescription;
@@ -18,7 +19,7 @@ import cloud.codestore.client.usecases.deletesnippet.DeleteSnippetUseCase;
 import cloud.codestore.client.usecases.readsnippet.ReadSnippetUseCase;
 import cloud.codestore.client.usecases.updatesnippet.UpdateSnippetUseCase;
 import cloud.codestore.client.usecases.updatesnippet.UpdatedSnippetDto;
-import com.google.common.eventbus.EventBus;
+import javafx.event.EventType;
 import javafx.scene.layout.Pane;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -51,7 +52,6 @@ class SnippetControllerTest extends ApplicationTest {
     private DeleteSnippetUseCase deleteSnippetUseCase = mock(DeleteSnippetUseCase.class);
     private CreateSnippetUseCase createSnippetUseCase = mock(CreateSnippetUseCase.class);
     private UpdateSnippetUseCase updateSnippetUseCase = mock(UpdateSnippetUseCase.class);
-    private EventBus eventBus = spy(new EventBus());
 
     @Mock
     private SnippetTitle snippetTitleController;
@@ -73,7 +73,7 @@ class SnippetControllerTest extends ApplicationTest {
 
     @InjectMocks
     private SnippetController snippetController = new SnippetController(
-            readSnippetUseCase, createSnippetUseCase, updateSnippetUseCase, deleteSnippetUseCase, eventBus
+            readSnippetUseCase, createSnippetUseCase, updateSnippetUseCase, deleteSnippetUseCase
     );
 
     private Snippet testSnippet;
@@ -135,7 +135,7 @@ class SnippetControllerTest extends ApplicationTest {
             verify(deleteSnippetUseCase).deleteSnippet(SNIPPET_URI);
             verifyVisit(EMPTY_SNIPPET);
             verifyEditable(false);
-            verify(eventBus).post(new SnippetDeletedEvent(SNIPPET_URI));
+            verifyEventFired(SnippetsChangedEvent.SNIPPET_DELETED, SNIPPET_URI);
         }
     }
 
@@ -170,7 +170,7 @@ class SnippetControllerTest extends ApplicationTest {
 
             verifyEditable(false);
             verifyVisit(createdSnippet);
-            verify(eventBus).post(new SnippetCreatedEvent(SNIPPET_URI));
+            verifyEventFired(SnippetsChangedEvent.SNIPPET_CREATED, SNIPPET_URI);
         }
 
         @Test
@@ -204,7 +204,7 @@ class SnippetControllerTest extends ApplicationTest {
 
                 clickOn("#yes");
 
-                verify(eventBus).post(new SnippetCreatedEvent(CREATED_SNIPPET_URI));
+                verifyEventFired(SnippetsChangedEvent.SNIPPET_CREATED, CREATED_SNIPPET_URI);
                 assertThat(snippetController.selectedSnippetProperty().get()).isEqualTo(SELECTED_SNIPPET_URI);
             }
 
@@ -212,7 +212,7 @@ class SnippetControllerTest extends ApplicationTest {
             @DisplayName("does not save the current snippet and selects the new one when the user rejected saving")
             void rejectSaving() {
                 clickOn("#no");
-                verify(eventBus, never()).post(new SnippetCreatedEvent(CREATED_SNIPPET_URI));
+                verifyEventNotFired(SnippetsChangedEvent.SNIPPET_CREATED);
                 assertThat(snippetController.selectedSnippetProperty().get()).isEqualTo(SELECTED_SNIPPET_URI);
             }
 
@@ -220,7 +220,7 @@ class SnippetControllerTest extends ApplicationTest {
             @DisplayName("does nothing when the user cancels saving")
             void cancelSaving() {
                 clickOn("#cancel");
-                verify(eventBus, never()).post(new SnippetCreatedEvent(CREATED_SNIPPET_URI));
+                verifyEventNotFired(SnippetsChangedEvent.SNIPPET_CREATED);
                 assertThat(snippetController.selectedSnippetProperty().get()).isEmpty();
             }
         }
@@ -259,7 +259,7 @@ class SnippetControllerTest extends ApplicationTest {
 
             verifyEditable(false);
             verifyVisit(updatedSnippet);
-            verify(eventBus).post(new SnippetUpdatedEvent(SNIPPET_URI));
+            verifyEventFired(SnippetsChangedEvent.SNIPPET_UPDATED, SNIPPET_URI);
         }
 
         @Test
@@ -294,7 +294,7 @@ class SnippetControllerTest extends ApplicationTest {
 
                 clickOn("#yes");
 
-                verify(eventBus).post(new SnippetUpdatedEvent(CURRENT_SNIPPET_URI));
+                verifyEventFired(SnippetsChangedEvent.SNIPPET_UPDATED, SNIPPET_URI);
                 assertThat(snippetController.selectedSnippetProperty().get()).isEqualTo(SELECTED_SNIPPET_URI);
             }
 
@@ -303,7 +303,7 @@ class SnippetControllerTest extends ApplicationTest {
             void rejectSaving() {
                 clickOn("#no");
 
-                verify(eventBus, never()).post(new SnippetUpdatedEvent(CURRENT_SNIPPET_URI));
+                verifyEventNotFired(SnippetsChangedEvent.SNIPPET_UPDATED);
                 assertThat(snippetController.selectedSnippetProperty().get()).isEqualTo(SELECTED_SNIPPET_URI);
             }
 
@@ -311,7 +311,7 @@ class SnippetControllerTest extends ApplicationTest {
             @DisplayName("does nothing when the user cancels saving")
             void cancelSaving() {
                 clickOn("#cancel");
-                verify(eventBus, never()).post(new SnippetUpdatedEvent(SNIPPET_URI));
+                verifyEventNotFired(SnippetsChangedEvent.SNIPPET_UPDATED);
                 assertThat(snippetController.selectedSnippetProperty().get()).isEqualTo(SNIPPET_URI);
             }
         }
@@ -365,8 +365,7 @@ class SnippetControllerTest extends ApplicationTest {
                 snippetCodeController,
                 snippetDetailsController,
                 snippetFooterController,
-                history,
-                eventBus
+                history
         );
     }
 
@@ -408,6 +407,20 @@ class SnippetControllerTest extends ApplicationTest {
 
     private void requestSnippetSelection(String uri) {
         snippetController.selectedSnippetProperty().set(uri);
+    }
+
+    private void verifyEventFired(EventType<SnippetsChangedEvent> expectedEventType, String expectedUri) {
+        verify(snippetPane).fireEvent(
+                argThat((SnippetsChangedEvent event) ->
+                        event.getEventType() == expectedEventType &&
+                        Objects.equals(event.getSnippetUri(), expectedUri)
+                ));
+    }
+
+    private void verifyEventNotFired(EventType<SnippetsChangedEvent> expectedEventType) {
+        verify(snippetPane, never()).fireEvent(
+                argThat((SnippetsChangedEvent event) -> event.getEventType() == expectedEventType)
+        );
     }
 
     private class DummyFooter extends SnippetFooter {
