@@ -12,5 +12,9 @@
             <Tooltip text="%search.clear" />
         </tooltip>
     </IconButton>
-    <TextField fx:id="inputField" promptText="%search.placeholder" HBox.hgrow="ALWAYS"/>
+    <TextField fx:id="inputField" promptText="%search.placeholder" HBox.hgrow="ALWAYS">
+        <tooltip>
+            <Tooltip text="%search.shortcut"/>
+        </tooltip>
+    </TextField>
 </HBox>

@@ -11,6 +11,9 @@ import javafx.beans.property.StringProperty;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -103,7 +106,7 @@ class SnippetListTest extends AbstractUiTest {
     }
 
     @Test
-    @DisplayName("fires a ChangeSnippetsEvent if the create-snippet button was clicked")
+    @DisplayName("fires a ChangeSnippetsEvent when the create-snippet button was clicked")
     void createSnippetEvent() {
         Button createSnippetButton = createSnippetButton();
         createSnippetButton.setVisible(true);
@@ -111,6 +114,18 @@ class SnippetListTest extends AbstractUiTest {
         createSnippetButton.addEventHandler(ChangeSnippetsEvent.CREATE_SNIPPET, event -> eventFired.set(true));
 
         clickOn(createSnippetButton);
+        assertThat(eventFired.get()).isTrue();
+    }
+
+    @Test
+    @DisplayName("fires a ChangeSnippetsEvent when pressing ctrl-N")
+    void focusOnCtrlF() {
+        Button createSnippetButton = createSnippetButton();
+
+        AtomicBoolean eventFired = new AtomicBoolean(false);
+        createSnippetButton.addEventHandler(ChangeSnippetsEvent.CREATE_SNIPPET, event -> eventFired.set(true));
+
+        push(new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN));
         assertThat(eventFired.get()).isTrue();
     }
 

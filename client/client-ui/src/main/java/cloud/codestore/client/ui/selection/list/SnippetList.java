@@ -13,6 +13,9 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
@@ -40,6 +43,13 @@ public class SnippetList {
         createSnippet.managedProperty().bind(createSnippet.visibleProperty());
         handleNextPageVisibility();
         handleSnippetSelection();
+
+        createSnippet.sceneProperty()
+                     .addListener((observable, oldValue, scene) ->
+                             scene.getAccelerators().put(
+                                     new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN),
+                                     this::createNewSnippet
+                             ));
     }
 
     public void setSelectedSnippetProperty(@Nonnull StringProperty selectedSnippet) {
@@ -126,6 +136,7 @@ public class SnippetList {
 
     /**
      * Sets the selected element in the list to the one defined by {@code selectedSnippetUri}.
+     *
      * @return the index of the snippet in the list.
      */
     private int updateSelection() {
@@ -135,7 +146,7 @@ public class SnippetList {
     }
 
     private int findSelectedSnippetIndex() {
-        String selectedSnippetUri =  selectedSnippet.get();
+        String selectedSnippetUri = selectedSnippet.get();
         if (!selectedSnippetUri.isEmpty()) {
             ObservableList<SnippetListItem> listItems = list.getItems();
             for (int i = 0; i < listItems.size(); i++) {

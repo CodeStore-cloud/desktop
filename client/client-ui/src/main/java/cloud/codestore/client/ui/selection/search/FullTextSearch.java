@@ -6,6 +6,8 @@ import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -27,6 +29,13 @@ public class FullTextSearch {
                 keyCodeHandlers.get(keyCode).run();
             }
         });
+
+        inputField.sceneProperty()
+                  .addListener((observable, oldValue, scene) ->
+                          scene.getAccelerators().put(
+                                  new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN),
+                                  this::focus
+                          ));
     }
 
     /**
@@ -45,6 +54,10 @@ public class FullTextSearch {
      */
     public void registerKeyHandler(@Nonnull KeyCode keyCode, @Nonnull Runnable runnable) {
         keyCodeHandlers.put(keyCode, runnable);
+    }
+
+    private void focus() {
+        inputField.requestFocus();
     }
 
     @FXML

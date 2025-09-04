@@ -4,6 +4,8 @@ import cloud.codestore.client.ui.AbstractUiTest;
 import javafx.scene.control.Labeled;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,7 +13,7 @@ import org.testfx.framework.junit5.Start;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.testfx.assertions.api.Assertions.assertThat;
 
 @DisplayName("The full-text-search input field")
 class FullTextSearchTest extends AbstractUiTest {
@@ -20,6 +22,15 @@ class FullTextSearchTest extends AbstractUiTest {
     @Start
     public void start(Stage stage) throws Exception {
         start(stage, "searchField.fxml", controller);
+    }
+
+    @Test
+    @DisplayName("is focused via the shortcut ctrl-F")
+    void focusOnCtrlF() {
+        var inputField = inputField();
+        assertThat(inputField).isNotFocused();
+        push(new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN));
+        assertThat(inputField).isFocused();
     }
 
     @Test
