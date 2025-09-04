@@ -54,27 +54,22 @@ class SnippetControllerTest extends ApplicationTest {
     private CreateSnippetUseCase createSnippetUseCase = mock(CreateSnippetUseCase.class);
     private UpdateSnippetUseCase updateSnippetUseCase = mock(UpdateSnippetUseCase.class);
 
-    @Mock
-    private SnippetTitle snippetTitleController;
-    @Mock
-    private SnippetDescription snippetDescriptionController;
-    @Mock
-    private SnippetCode snippetCodeController;
-    @Mock
-    private SnippetDetails snippetDetailsController;
-    @Spy
-    private DummyFooter snippetFooterController = new DummyFooter();
+    private SnippetTitle snippetTitleController = mock(SnippetTitle.class);
+    private SnippetDescription snippetDescriptionController = mock(SnippetDescription.class);
+    private SnippetCode snippetCodeController = mock(SnippetCode.class);
+    private SnippetDetails snippetDetailsController = mock(SnippetDetails.class);
+    private DummyFooter snippetFooterController = spy(new DummyFooter());
+    private History historyController = mock(History.class);
 
     @Spy
     private Pane snippetPane = new Pane();
     @Mock
     private Pane noSnippetLabel;
-    @Mock
-    private History history;
 
     @InjectMocks
     private SnippetController snippetController = new SnippetController(
-            readSnippetUseCase, createSnippetUseCase, updateSnippetUseCase, deleteSnippetUseCase
+            readSnippetUseCase, createSnippetUseCase, updateSnippetUseCase, deleteSnippetUseCase,
+            List.of(snippetTitleController, snippetDescriptionController, snippetCodeController, snippetDetailsController, snippetFooterController, historyController)
     );
 
     private Snippet testSnippet;
@@ -130,7 +125,7 @@ class SnippetControllerTest extends ApplicationTest {
             doAnswer(invocation -> {
                 snippetController.selectedSnippetProperty().set("");
                 return null;
-            }).when(history).removeCurrentSnippet();
+            }).when(historyController).removeCurrentSnippet();
             requestSnippetSelection(SNIPPET_URI);
             clearInvocations();
 
@@ -328,7 +323,7 @@ class SnippetControllerTest extends ApplicationTest {
         verify(snippetCodeController).setEditing(editable);
         verify(snippetDetailsController).setEditing(editable);
         verify(snippetFooterController).setEditing(editable);
-        verify(history).setEditing(editable);
+        verify(historyController).setEditing(editable);
     }
 
     private void verifyShowSnippetPane() {
@@ -370,7 +365,7 @@ class SnippetControllerTest extends ApplicationTest {
                 snippetCodeController,
                 snippetDetailsController,
                 snippetFooterController,
-                history
+                historyController
         );
     }
 

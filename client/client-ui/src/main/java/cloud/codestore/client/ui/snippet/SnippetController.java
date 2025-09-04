@@ -6,12 +6,7 @@ import cloud.codestore.client.ui.ChangeSnippetsEvent;
 import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.SnippetsChangedEvent;
 import cloud.codestore.client.ui.selection.history.History;
-import cloud.codestore.client.ui.snippet.code.SnippetCode;
-import cloud.codestore.client.ui.snippet.description.SnippetDescription;
-import cloud.codestore.client.ui.snippet.details.SnippetDetails;
 import cloud.codestore.client.ui.snippet.footer.ControlEvent;
-import cloud.codestore.client.ui.snippet.footer.SnippetFooter;
-import cloud.codestore.client.ui.snippet.title.SnippetTitle;
 import cloud.codestore.client.usecases.createsnippet.CreateSnippetUseCase;
 import cloud.codestore.client.usecases.createsnippet.NewSnippetDto;
 import cloud.codestore.client.usecases.deletesnippet.DeleteSnippetUseCase;
@@ -23,6 +18,7 @@ import javafx.fxml.FXML;
 import javafx.scene.layout.Pane;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
 @FxController
 public class SnippetController {
@@ -42,17 +38,6 @@ public class SnippetController {
     private Pane snippetPane;
     @FXML
     private Pane noSnippetLabel;
-
-    @FXML
-    private SnippetTitle snippetTitleController;
-    @FXML
-    private SnippetDescription snippetDescriptionController;
-    @FXML
-    private SnippetCode snippetCodeController;
-    @FXML
-    private SnippetDetails snippetDetailsController;
-    @FXML
-    private SnippetFooter snippetFooterController;
     @FXML
     private History historyController;
 
@@ -60,25 +45,18 @@ public class SnippetController {
             @Nonnull ReadSnippetUseCase readSnippetUseCase,
             @Nonnull CreateSnippetUseCase createSnippetUseCase,
             @Nonnull UpdateSnippetUseCase updateSnippetUseCase,
-            @Nonnull DeleteSnippetUseCase deleteSnippetUseCase
+            @Nonnull DeleteSnippetUseCase deleteSnippetUseCase,
+            List<SnippetForm> forms
     ) {
         this.readSnippetUseCase = readSnippetUseCase;
         this.createSnippetUseCase = createSnippetUseCase;
         this.updateSnippetUseCase = updateSnippetUseCase;
         this.deleteSnippetUseCase = deleteSnippetUseCase;
+        this.forms = forms.toArray(SnippetForm[]::new);
     }
 
     @FXML
     private void initialize() {
-        forms = new SnippetForm[]{
-                historyController,
-                snippetTitleController,
-                snippetDescriptionController,
-                snippetCodeController,
-                snippetDetailsController,
-                snippetFooterController
-        };
-
         snippetPane.addEventHandler(ControlEvent.SAVE, event -> state.save());
         snippetPane.addEventHandler(ControlEvent.CANCEL, event -> state.cancel());
         snippetPane.addEventHandler(ChangeSnippetsEvent.UPDATE_SNIPPET, event -> state.edit());
