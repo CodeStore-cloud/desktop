@@ -4,6 +4,7 @@ import cloud.codestore.client.Permission;
 import cloud.codestore.client.ui.ChangeSnippetsEvent;
 import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.usecases.listsnippets.*;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -54,12 +55,12 @@ public class SnippetList {
 
     public void setSelectedSnippetProperty(@Nonnull StringProperty selectedSnippet) {
         this.selectedSnippet = selectedSnippet;
-        selectedSnippet.addListener((observable, oldValue, newValue) -> updateSelection());
+        selectedSnippet.addListener((observable, oldValue, newValue) ->
+                runWithoutHandlingSnippetSelection(this::updateSelection));
     }
 
     public void update(String searchQuery, FilterProperties filterProperties, SortProperties sortProperties) {
-        try {
-            handleSelectionChanges = false;
+        runWithoutHandlingSnippetSelection(() -> {
             list.getItems().clear();
             SnippetPage page = readSnippetsUseCase.getPage(searchQuery, filterProperties, sortProperties);
             createSnippet.setVisible(page.permissions().contains(Permission.CREATE));
@@ -67,9 +68,7 @@ public class SnippetList {
 
             int snippetIndex = updateSelection();
             list.scrollTo(snippetIndex);
-        } finally {
-            handleSelectionChanges = true;
-        }
+        });
     }
 
     public void selectNextSnippet() {
@@ -99,7 +98,10 @@ public class SnippetList {
             .selectedItemProperty()
             .addListener((observable, oldValue, newValue) -> {
                 if (handleSelectionChanges) {
-                    selectionChanged(newValue);
+                    // Error when selecting a new snippet while creating a new one:
+                    // IndexOutOfBoundsException: [ fromIndex: 0, toIndex: 1, size: 0 ]
+                    // Workaround: Platform.runLater
+                    Platform.runLater(() -> selectionChanged(newValue));
                 }
             });
     }
@@ -124,13 +126,10 @@ public class SnippetList {
         if (newSelection == null) {
             selectedSnippet.set("");
         } else if (!Objects.equals(selectedSnippet.get(), newSelection.uri())) {
-            try {
-                handleSelectionChanges = false;
+            runWithoutHandlingSnippetSelection(() -> {
                 updateSelection();
                 selectedSnippet.set(newSelection.uri());
-            } finally {
-                handleSelectionChanges = true;
-            }
+            });
         }
     }
 
@@ -158,5 +157,18 @@ public class SnippetList {
         }
 
         return -1;
+    }
+
+    /**
+     * In some cases, we need to avoid recursive snippet selection.
+     * This method disables handling the snippet selection while running the given action.
+     */
+    private void runWithoutHandlingSnippetSelection(Runnable action) {
+        try {
+            handleSelectionChanges = false;
+            action.run();
+        } finally {
+            handleSelectionChanges = true;
+        }
     }
 }
