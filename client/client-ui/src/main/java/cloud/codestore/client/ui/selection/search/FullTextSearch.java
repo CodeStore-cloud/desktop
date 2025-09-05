@@ -25,6 +25,7 @@ public class FullTextSearch {
             KeyCode keyCode = event.getCode();
             if (keyCode == KeyCode.ESCAPE) {
                 clearInput();
+                event.consume();
             } else if (keyCodeHandlers.containsKey(keyCode)) {
                 keyCodeHandlers.get(keyCode).run();
             }

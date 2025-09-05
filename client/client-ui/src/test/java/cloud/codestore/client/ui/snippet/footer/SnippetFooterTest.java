@@ -2,10 +2,14 @@ package cloud.codestore.client.ui.snippet.footer;
 
 import cloud.codestore.client.Permission;
 import cloud.codestore.client.Snippet;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,6 +21,7 @@ import org.testfx.framework.junit5.Start;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.testfx.assertions.api.Assertions.assertThat;
 
@@ -57,6 +62,12 @@ class SnippetFooterTest extends ApplicationTest {
             controller.visit(snippet(Permission.UPDATE));
             assertVisibleIfNotEditing(button);
         }
+
+        @Test
+        @DisplayName("fires on CTRL+E")
+        void shortcut() {
+            assertButtonFiresOnShortcut(new KeyCodeCombination(KeyCode.E, KeyCombination.CONTROL_DOWN));
+        }
     }
 
     @Nested
@@ -79,6 +90,12 @@ class SnippetFooterTest extends ApplicationTest {
             controller.visit(snippet(Permission.DELETE));
             assertVisibleIfNotEditing(button);
         }
+
+        @Test
+        @DisplayName("fires on CTRL+D")
+        void shortcut() {
+            assertButtonFiresOnShortcut(new KeyCodeCombination(KeyCode.D, KeyCombination.CONTROL_DOWN));
+        }
     }
 
     @Nested
@@ -94,6 +111,12 @@ class SnippetFooterTest extends ApplicationTest {
         void visibleIfNotEditing() {
             assertVisibleIfEditing(button);
         }
+
+        @Test
+        @DisplayName("fires on CTRL+S")
+        void shortcut() {
+            assertButtonFiresOnShortcut(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
+        }
     }
 
     @Nested
@@ -108,6 +131,12 @@ class SnippetFooterTest extends ApplicationTest {
         @DisplayName("are only visible if editing")
         void visibleIfNotEditing() {
             assertVisibleIfEditing(button);
+        }
+
+        @Test
+        @DisplayName("fires on ESC")
+        void shortcut() {
+            assertButtonFiresOnShortcut(new KeyCodeCombination(KeyCode.ESCAPE));
         }
     }
 
@@ -145,5 +174,12 @@ class SnippetFooterTest extends ApplicationTest {
 
         controller.setEditing(false);
         assertThat(button).isVisible();
+    }
+
+    void assertButtonFiresOnShortcut(KeyCodeCombination shortcut) {
+        AtomicBoolean buttonFired = new AtomicBoolean(false);
+        button.addEventHandler(ActionEvent.ACTION, event -> buttonFired.set(true));
+        push(shortcut);
+        assertThat(buttonFired.get()).isTrue();
     }
 }

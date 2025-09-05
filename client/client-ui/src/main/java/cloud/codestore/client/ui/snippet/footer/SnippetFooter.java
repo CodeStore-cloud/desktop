@@ -7,6 +7,9 @@ import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.snippet.SnippetForm;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
@@ -40,6 +43,21 @@ public class SnippetFooter implements SnippetForm {
         deleteButton.setOnAction(event -> editButton.fireEvent(
                 new ChangeSnippetsEvent(ChangeSnippetsEvent.DELETE_SNIPPET))
         );
+
+        saveButton.sceneProperty().addListener((observable, oldValue, scene) -> {
+            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN), saveButton::fire);
+            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.ESCAPE), cancelButton::fire);
+            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.E, KeyCombination.CONTROL_DOWN), () -> {
+                if (editButton.isVisible()) {
+                    editButton.fire();
+                }
+            });
+            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.D, KeyCombination.CONTROL_DOWN), () -> {
+                if (deleteButton.isVisible()) {
+                    deleteButton.fire();
+                }
+            });
+        });
     }
 
     @Override
