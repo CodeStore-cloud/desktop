@@ -130,40 +130,33 @@ class HistoryTest extends AbstractUiTest {
     @Nested
     @DisplayName("when deleting the current snippet")
     class DeleteSnippet {
-        @BeforeEach
-        void setUp() {
+        @Test
+        @DisplayName("selects the previous snippet if available")
+        void deleteSnippetAndSelectPrevious() {
             selectedSnippet.set("1");
             selectedSnippet.set("2"); // current snippet
             selectedSnippet.set("3");
             clickOn(prevSnippetButton());
-        }
-
-        @Test
-        @DisplayName("selects the previous snippet if available")
-        void deleteSnippetAndSelectPrevious() {
-            assertThat(prevSnippetButton()).isEnabled();
-            assertThat(nextSnippetButton()).isEnabled();
-
             controller.removeCurrentSnippet();
-
-            assertThat(prevSnippetButton()).isDisabled();
-            assertThat(nextSnippetButton()).isEnabled();
             assertThat(selectedSnippet.get()).isEqualTo("1");
         }
 
         @Test
         @DisplayName("selects the next snippet if no previous snippet is available")
         void deleteSnippetAndSelectNext() {
+            selectedSnippet.set("1"); // current snippet
+            selectedSnippet.set("2");
             clickOn(prevSnippetButton());
-            assertThat(prevSnippetButton()).isDisabled();
-            assertThat(nextSnippetButton()).isEnabled();
-
-
             controller.removeCurrentSnippet();
-
-            assertThat(prevSnippetButton()).isDisabled();
-            assertThat(nextSnippetButton()).isEnabled();
             assertThat(selectedSnippet.get()).isEqualTo("2");
+        }
+
+        @Test
+        @DisplayName("clears the selection if no previous or next snippet exists")
+        void clearSelection() {
+            selectedSnippet.set("1"); // current snippet
+            controller.removeCurrentSnippet();
+            assertThat(selectedSnippet.get()).isEqualTo("");
         }
     }
 

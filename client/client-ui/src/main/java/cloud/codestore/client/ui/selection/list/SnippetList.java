@@ -123,18 +123,24 @@ public class SnippetList {
     }
 
     private void selectionChanged(SnippetListItem newSelection) {
-        if (newSelection == null) {
-            selectedSnippet.set("");
-        } else if (!Objects.equals(selectedSnippet.get(), newSelection.uri())) {
+        if (newSelection != null && !Objects.equals(selectedSnippet.get(), newSelection.uri())) {
             runWithoutHandlingSnippetSelection(() -> {
-                updateSelection();
+                keepCurrentSelection();
                 selectedSnippet.set(newSelection.uri());
             });
         }
     }
 
     /**
-     * Sets the selected element in the list to the one defined by {@code selectedSnippetUri}.
+     * Selecting another snippet is handled asynchronously.
+     * So we need to reset the selected item in the list to the currently selected snippet.
+     */
+    private void keepCurrentSelection() {
+        updateSelection();
+    }
+
+    /**
+     * Sets the selected element in the list to the one defined by {@link #selectedSnippet}.
      *
      * @return the index of the snippet in the list.
      */

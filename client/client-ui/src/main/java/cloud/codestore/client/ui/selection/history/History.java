@@ -61,6 +61,7 @@ public class History implements SnippetForm {
         } else if (hasNextSnippets()) {
             selectNextSnippetWithoutAddingCurrentSnippetToHistory();
         } else {
+            handleSelection = false;
             selectedSnippetProperty.set("");
         }
     }

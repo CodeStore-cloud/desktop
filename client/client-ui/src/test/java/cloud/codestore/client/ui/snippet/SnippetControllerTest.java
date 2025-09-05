@@ -129,8 +129,10 @@ class SnippetControllerTest extends ApplicationTest {
             requestSnippetSelection(SNIPPET_URI);
             clearInvocations();
 
-            interact(snippetFooterController::clickDeleteButton);
-            clickOn("#yes");
+            interact(() -> {
+                snippetFooterController.clickDeleteButton();
+                clickOn("#yes");
+            });
 
             verify(deleteSnippetUseCase).deleteSnippet(SNIPPET_URI);
             verifyVisit(EMPTY_SNIPPET);

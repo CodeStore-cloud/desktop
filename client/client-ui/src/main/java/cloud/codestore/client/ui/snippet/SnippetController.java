@@ -85,15 +85,19 @@ public class SnippetController {
 
     private void registerSelectionHandler() {
         selectedSnippetProperty.onChangeRequested(snippetUri -> {
-            Runnable selectSnippet = () -> {
-                Snippet snippet = readSnippetUseCase.readSnippet(snippetUri);
-                state = new ShowSnippetState(snippet);
-            };
-
-            if (state.isEditing()) {
-                requestSaving(selectSnippet);
+            if (snippetUri.isEmpty()) {
+                state = new DefaultState();
             } else {
-                selectSnippet.run();
+                Runnable selectSnippet = () -> {
+                    Snippet snippet = readSnippetUseCase.readSnippet(snippetUri);
+                    state = new ShowSnippetState(snippet);
+                };
+
+                if (state.isEditing()) {
+                    requestSaving(selectSnippet);
+                } else {
+                    selectSnippet.run();
+                }
             }
         });
     }

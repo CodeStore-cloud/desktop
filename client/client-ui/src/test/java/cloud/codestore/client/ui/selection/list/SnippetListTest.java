@@ -177,12 +177,12 @@ class SnippetListTest extends AbstractUiTest {
     @DisplayName("selects the next snippet")
     void selectNextSnippet() {
         initSelection(uri(1));
-        controller.selectNextSnippet();
+        interact(() -> controller.selectNextSnippet());
         assertThat(selectedSnippet.get()).isEqualTo(uri(2));
 
         initSelection(uri(10));
 
-        controller.selectNextSnippet();
+        interact(() -> controller.selectNextSnippet());
         assertThat(selectedSnippet.get()).isEqualTo(uri(10));
     }
 
@@ -190,12 +190,12 @@ class SnippetListTest extends AbstractUiTest {
     @DisplayName("selects the previous snippet")
     void selectPreviousSnippet() {
         initSelection(uri(5));
-        controller.selectPreviousSnippet();
+        interact(() -> controller.selectPreviousSnippet());
         assertThat(selectedSnippet.get()).isEqualTo(uri(4));
 
         initSelection(uri(1));
 
-        controller.selectPreviousSnippet();
+        interact(() -> controller.selectPreviousSnippet());
         assertThat(selectedSnippet.get()).isEqualTo(uri(1));
     }
 
