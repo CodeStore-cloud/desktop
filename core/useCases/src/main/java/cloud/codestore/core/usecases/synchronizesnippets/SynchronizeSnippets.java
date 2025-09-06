@@ -18,20 +18,21 @@ public class SynchronizeSnippets {
 
     private final Status status;
     private final Synchronization<Snippet> synchronization;
-    private final SynchronizationProgressListener progressListener;
+    private final SynchronizationReport syncReport;
 
     SynchronizeSnippets(
             Synchronization<Snippet> synchronization,
             Status status,
-            SynchronizationProgressListener progressListener
+            SynchronizationProgressListener progressListener,
+            SynchronizationReport syncReport
     ) {
-        this.status = status;
         this.synchronization = synchronization;
-        this.progressListener = new SynchronizationProgressListener();
+        this.status = status;
+        this.syncReport = syncReport;
         this.synchronization.setProgressListener(progressListener);
     }
 
-    public void synchronizeSnippets() {
+    public SynchronizationReport synchronizeSnippets() {
         long start = System.currentTimeMillis();
         LOGGER.info("===== Snippet synchronization startet =====");
 
@@ -40,9 +41,11 @@ public class SynchronizeSnippets {
 
         LOGGER.info(
                 "===== Snippet synchronization finished {} in {}ms =====",
-                progressListener.getErrorCount() == 0 ? "successfully" : "with errors",
+                syncReport.getErrorCount() == 0 ? "successfully" : "with errors",
                 System.currentTimeMillis() - start
         );
+
+        return syncReport;
     }
 
     private void saveStatus() {

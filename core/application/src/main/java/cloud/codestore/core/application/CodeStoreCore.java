@@ -1,6 +1,7 @@
 package cloud.codestore.core.application;
 
 import cloud.codestore.core.Snippet;
+import cloud.codestore.core.Sync;
 import cloud.codestore.core.UseCase;
 import cloud.codestore.core.Validator;
 import cloud.codestore.core.repositories.Repository;
@@ -25,7 +26,7 @@ import java.awt.*;
         basePackages = "cloud.codestore.core",
         includeFilters = @ComponentScan.Filter(
                 type = FilterType.ANNOTATION,
-                classes = {UseCase.class, Validator.class, Repository.class}
+                classes = {UseCase.class, Validator.class, Sync.class, Repository.class}
         )
 )
 public class CodeStoreCore {

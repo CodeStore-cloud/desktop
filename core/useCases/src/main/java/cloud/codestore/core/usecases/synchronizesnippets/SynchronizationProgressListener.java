@@ -1,19 +1,24 @@
 package cloud.codestore.core.usecases.synchronizesnippets;
 
+import cloud.codestore.core.Sync;
 import cloud.codestore.synchronization.ProgressListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
+@Sync
 class SynchronizationProgressListener implements ProgressListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(SynchronizationProgressListener.class);
 
-    private final AtomicInteger errorCount =  new AtomicInteger(0);
+    private final SynchronizationReport syncReport;
+
+    SynchronizationProgressListener(SynchronizationReport syncReport) {
+        this.syncReport = syncReport;
+    }
 
     @Override
     public void numberOfItems(int snippetCount) {
         LOGGER.info("Total snippet count: {}", snippetCount);
+        syncReport.setTotalSnippetCount(snippetCount);
     }
 
     @Override
@@ -25,10 +30,6 @@ class SynchronizationProgressListener implements ProgressListener {
     @Override
     public void synchronizationFailed(String snippetId, Throwable exception) {
         LOGGER.error("Synchronization failed for snippet {}", snippetId, exception);
-        errorCount.incrementAndGet();
-    }
-
-    int getErrorCount() {
-        return errorCount.get();
+        syncReport.synchronizationFailed(snippetId, exception);
     }
 }

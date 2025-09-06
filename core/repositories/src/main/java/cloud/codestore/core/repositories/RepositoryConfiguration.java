@@ -49,7 +49,7 @@ class RepositoryConfiguration {
             dataDirectory = new Directory(Path.of(dataPath).toAbsolutePath());
         }
 
-        LOGGER.info("Data directory: {}", dataDirectory);
+        LOGGER.debug("Data directory: {}", dataDirectory);
         return dataDirectory;
     }
 
@@ -67,7 +67,7 @@ class RepositoryConfiguration {
     @Bean("bin")
     public Directory binDirectory() {
         Directory binDirectory = new Directory(Path.of(binaryPath).toAbsolutePath());
-        LOGGER.info("Binary directory: {}", binDirectory);
+        LOGGER.debug("Binary directory: {}", binDirectory);
         return binDirectory;
     }
 }
