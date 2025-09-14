@@ -4,18 +4,19 @@ import cloud.codestore.core.Sync;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
 @Sync
 public class SynchronizationProgress {
-    private SynchronizationStatus status;
+    private SynchronizationStatus status = SynchronizationStatus.PENDING;
     private OffsetDateTime startTime;
     private OffsetDateTime endTime;
     private int totalSnippets;
     private int processedSnippets;
 
-    @Nullable
+    @Nonnull
     public SynchronizationStatus getStatus() {
         return status;
     }
@@ -35,10 +36,22 @@ public class SynchronizationProgress {
     }
 
     void setStatus(@Nonnull SynchronizationStatus status) {
+        if (this.status == SynchronizationStatus.COMPLETED || this.status == SynchronizationStatus.FAILED) {
+            throw new IllegalStateException("Synchronization already completed.");
+        }
+
         this.status = status;
         switch (status) {
             case IN_PROGRESS -> startTime = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC);
             case COMPLETED, FAILED -> endTime = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC);
+        }
+    }
+
+    int getDuration() {
+        if (startTime != null && endTime != null) {
+            return (int) Duration.between(startTime, endTime).toMillis();
+        } else {
+            return 0;
         }
     }
 

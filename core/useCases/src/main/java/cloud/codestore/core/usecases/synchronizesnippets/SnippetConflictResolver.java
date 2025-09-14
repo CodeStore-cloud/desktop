@@ -5,7 +5,7 @@ import cloud.codestore.synchronization.ConflictResolver;
 
 import java.time.OffsetDateTime;
 
-public class SnippetConflictResolver extends ConflictResolver<Snippet> {
+class SnippetConflictResolver extends ConflictResolver<Snippet> {
     @Override
     public void resolve(String snippetId, String etagA, String etagB) throws Exception {
         OffsetDateTime dateA = OffsetDateTime.parse(etagA);

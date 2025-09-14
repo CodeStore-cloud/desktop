@@ -1,11 +1,9 @@
 package cloud.codestore.core.usecases.synchronizesnippets;
 
-import cloud.codestore.core.Sync;
 import cloud.codestore.synchronization.ProgressListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Sync
 class SynchronizationProgressListener implements ProgressListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(SynchronizationProgressListener.class);
 
