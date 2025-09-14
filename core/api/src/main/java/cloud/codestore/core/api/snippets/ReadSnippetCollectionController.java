@@ -97,17 +97,17 @@ public class ReadSnippetCollectionController {
     ) {
         if (totalPages > 1) {
             urlParameters.put("page[number]", 1);
-            document.addLink(new Link(Link.FIRST, SnippetCollectionResource.createLink(urlParameters)));
+            document.addLink(Link.FIRST, new Link(SnippetCollectionResource.createLink(urlParameters)));
             urlParameters.put("page[number]", totalPages);
-            document.addLink(new Link(Link.LAST, SnippetCollectionResource.createLink(urlParameters)));
+            document.addLink(Link.LAST, new Link(SnippetCollectionResource.createLink(urlParameters)));
         }
         if (pageNumber < totalPages) {
             urlParameters.put("page[number]", pageNumber + 1);
-            document.addLink(new Link(Link.NEXT, SnippetCollectionResource.createLink(urlParameters)));
+            document.addLink(Link.NEXT, new Link(SnippetCollectionResource.createLink(urlParameters)));
         }
         if (pageNumber > 1) {
             urlParameters.put("page[number]", pageNumber - 1);
-            document.addLink(new Link(Link.PREV, SnippetCollectionResource.createLink(urlParameters)));
+            document.addLink(Link.PREV, new Link(SnippetCollectionResource.createLink(urlParameters)));
         }
     }
 
