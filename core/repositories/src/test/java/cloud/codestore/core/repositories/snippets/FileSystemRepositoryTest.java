@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 @DisplayName("The local snippet repository")
 class FileSystemRepositoryTest {
     private static final String SNIPPET_ID = UUID.randomUUID().toString();
-    private static final String SNIPPET_FILE_NAME = SNIPPET_ID + FileSystemRepository.JSON_FILE_EXTENSION;
+    private static final String SNIPPET_FILE_NAME = SnippetFileHelper.getFileName(SNIPPET_ID);
 
     @Mock
     private File snippetFile;

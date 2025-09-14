@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 /**
- * Use Case: synchronize local code snippet with cloud storage.
+ * Use Case: synchronize all local code snippets with cloud storage.
  */
 @UseCase
 public class SynchronizeSnippets {
@@ -24,12 +24,14 @@ public class SynchronizeSnippets {
             Synchronization<Snippet> synchronization,
             Status status,
             SynchronizationProgressListener progressListener,
-            SynchronizationReport syncReport
+            SynchronizationReport syncReport,
+            SnippetConflictResolver conflictResolver
     ) {
         this.synchronization = synchronization;
         this.status = status;
         this.syncReport = syncReport;
         this.synchronization.setProgressListener(progressListener);
+        this.synchronization.setConflictResolver(conflictResolver);
     }
 
     public SynchronizationReport synchronizeSnippets() {

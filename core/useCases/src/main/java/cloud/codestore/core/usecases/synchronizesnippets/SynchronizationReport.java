@@ -19,7 +19,6 @@ public class SynchronizationReport {
     private final List<Snippet> remoteUpdatedSnippets = Collections.synchronizedList(new LinkedList<>());
     private final List<Snippet> remoteDeletedSnippets = Collections.synchronizedList(new LinkedList<>());
     private final Map<String, Throwable> errors = new HashMap<>();
-    private int totalSnippetCount;
 
     public void snippetCreatedLocally(Snippet snippet) {
         localNewSnippets.add(snippet);
@@ -71,18 +70,6 @@ public class SynchronizationReport {
 
     void synchronizationFailed(String snippetId, Throwable error) {
         errors.put(snippetId, error);
-    }
-
-    public int getTotalSnippetCount() {
-        return totalSnippetCount;
-    }
-
-    void setTotalSnippetCount(int totalSnippetCount) {
-        this.totalSnippetCount = totalSnippetCount;
-    }
-
-    public int getSuccessCount() {
-        return totalSnippetCount - getErrorCount();
     }
 
     public int getErrorCount() {

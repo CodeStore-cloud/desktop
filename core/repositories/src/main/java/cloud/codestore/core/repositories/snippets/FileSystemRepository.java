@@ -19,8 +19,6 @@ import java.util.stream.Stream;
  */
 @Repository
 class FileSystemRepository implements CreateSnippetQuery, UpdateSnippetQuery, DeleteSnippetQuery, ReadSnippetQuery {
-    static final String JSON_FILE_EXTENSION = ".json";
-
     private final Directory snippetsDirectory;
     private final SnippetReader snippetReader;
     private final SnippetWriter snippetWriter;
@@ -87,6 +85,6 @@ class FileSystemRepository implements CreateSnippetQuery, UpdateSnippetQuery, De
     }
 
     private File file(String snippetId) {
-        return snippetsDirectory.getFile(snippetId + JSON_FILE_EXTENSION);
+        return snippetsDirectory.getFile(SnippetFileHelper.getFileName(snippetId));
     }
 }

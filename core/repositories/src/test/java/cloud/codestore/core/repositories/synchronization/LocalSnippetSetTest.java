@@ -50,11 +50,11 @@ class LocalSnippetSetTest {
     void setUp() throws SnippetNotExistsException {
         lenient().when(readSnippetQuery.read(anyString())).thenReturn(testSnippet);
         when(snippetsDirectory.getFiles()).thenReturn(List.of(
-                new File(Path.of("snippet-1")),
-                new File(Path.of("snippet-2")),
-                new File(Path.of("snippet-3")),
-                new File(Path.of("snippet-4")),
-                new File(Path.of("snippet-5"))
+                new File(Path.of("snippet-1.json")),
+                new File(Path.of("snippet-2.json")),
+                new File(Path.of("snippet-3.json")),
+                new File(Path.of("snippet-4.json")),
+                new File(Path.of("snippet-5.json"))
         ));
 
         snippetSet = new LocalSnippetSet(

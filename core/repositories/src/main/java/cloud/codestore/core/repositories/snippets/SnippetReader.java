@@ -24,7 +24,7 @@ class SnippetReader {
     Snippet read(File file) {
         var dto = readDto(file);
         return Snippet.builder()
-                      .id(getSnippetId(file))
+                      .id(SnippetFileHelper.getSnippetId(file))
                       .title(dto.title())
                       .description(dto.description())
                       .code(dto.code())
@@ -59,10 +59,5 @@ class SnippetReader {
         return Optional.ofNullable(timestamp)
                        .map(OffsetDateTime::parse)
                        .orElse(null);
-    }
-
-    private String getSnippetId(File file) {
-        String fileName = file.getName();
-        return fileName.substring(0, fileName.length() - FileSystemRepository.JSON_FILE_EXTENSION.length());
     }
 }

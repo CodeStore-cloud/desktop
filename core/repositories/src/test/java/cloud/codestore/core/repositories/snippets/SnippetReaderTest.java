@@ -33,7 +33,7 @@ class SnippetReaderTest {
     @BeforeEach
     void setUp() {
         snippetReader = new SnippetReader(new ObjectMapper());
-        lenient().when(testFile.getName()).thenReturn(SNIPPET_ID + FileSystemRepository.JSON_FILE_EXTENSION);
+        lenient().when(testFile.getName()).thenReturn(SnippetFileHelper.getFileName(SNIPPET_ID));
     }
 
     @Test

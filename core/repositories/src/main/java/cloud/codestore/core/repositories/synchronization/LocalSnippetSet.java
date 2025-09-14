@@ -2,8 +2,8 @@ package cloud.codestore.core.repositories.synchronization;
 
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.repositories.Directory;
-import cloud.codestore.core.repositories.File;
 import cloud.codestore.core.repositories.Repository;
+import cloud.codestore.core.repositories.snippets.SnippetFileHelper;
 import cloud.codestore.core.usecases.createsnippet.CreateSnippetQuery;
 import cloud.codestore.core.usecases.deletesnippet.DeleteSnippetQuery;
 import cloud.codestore.core.usecases.readsnippet.ReadSnippetQuery;
@@ -54,7 +54,7 @@ class LocalSnippetSet implements ItemSet<Snippet> {
     public Set<String> getItemIds() {
         snippetIds = snippetsDirectory.getFiles()
                                       .stream()
-                                      .map(File::getName)
+                                      .map(SnippetFileHelper::getSnippetId)
                                       .collect(Collectors.toSet());
 
         return snippetIds;
