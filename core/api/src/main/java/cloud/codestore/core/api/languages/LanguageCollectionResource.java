@@ -17,7 +17,7 @@ public class LanguageCollectionResource extends ResourceCollectionDocument<Langu
     /**
      * @return the URI to the language collection resource.
      */
-    public static String getLink() {
+    public static String createLink() {
         return UriFactory.createUri(PATH);
     }
 

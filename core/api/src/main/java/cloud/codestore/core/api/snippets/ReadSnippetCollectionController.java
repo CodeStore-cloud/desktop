@@ -22,7 +22,6 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 import static cloud.codestore.core.api.snippets.SnippetCollectionResource.PATH;
-import static cloud.codestore.core.api.snippets.SnippetCollectionResource.getLink;
 import static cloud.codestore.core.usecases.listsnippets.SortProperties.SnippetProperty;
 
 @RestController
@@ -98,22 +97,22 @@ public class ReadSnippetCollectionController {
     ) {
         if (totalPages > 1) {
             urlParameters.put("page[number]", 1);
-            document.addLink(new Link(Link.FIRST, getLink(urlParameters)));
+            document.addLink(new Link(Link.FIRST, SnippetCollectionResource.createLink(urlParameters)));
             urlParameters.put("page[number]", totalPages);
-            document.addLink(new Link(Link.LAST, getLink(urlParameters)));
+            document.addLink(new Link(Link.LAST, SnippetCollectionResource.createLink(urlParameters)));
         }
         if (pageNumber < totalPages) {
             urlParameters.put("page[number]", pageNumber + 1);
-            document.addLink(new Link(Link.NEXT, getLink(urlParameters)));
+            document.addLink(new Link(Link.NEXT, SnippetCollectionResource.createLink(urlParameters)));
         }
         if (pageNumber > 1) {
             urlParameters.put("page[number]", pageNumber - 1);
-            document.addLink(new Link(Link.PREV, getLink(urlParameters)));
+            document.addLink(new Link(Link.PREV, SnippetCollectionResource.createLink(urlParameters)));
         }
     }
 
     private ResourceMetaInfo createMetaInfo() {
-        Operation createSnippetOperation = new Operation("createSnippet", HttpMethod.POST.name(), getLink());
+        Operation createSnippetOperation = new Operation("createSnippet", HttpMethod.POST.name(), SnippetCollectionResource.createLink());
         return new ResourceMetaInfo(List.of(createSnippetOperation));
     }
 }

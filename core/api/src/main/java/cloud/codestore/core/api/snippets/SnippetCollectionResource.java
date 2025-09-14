@@ -19,7 +19,7 @@ public class SnippetCollectionResource extends ResourceCollectionDocument<Snippe
     /**
      * @return the URI to the snippet collection resource.
      */
-    public static String getLink() {
+    public static String createLink() {
         return UriFactory.createUri(PATH);
     }
 
@@ -27,23 +27,23 @@ public class SnippetCollectionResource extends ResourceCollectionDocument<Snippe
      * @param language a programming language. Must not be {@code null}.
      * @return the URI to the snippet collection resource filtered by the given programming language.
      */
-    public static String getLink(@Nonnull Language language) {
-        return getLink(Map.of("filter[language]", language.getId()));
+    public static String createLink(@Nonnull Language language) {
+        return createLink(Map.of("filter[language]", language.getId()));
     }
 
     /**
      * @param tag a tag. Must not be {@code null}.
      * @return the URI to the snippet collection resource filtered by the given tag.
      */
-    public static String getLink(@Nonnull String tag) {
-        return getLink(Map.of("filter[tags]", tag));
+    public static String createLink(@Nonnull String tag) {
+        return createLink(Map.of("filter[tags]", tag));
     }
 
     /**
      * @param urlParameters additional URL parameters to add.
      * @return the URI to the corresponding page of the snippet collection resource.
      */
-    static String getLink(@Nonnull Map<String, Object> urlParameters) {
+    static String createLink(@Nonnull Map<String, Object> urlParameters) {
         return UriFactory.createUri(PATH, urlParameters);
     }
 

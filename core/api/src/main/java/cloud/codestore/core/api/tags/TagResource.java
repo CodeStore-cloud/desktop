@@ -19,8 +19,8 @@ public class TagResource extends ResourceObject {
     @JsonCreator
     TagResource(@Nonnull @JsonProperty("name") String tag) {
         super(RESOURCE_TYPE, tag);
-        setSelfLink(getLink(tag));
-        snippets = new Relationship(SnippetCollectionResource.getLink(tag));
+        setSelfLink(createLink(tag));
+        snippets = new Relationship(SnippetCollectionResource.createLink(tag));
     }
 
     @JsonGetter("name")
@@ -33,7 +33,7 @@ public class TagResource extends ResourceObject {
         return snippets;
     }
 
-    private static String getLink(String tag) {
-        return TagCollectionResource.getLink() + "/" + URLEncoder.encode(tag, StandardCharsets.UTF_8);
+    private static String createLink(String tag) {
+        return TagCollectionResource.createLink() + "/" + URLEncoder.encode(tag, StandardCharsets.UTF_8);
     }
 }

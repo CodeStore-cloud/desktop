@@ -17,7 +17,7 @@ public class TagCollectionResource extends ResourceCollectionDocument<TagResourc
     /**
      * @return the URI to the tag collection resource.
      */
-    public static String getLink() {
+    public static String createLink() {
         return UriFactory.createUri(PATH);
     }
 
@@ -25,7 +25,7 @@ public class TagCollectionResource extends ResourceCollectionDocument<TagResourc
      * @param snippetId the ID of a code snippet. Must not be {@code null}.
      * @return the URI to the tag collection resource filtered by the given snippet ID.
      */
-    public static String getLink(@Nonnull String snippetId) {
+    public static String createLink(@Nonnull String snippetId) {
         return UriFactory.createUri(PATH, Map.of("filter[snippet]", snippetId));
     }
 

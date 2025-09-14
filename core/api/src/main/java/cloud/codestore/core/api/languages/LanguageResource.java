@@ -18,8 +18,8 @@ public class LanguageResource extends ResourceObject {
         super(RESOURCE_TYPE, String.valueOf(language.getId()));
 
         name = language.getName();
-        snippets = new Relationship(SnippetCollectionResource.getLink(language));
-        setSelfLink(getLink(language));
+        snippets = new Relationship(SnippetCollectionResource.createLink(language));
+        setSelfLink(createLink(language));
     }
 
     @JsonGetter("name")
@@ -36,7 +36,7 @@ public class LanguageResource extends ResourceObject {
      * @param language a programming language
      * @return the URI to the language resource with the given id.
      */
-    public static String getLink(@Nonnull Language language) {
-        return LanguageCollectionResource.getLink() + "/" + language.getId();
+    public static String createLink(@Nonnull Language language) {
+        return LanguageCollectionResource.createLink() + "/" + language.getId();
     }
 }

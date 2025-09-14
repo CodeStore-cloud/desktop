@@ -26,12 +26,13 @@ import java.util.stream.Collectors;
 class LocalSnippetSet implements ItemSet<Snippet> {
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalSnippetSet.class);
 
-    private final Set<String> snippetIds;
+    private final Directory snippetsDirectory;
     private final ReadSnippetQuery readSnippetQuery;
     private final CreateSnippetQuery createSnippetQuery;
     private final DeleteSnippetQuery deleteSnippetQuery;
     private final UpdateSnippetQuery updateSnippetQuery;
     private final SynchronizationReport syncReport;
+    private Set<String> snippetIds;
 
     LocalSnippetSet(
             @Qualifier("snippets") Directory snippetsDirectory,
@@ -41,11 +42,7 @@ class LocalSnippetSet implements ItemSet<Snippet> {
             UpdateSnippetQuery updateSnippetQuery,
             SynchronizationReport syncReport
     ) {
-        snippetIds = snippetsDirectory.getFiles()
-                                      .stream()
-                                      .map(File::getName)
-                                      .collect(Collectors.toSet());
-
+        this.snippetsDirectory = snippetsDirectory;
         this.readSnippetQuery = readSnippetQuery;
         this.createSnippetQuery = createSnippetQuery;
         this.deleteSnippetQuery = deleteSnippetQuery;
@@ -55,6 +52,11 @@ class LocalSnippetSet implements ItemSet<Snippet> {
 
     @Override
     public Set<String> getItemIds() {
+        snippetIds = snippetsDirectory.getFiles()
+                                      .stream()
+                                      .map(File::getName)
+                                      .collect(Collectors.toSet());
+
         return snippetIds;
     }
 

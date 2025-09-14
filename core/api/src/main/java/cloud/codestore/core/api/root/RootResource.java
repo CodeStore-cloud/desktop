@@ -41,16 +41,16 @@ class RootResource extends ResourceObject {
 
     @JsonGetter("snippets")
     Relationship getSnippets() {
-        return new Relationship(SnippetCollectionResource.getLink());
+        return new Relationship(SnippetCollectionResource.createLink());
     }
 
     @JsonGetter("languages")
     Relationship getLanguages() {
-        return new Relationship(LanguageCollectionResource.getLink());
+        return new Relationship(LanguageCollectionResource.createLink());
     }
 
     @JsonGetter("tags")
     Relationship getTags() {
-        return new Relationship(TagCollectionResource.getLink());
+        return new Relationship(TagCollectionResource.createLink());
     }
 }

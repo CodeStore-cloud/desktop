@@ -34,7 +34,7 @@ public class SnippetResource extends ResourceObject {
 
     SnippetResource(@Nonnull Snippet snippet) {
         super(RESOURCE_TYPE, snippet.getId());
-        setSelfLink(getLink(getId()));
+        setSelfLink(createLink(getId()));
         setMeta(createPermissionsMetaInfo(snippet.getPermissions()));
 
         this.title = snippet.getTitle();
@@ -42,8 +42,8 @@ public class SnippetResource extends ResourceObject {
         this.code = snippet.getCode();
         this.created = snippet.getCreated();
         this.modified = snippet.getModified();
-        this.language = new Relationship(LanguageResource.getLink(snippet.getLanguage()));
-        this.tags = new Relationship(TagCollectionResource.getLink(getId()));
+        this.language = new Relationship(LanguageResource.createLink(snippet.getLanguage()));
+        this.tags = new Relationship(TagCollectionResource.createLink(getId()));
     }
 
     @JsonCreator
@@ -99,7 +99,7 @@ public class SnippetResource extends ResourceObject {
      * @param snippetId the id of a snippet.
      * @return the URI to the corresponding snippet resource.
      */
-    private String getLink(@Nonnull String snippetId) {
+    private String createLink(@Nonnull String snippetId) {
         return UriFactory.createUri(SnippetCollectionResource.PATH + "/" + snippetId);
     }
 
