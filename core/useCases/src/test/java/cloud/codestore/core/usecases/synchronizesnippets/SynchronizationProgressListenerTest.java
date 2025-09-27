@@ -10,25 +10,35 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("The progress listener")
 class SynchronizationProgressListenerTest {
     private SynchronizationReport syncReport = new SynchronizationReport();
-    private SynchronizationProgressListener progressListener = new  SynchronizationProgressListener(syncReport);
+    private SynchronizationProgress progress = new SynchronizationProgress();
+    private SynchronizationProgressListener progressListener = new SynchronizationProgressListener(
+            syncReport, progress
+    );
 
     @Test
-    @DisplayName("sets the number of total snippets in the synchronization report")
+    @DisplayName("updates the progress when the synchronization of a snippet was finished")
     void setTotalSnippetsInReport() {
-        assertThat(syncReport.getTotalSnippetCount()).isEqualTo(0);
-        progressListener.numberOfItems(387);
-        assertThat(syncReport.getTotalSnippetCount()).isEqualTo(387);
+        progressListener.numberOfItems(5);
+        assertThat(progress.getProgressInPercent()).isEqualTo(0);
+        progressListener.synchronizationFinished("1");
+        assertThat(progress.getProgressInPercent()).isEqualTo(20);
+        progressListener.synchronizationFinished("2");
+        assertThat(progress.getProgressInPercent()).isEqualTo(40);
+        progressListener.synchronizationFinished("3");
+        assertThat(progress.getProgressInPercent()).isEqualTo(60);
+        progressListener.synchronizationFailed("4", new IOException());
+        assertThat(progress.getProgressInPercent()).isEqualTo(80);
+        progressListener.synchronizationFailed("5", new IOException());
+        assertThat(progress.getProgressInPercent()).isEqualTo(100);
     }
 
     @Test
-    @DisplayName("")
-    void setErrorInReport() {
-        Exception exception = new IOException("test error");
+    @DisplayName("sets the number of errors in the report")
+    void passErrorToReport() {
         assertThat(syncReport.getErrorCount()).isEqualTo(0);
-
-        progressListener.synchronizationFailed("123", exception);
-
-        assertThat(syncReport.getErrorCount()).isEqualTo(1);
-        assertThat(syncReport.getErrors().get("123")).isSameAs(exception);
+        progressListener.synchronizationFailed("1", new IOException());
+        progressListener.synchronizationFailed("2", new IOException());
+        progressListener.synchronizationFailed("3", new IOException());
+        assertThat(syncReport.getErrorCount()).isEqualTo(3);
     }
 }

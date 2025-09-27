@@ -1,6 +1,7 @@
 package cloud.codestore.core.usecases.synchronizesnippets;
 
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,8 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("The snippet conflict resolver")
@@ -21,6 +21,12 @@ class SnippetConflictResolverTest {
 
     @Spy
     private SnippetConflictResolver conflictResolver;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        lenient().doNothing().when(conflictResolver).applyItemA();
+        lenient().doNothing().when(conflictResolver).applyItemB();
+    }
 
     @Test
     @DisplayName("applies item A when date A is after date B")

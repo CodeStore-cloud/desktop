@@ -22,7 +22,10 @@ public class SynchronizationProgress {
     }
 
     public int getProgressInPercent() {
-        return (processedSnippets / totalSnippets) * 100;
+        if (totalSnippets == 0) {
+            return 0;
+        }
+        return (int) ((processedSnippets / (double) totalSnippets) * 100);
     }
 
     @Nullable
@@ -36,8 +39,8 @@ public class SynchronizationProgress {
     }
 
     void setStatus(@Nonnull SynchronizationStatus status) {
-        if (this.status == SynchronizationStatus.COMPLETED || this.status == SynchronizationStatus.FAILED) {
-            throw new IllegalStateException("Synchronization already completed.");
+        if (this.status.isDone()) {
+            throw new IllegalStateException("Synchronization already finished.");
         }
 
         this.status = status;

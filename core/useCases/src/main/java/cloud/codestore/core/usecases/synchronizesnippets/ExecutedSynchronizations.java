@@ -3,26 +3,26 @@ package cloud.codestore.core.usecases.synchronizesnippets;
 import cloud.codestore.core.Sync;
 
 import javax.annotation.Nonnull;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Contains a list of all executed synchronizations and corresponding reports.
+ * Contains a list of all executed synchronizations.
  */
 @Sync
 public class ExecutedSynchronizations {
-    private final Map<Integer, Synchronization> executedSynchronizations = new HashMap<>();
+    private final List<Synchronization> executedSynchronizations = new ArrayList<>();
 
     public void add(@Nonnull Synchronization synchronization) {
-        int synchronizationId = executedSynchronizations.size();
-        executedSynchronizations.put(synchronizationId, synchronization);
+        executedSynchronizations.add(synchronization);
     }
 
     public Synchronization get(int synchronizationId) throws SynchronizationNotExistsException {
-        if (executedSynchronizations.containsKey(synchronizationId)) {
-            return executedSynchronizations.get(synchronizationId);
-        } else {
+        int index = synchronizationId - 1;
+        if (index < 0 || index >= executedSynchronizations.size()) {
             throw new SynchronizationNotExistsException();
         }
+
+        return executedSynchronizations.get(index);
     }
 }

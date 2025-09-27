@@ -3,7 +3,6 @@ package cloud.codestore.core.api.synchronization;
 import cloud.codestore.core.api.UriFactory;
 import cloud.codestore.core.usecases.synchronizesnippets.Synchronization;
 import cloud.codestore.core.usecases.synchronizesnippets.SynchronizationProgress;
-import cloud.codestore.core.usecases.synchronizesnippets.SynchronizationStatus;
 import cloud.codestore.jsonapi.relationship.Relationship;
 import cloud.codestore.jsonapi.resource.ResourceObject;
 import com.fasterxml.jackson.annotation.JsonGetter;
@@ -17,13 +16,12 @@ class SynchronizationResource extends ResourceObject {
     private final SynchronizationProgress progress;
     private Relationship report;
 
-    public SynchronizationResource(int syncId, Synchronization synchronization) {
+    SynchronizationResource(int syncId, Synchronization synchronization) {
         super(RESOURCE_TYPE, String.valueOf(syncId));
         progress = synchronization.getProgress();
         setSelfLink(createLink(syncId));
 
-        SynchronizationStatus status = progress.getStatus();
-        if (status == SynchronizationStatus.COMPLETED || status == SynchronizationStatus.FAILED) {
+        if (progress.getStatus().isDone()) {
             report = asRelationship(new SynchronizationReportResource(syncId, synchronization.getReport()));
         }
     }
