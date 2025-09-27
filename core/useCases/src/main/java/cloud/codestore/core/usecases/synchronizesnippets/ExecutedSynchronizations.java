@@ -1,6 +1,6 @@
 package cloud.codestore.core.usecases.synchronizesnippets;
 
-import cloud.codestore.core.Sync;
+import cloud.codestore.core.Injectable;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Contains a list of all executed synchronizations.
  */
-@Sync
+@Injectable
 public class ExecutedSynchronizations {
     private final List<Synchronization> executedSynchronizations = new ArrayList<>();
 

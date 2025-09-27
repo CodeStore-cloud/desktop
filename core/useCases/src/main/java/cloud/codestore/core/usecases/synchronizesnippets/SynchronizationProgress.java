@@ -1,6 +1,6 @@
 package cloud.codestore.core.usecases.synchronizesnippets;
 
-import cloud.codestore.core.Sync;
+import cloud.codestore.core.Injectable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -8,7 +8,7 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
-@Sync
+@Injectable
 public class SynchronizationProgress {
     private SynchronizationStatus status = SynchronizationStatus.PENDING;
     private OffsetDateTime startTime;

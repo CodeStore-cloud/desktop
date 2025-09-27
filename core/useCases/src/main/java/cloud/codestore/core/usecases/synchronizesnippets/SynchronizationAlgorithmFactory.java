@@ -1,7 +1,7 @@
 package cloud.codestore.core.usecases.synchronizesnippets;
 
+import cloud.codestore.core.Injectable;
 import cloud.codestore.core.Snippet;
-import cloud.codestore.core.Sync;
 import cloud.codestore.synchronization.MutableItemSynchronization;
 import cloud.codestore.synchronization.Status;
 import cloud.codestore.synchronization.Synchronization;
@@ -9,7 +9,7 @@ import cloud.codestore.synchronization.Synchronization;
 /**
  * A factory to create a fully initialized {@link Synchronization} object.
  */
-@Sync
+@Injectable
 class SynchronizationAlgorithmFactory {
     private final Status status;
     private final SnippetSetFactory snippetSetFactory;

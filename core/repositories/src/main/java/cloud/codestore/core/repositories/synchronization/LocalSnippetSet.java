@@ -2,7 +2,6 @@ package cloud.codestore.core.repositories.synchronization;
 
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.repositories.Directory;
-import cloud.codestore.core.repositories.Repository;
 import cloud.codestore.core.repositories.snippets.SnippetFileHelper;
 import cloud.codestore.core.usecases.createsnippet.CreateSnippetQuery;
 import cloud.codestore.core.usecases.deletesnippet.DeleteSnippetQuery;
@@ -13,6 +12,7 @@ import cloud.codestore.synchronization.ItemSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
 import java.util.Set;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 /**
  * Represents the set of code snippets on the local system.
  */
-@Repository
+@Component
 @Qualifier("local")
 class LocalSnippetSet implements ItemSet<Snippet> {
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalSnippetSet.class);

@@ -1,11 +1,11 @@
 package cloud.codestore.core.usecases.synchronizesnippets;
 
-import cloud.codestore.core.UseCase;
+import cloud.codestore.core.Injectable;
 
 /**
  * Use Case: synchronize all local code snippets with cloud storage.
  */
-@UseCase
+@Injectable
 public class SynchronizeSnippets {
     private final SynchronizationAlgorithmFactory algorithmFactory;
     private final ExecutedSynchronizations executedSynchronizations;

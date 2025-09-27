@@ -1,7 +1,7 @@
 package cloud.codestore.core.usecases.synchronizesnippets;
 
+import cloud.codestore.core.Injectable;
 import cloud.codestore.core.Snippet;
-import cloud.codestore.core.Sync;
 
 import java.util.*;
 
@@ -9,7 +9,7 @@ import java.util.*;
  * Provides information about the code snippets that were created, updated or deleted during the synchronization
  * on both, the local and remote system.
  */
-@Sync
+@Injectable
 public class SynchronizationReport {
 
     private final List<Snippet> localNewSnippets = Collections.synchronizedList(new LinkedList<>());
