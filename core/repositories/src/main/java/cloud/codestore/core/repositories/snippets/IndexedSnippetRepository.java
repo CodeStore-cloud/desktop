@@ -2,7 +2,6 @@ package cloud.codestore.core.repositories.snippets;
 
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.SnippetNotExistsException;
-import cloud.codestore.core.repositories.Repository;
 import cloud.codestore.core.repositories.tags.TagRepository;
 import cloud.codestore.core.usecases.createsnippet.CreateSnippetQuery;
 import cloud.codestore.core.usecases.deletesnippet.DeleteSnippetQuery;
@@ -17,6 +16,7 @@ import org.apache.lucene.search.SortField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -28,7 +28,7 @@ import static cloud.codestore.core.repositories.snippets.SnippetIndex.SnippetFie
  * A decorator around the {@link FileSystemRepository} which stores code snippets in the {@link SnippetIndex}.
  */
 @Primary
-@Repository
+@Component
 class IndexedSnippetRepository implements CreateSnippetQuery, UpdateSnippetQuery, DeleteSnippetQuery, ReadSnippetQuery, ReadSnippetsQuery {
     private static final Logger LOGGER = LoggerFactory.getLogger(IndexedSnippetRepository.class);
 

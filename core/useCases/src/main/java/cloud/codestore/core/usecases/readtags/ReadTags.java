@@ -1,7 +1,7 @@
 package cloud.codestore.core.usecases.readtags;
 
+import cloud.codestore.core.Injectable;
 import cloud.codestore.core.TagNotExistsException;
-import cloud.codestore.core.UseCase;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
@@ -10,7 +10,7 @@ import java.util.Set;
 /**
  * Use case: read all available tags.
  */
-@UseCase
+@Injectable
 public class ReadTags {
     private final ReadTagsQuery readTagsQuery;
 
