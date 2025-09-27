@@ -1,7 +1,7 @@
 package cloud.codestore.core.validation;
 
+import cloud.codestore.core.Injectable;
 import cloud.codestore.core.Snippet;
-import cloud.codestore.core.Validator;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -13,7 +13,7 @@ import static cloud.codestore.core.validation.SnippetProperty.*;
 /**
  * Validates the input constraints of a code snippet.
  */
-@Validator
+@Injectable
 public class SnippetValidator {
     private static final int MAX_TITLE_LENGTH = 100;
     private static final int MAX_DESCRIPTION_LENGTH = 10000;

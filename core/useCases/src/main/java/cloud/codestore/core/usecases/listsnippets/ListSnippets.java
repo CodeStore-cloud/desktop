@@ -1,7 +1,7 @@
 package cloud.codestore.core.usecases.listsnippets;
 
+import cloud.codestore.core.Injectable;
 import cloud.codestore.core.Snippet;
-import cloud.codestore.core.UseCase;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -13,7 +13,7 @@ import static cloud.codestore.core.usecases.listsnippets.SortProperties.SnippetP
 /**
  * Use case: read all code snippets.
  */
-@UseCase
+@Injectable
 public class ListSnippets {
     private static final int PAGE_SIZE = 50;
 

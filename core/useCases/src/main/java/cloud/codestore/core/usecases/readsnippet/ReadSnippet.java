@@ -1,15 +1,15 @@
 package cloud.codestore.core.usecases.readsnippet;
 
+import cloud.codestore.core.Injectable;
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.SnippetNotExistsException;
-import cloud.codestore.core.UseCase;
 
 import javax.annotation.Nonnull;
 
 /**
  * Use case: read a code snippet by its id.
  */
-@UseCase
+@Injectable
 public class ReadSnippet {
     private final ReadSnippetQuery query;
 

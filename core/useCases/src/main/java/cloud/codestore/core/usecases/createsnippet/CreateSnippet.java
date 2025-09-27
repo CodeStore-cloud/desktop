@@ -1,7 +1,7 @@
 package cloud.codestore.core.usecases.createsnippet;
 
+import cloud.codestore.core.Injectable;
 import cloud.codestore.core.Snippet;
-import cloud.codestore.core.UseCase;
 import cloud.codestore.core.validation.InvalidSnippetException;
 import cloud.codestore.core.validation.SnippetValidator;
 
@@ -12,7 +12,7 @@ import java.util.UUID;
 /**
  * Use case: create a new code snippet.
  */
-@UseCase
+@Injectable
 public class CreateSnippet {
     private final CreateSnippetQuery query;
     private final SnippetValidator validator;

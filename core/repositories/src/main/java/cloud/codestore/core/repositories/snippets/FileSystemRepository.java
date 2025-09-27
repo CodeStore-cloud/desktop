@@ -4,12 +4,12 @@ import cloud.codestore.core.Snippet;
 import cloud.codestore.core.SnippetNotExistsException;
 import cloud.codestore.core.repositories.Directory;
 import cloud.codestore.core.repositories.File;
-import cloud.codestore.core.repositories.Repository;
 import cloud.codestore.core.usecases.createsnippet.CreateSnippetQuery;
 import cloud.codestore.core.usecases.deletesnippet.DeleteSnippetQuery;
 import cloud.codestore.core.usecases.readsnippet.ReadSnippetQuery;
 import cloud.codestore.core.usecases.updatesnippet.UpdateSnippetQuery;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import java.util.stream.Stream;
@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 /**
  * Represents a repository which loads/saves the code snippets on the file system.
  */
-@Repository
+@Component
 class FileSystemRepository implements CreateSnippetQuery, UpdateSnippetQuery, DeleteSnippetQuery, ReadSnippetQuery {
     static final String JSON_FILE_EXTENSION = ".json";
 

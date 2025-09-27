@@ -1,8 +1,6 @@
 package cloud.codestore.core.application;
 
-import cloud.codestore.core.UseCase;
-import cloud.codestore.core.Validator;
-import cloud.codestore.core.repositories.Repository;
+import cloud.codestore.core.Injectable;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -19,7 +17,7 @@ import java.awt.*;
         basePackages = "cloud.codestore.core",
         includeFilters = @ComponentScan.Filter(
                 type = FilterType.ANNOTATION,
-                classes = {UseCase.class, Validator.class, Repository.class}
+                classes = {Injectable.class}
         )
 )
 public class CodeStoreCore {

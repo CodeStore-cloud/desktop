@@ -1,10 +1,10 @@
 package cloud.codestore.core.usecases.createtag;
 
-import cloud.codestore.core.UseCase;
+import cloud.codestore.core.Injectable;
 
 import javax.annotation.Nonnull;
 
-@UseCase
+@Injectable
 public class CreateTag {
     private final CreateTagQuery query;
     private final TagValidator validator;
