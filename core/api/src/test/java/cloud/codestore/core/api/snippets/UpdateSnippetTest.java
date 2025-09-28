@@ -21,8 +21,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.OffsetDateTime;
@@ -39,11 +39,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UpdateSnippetTest extends SnippetControllerTest {
 
 
-    @MockBean
+    @MockitoBean
     private ReadSnippet readSnippetUseCase;
-    @MockBean
+    @MockitoBean
     private UpdateSnippet updateSnippetUseCase;
-    @MockBean
+    @MockitoBean
     private SnippetDeserializationHelper deserializationHelper;
     private Snippet testSnippet;
 

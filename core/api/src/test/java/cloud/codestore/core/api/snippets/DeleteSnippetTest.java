@@ -10,8 +10,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.*;
@@ -21,9 +21,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import({DeleteSnippetController.class})
 @DisplayName("DELETE /snippets/{snippetId}")
 class DeleteSnippetTest extends SnippetControllerTest {
-    @MockBean
+    @MockitoBean
     private ReadSnippet readSnippetUseCase;
-    @MockBean
+    @MockitoBean
     private DeleteSnippet deleteSnippetUseCase;
 
     @BeforeEach

@@ -19,8 +19,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.Map;
@@ -35,9 +35,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DisplayName("POST /snippets")
 class CreateSnippetTest extends SnippetControllerTest {
 
-    @MockBean
+    @MockitoBean
     protected CreateSnippet createSnippetUseCase;
-    @MockBean
+    @MockitoBean
     private SnippetDeserializationHelper deserializationHelper;
     private Snippet testSnippet;
 
