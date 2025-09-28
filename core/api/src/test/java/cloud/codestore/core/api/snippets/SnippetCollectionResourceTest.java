@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.Collections;
 import java.util.List;
@@ -32,7 +32,7 @@ class SnippetCollectionResourceTest extends SnippetControllerTest {
     private static final int PAGE_NUMBER = 12;
     private static final int TOTAL_PAGES = 15;
 
-    @MockBean
+    @MockitoBean
     private ListSnippets listSnippetsUseCase;
 
     @BeforeEach

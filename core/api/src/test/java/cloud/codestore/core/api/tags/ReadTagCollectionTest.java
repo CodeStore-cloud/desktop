@@ -8,8 +8,8 @@ import cloud.codestore.jsonapi.document.JsonApiDocument;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,9 +24,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(ReadTagCollectionController.class)
 @DisplayName("GET /tags")
 class ReadTagCollectionTest extends AbstractControllerTest {
-    @MockBean
+    @MockitoBean
     private ReadSnippet readSnippetUseCase;
-    @MockBean
+    @MockitoBean
     private ReadTags readTagsUseCase;
 
     @Test

@@ -7,8 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.Set;
 
@@ -21,7 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(ReadTagController.class)
 @DisplayName("GET /tags/{tagId}")
 class ReadTagTest extends AbstractControllerTest {
-    @MockBean
+    @MockitoBean
     private ReadTags readTagsUseCase;
 
     @BeforeEach
