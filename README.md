@@ -2,7 +2,7 @@
 
 This is the open source reimplementation of the [{CodeStore}](https://codestore.cloud) desktop application.
 
-**This project is in a very early state of the development. It does not provide all functionalities yet.*
+*This project is in a very early state of the development. It does not provide all functionalities yet.*
 
 ## REST Interface
 
@@ -52,7 +52,7 @@ desktop-app
 |-- core
 |   |-- useCases             -> abstract application logic
 |   |-- api                  -> REST API
-|   |-- repositories         -> access file system and public server
+|   |-- repositories         -> access file system and public servers
 |   `-- application          -> main module and dependency injection
 |
 `-- bundle                   -> application bundle build scripts
