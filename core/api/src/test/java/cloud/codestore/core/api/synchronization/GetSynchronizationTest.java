@@ -48,7 +48,7 @@ class GetSynchronizationTest extends AbstractControllerTest {
                .andExpect(jsonPath("$.data.type", is("synchronization")))
                .andExpect(jsonPath("$.data.id", is(String.valueOf(1))))
                .andExpect(jsonPath("$.data.attributes.status", is(SynchronizationStatus.IN_PROGRESS.name())))
-               .andExpect(jsonPath("$.data.attributes.progressPercent", is("75")))
+               .andExpect(jsonPath("$.data.attributes.progressPercent", is(75)))
                .andExpect(jsonPath("$.data.attributes.startTime", is(startTime.toString())))
                .andExpect(jsonPath("$.data.links.self", is("http://localhost:8080/synchronizations/1")));
     }

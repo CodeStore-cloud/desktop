@@ -3,6 +3,7 @@ package cloud.codestore.core.api.security;
 import cloud.codestore.core.api.DefaultLocale;
 import cloud.codestore.core.api.TestConfig;
 import cloud.codestore.core.api.root.RootController;
+import cloud.codestore.core.usecases.synchronizesnippets.ExecutedSynchronizations;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.bytebuddy.utility.RandomString;
@@ -19,6 +20,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.Optional;
+
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -36,7 +41,9 @@ class AccessTokenFilterTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(RootController.class)
+        ExecutedSynchronizations executedSynchronizations = mock(ExecutedSynchronizations.class);
+        lenient().when(executedSynchronizations.getOptionalInitialSynchronization()).thenReturn(Optional.empty());
+        mockMvc = MockMvcBuilders.standaloneSetup(new RootController(executedSynchronizations))
                                  .addFilters(new AccessTokenFilter(ACCESS_TOKEN, objectMapper))
                                  .build();
     }

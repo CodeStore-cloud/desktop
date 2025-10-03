@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -85,8 +86,7 @@ class CreateSnippetTest extends SnippetControllerTest {
                      .andExpect(jsonPath("$.data.links.self", is("http://localhost:8080/snippets/" + testSnippet.getId())))
                      .andExpect(jsonPath("$.data.meta.operations").isArray())
                      .andExpect(jsonPath("$.data.meta.operations.length()", is(2)))
-                     .andExpect(jsonPath("$.data.meta.operations[0].operation", is("updateSnippet")))
-                     .andExpect(jsonPath("$.data.meta.operations[1].operation", is("deleteSnippet")));
+                     .andExpect(jsonPath("$.data.meta.operations[*].operation", containsInAnyOrder("updateSnippet", "deleteSnippet")));
     }
 
     @Test

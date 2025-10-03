@@ -5,5 +5,5 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 class JsonApiMetaInformation implements MetaInformation {
     @JsonProperty("documentation")
-    public final String documentation = "https://jsonapi.org/format/1.0/";
+    public final String documentation = "https://jsonapi.org/format/1.1/";
 }

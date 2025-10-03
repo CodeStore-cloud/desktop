@@ -9,14 +9,15 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 
 import java.time.OffsetDateTime;
 
-class InitialSynchronizationResource extends ResourceObject {
+public class InitialSynchronizationResource extends ResourceObject {
     static final String PATH = "/synchronizations";
     private static final String RESOURCE_TYPE = "synchronization";
+    private static final String INITIAL_SYNC_ID = "1";
 
     private final InitialSynchronizationProgress progress;
 
     InitialSynchronizationResource(InitialSynchronization synchronization) {
-        super(RESOURCE_TYPE, "1");
+        super(RESOURCE_TYPE, INITIAL_SYNC_ID);
         progress = synchronization.getProgress();
         setSelfLink(createLink(getId()));
     }
@@ -50,6 +51,10 @@ class InitialSynchronizationResource extends ResourceObject {
         }
 
         return errorObject;
+    }
+
+    public static String createLink() {
+        return createLink(INITIAL_SYNC_ID);
     }
 
     static String createLink(String id) {
