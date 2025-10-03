@@ -18,8 +18,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("The synchronization object")
-class SynchronizationTest {
+@DisplayName("The initial synchronization object")
+class InitialSynchronizationTest {
 
     @Mock
     private SynchronizationAlgorithmFactory algorithmFactory;
@@ -27,20 +27,19 @@ class SynchronizationTest {
     private cloud.codestore.synchronization.Synchronization<Snippet> synchronizationAlgorithm;
     @Mock
     private Status status;
-    private Synchronization synchronization;
+    private InitialSynchronization synchronization;
 
     @BeforeEach
     void setUp() {
-        synchronization = new Synchronization(algorithmFactory);
-        lenient().when(algorithmFactory.createSnippetSynchronizationAlgorithm(any(), any())).thenReturn(synchronizationAlgorithm);
+        synchronization = new InitialSynchronization(algorithmFactory);
+        lenient().when(algorithmFactory.createSnippetSynchronizationAlgorithm(any())).thenReturn(synchronizationAlgorithm);
         lenient().when(algorithmFactory.getStatus()).thenReturn(status);
     }
 
     @Test
-    @DisplayName("provides access to progress and report")
+    @DisplayName("provides access to the progress")
     void providesAccessToProgressAndReport() {
         assertThat(synchronization.getProgress()).isNotNull();
-        assertThat(synchronization.getReport()).isNotNull();
     }
 
     @Test
@@ -56,7 +55,7 @@ class SynchronizationTest {
         @Test
         @DisplayName("updates the status")
         void setProgress() {
-            when(algorithmFactory.createSnippetSynchronizationAlgorithm(any(), any())).thenAnswer(invocation -> {
+            when(algorithmFactory.createSnippetSynchronizationAlgorithm(any())).thenAnswer(invocation -> {
                 assertThat(synchronization.getProgress().getStatus()).isEqualTo(SynchronizationStatus.IN_PROGRESS);
                 return synchronizationAlgorithm;
             });

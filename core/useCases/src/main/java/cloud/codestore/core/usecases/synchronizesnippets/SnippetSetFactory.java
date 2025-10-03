@@ -10,10 +10,10 @@ public interface SnippetSetFactory {
     /**
      * @return the {@link ItemSet} that represents the set of snippets located on the local system.
      */
-    ItemSet<Snippet> createLocalSnippetSet(SynchronizationReport syncReport);
+    ItemSet<Snippet> createLocalSnippetSet();
 
     /**
      * @return the {@link ItemSet} that represents the set of snippets located on the remote system.
      */
-    ItemSet<Snippet> createRemoteSnippetSet(SynchronizationReport syncReport);
+    ItemSet<Snippet> createRemoteSnippetSet();
 }

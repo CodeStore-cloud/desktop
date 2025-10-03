@@ -3,26 +3,46 @@ package cloud.codestore.core.usecases.synchronizesnippets;
 import cloud.codestore.core.Injectable;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Contains a list of all executed synchronizations.
  */
 @Injectable
 public class ExecutedSynchronizations {
-    private final List<Synchronization> executedSynchronizations = new ArrayList<>();
+    private InitialSynchronization initialSynchronization;
+    private final Map<String, SnippetSynchronization> snippetSynchronizations = Collections.synchronizedMap(new HashMap<>());
 
-    public void add(@Nonnull Synchronization synchronization) {
-        executedSynchronizations.add(synchronization);
+    void setInitialSynchronization(@Nonnull InitialSynchronization initialSynchronization) {
+        this.initialSynchronization = initialSynchronization;
     }
 
-    public Synchronization get(int synchronizationId) throws SynchronizationNotExistsException {
-        int index = synchronizationId - 1;
-        if (index < 0 || index >= executedSynchronizations.size()) {
+    @Nonnull
+    public InitialSynchronization getInitialSynchronization() throws SynchronizationNotExistsException {
+        if (initialSynchronization == null) {
             throw new SynchronizationNotExistsException();
         }
 
-        return executedSynchronizations.get(index);
+        return initialSynchronization;
+    }
+
+    @Nonnull
+    public Optional<InitialSynchronization> getOptionalInitialSynchronization() {
+        return Optional.ofNullable(initialSynchronization);
+    }
+
+    void add(@Nonnull SnippetSynchronization synchronization) {
+        snippetSynchronizations.put(synchronization.getSnippetId(), synchronization);
+    }
+
+    public SnippetSynchronization get(@Nonnull String snippetId) throws SynchronizationNotExistsException {
+        if (!snippetSynchronizations.containsKey(snippetId)) {
+            throw new SynchronizationNotExistsException();
+        }
+
+        return snippetSynchronizations.get(snippetId);
     }
 }

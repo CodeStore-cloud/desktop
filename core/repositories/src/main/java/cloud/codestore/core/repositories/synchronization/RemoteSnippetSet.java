@@ -1,7 +1,6 @@
 package cloud.codestore.core.repositories.synchronization;
 
 import cloud.codestore.core.Snippet;
-import cloud.codestore.core.usecases.synchronizesnippets.SynchronizationReport;
 import cloud.codestore.synchronization.ItemSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +16,6 @@ import java.util.Set;
 @Qualifier("remote")
 class RemoteSnippetSet implements ItemSet<Snippet> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RemoteSnippetSet.class);
-    private final SynchronizationReport syncReport;
-
-    RemoteSnippetSet(SynchronizationReport syncReport) {
-        this.syncReport = syncReport;
-    }
 
     @Override
     public Set<String> getItemIds() {
@@ -45,20 +39,16 @@ class RemoteSnippetSet implements ItemSet<Snippet> {
 
     @Override
     public void addItem(String snippetId, Snippet snippet) throws Exception {
-        LOGGER.debug("Create {} ({}) on remote system.", snippetId, snippet.getTitle());
-        syncReport.snippetCreatedRemotely(snippet);
+        LOGGER.debug("Create {} on remote system.", snippetId);
     }
 
     @Override
     public void delete(String snippetId) throws Exception {
-        Snippet snippet = getItem(snippetId);
-        LOGGER.debug("Delete {} ({}) on remote system.", snippetId, snippet.getTitle());
-        syncReport.snippetDeletedRemotely(snippet);
+        LOGGER.debug("Delete {} on remote system.", snippetId);
     }
 
     @Override
     public void updateItem(String snippetId, Snippet snippet) throws Exception {
-        LOGGER.debug("Update {} ({}) on remote system.", snippetId, snippet.getTitle());
-        syncReport.snippetUpdatedRemotely(snippet);
+        LOGGER.debug("Update {} on remote system.", snippetId);
     }
 }

@@ -2,7 +2,8 @@ package cloud.codestore.core.api.synchronization;
 
 import cloud.codestore.core.api.ErrorResponseBuilder;
 import cloud.codestore.core.usecases.synchronizesnippets.ExecutedSynchronizations;
-import cloud.codestore.core.usecases.synchronizesnippets.Synchronization;
+import cloud.codestore.core.usecases.synchronizesnippets.InitialSynchronization;
+import cloud.codestore.core.usecases.synchronizesnippets.SnippetSynchronization;
 import cloud.codestore.core.usecases.synchronizesnippets.SynchronizationNotExistsException;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
 import cloud.codestore.jsonapi.error.ErrorObject;
@@ -12,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(path = SynchronizationResource.PATH, produces = JsonApiDocument.MEDIA_TYPE)
+@RequestMapping(path = InitialSynchronizationResource.PATH, produces = JsonApiDocument.MEDIA_TYPE)
 class SynchronizationController {
     private final ExecutedSynchronizations executedSynchronizations;
 
@@ -21,30 +22,18 @@ class SynchronizationController {
         this.executedSynchronizations = executedSynchronizations;
     }
 
-    @GetMapping("/{syncId}")
+    @GetMapping("/1")
+    public JsonApiDocument getInitialSynchronization() throws SynchronizationNotExistsException {
+        InitialSynchronization initialSynchronization = executedSynchronizations.getInitialSynchronization();
+        return new InitialSynchronizationResource(initialSynchronization).asDocument();
+    }
+
+    @GetMapping("/{snippetId}")
     public JsonApiDocument getSynchronization(
-            @PathVariable("syncId") String syncIdParameter
+            @PathVariable("snippetId") String snippetId
     ) throws SynchronizationNotExistsException {
-        int syncId = parseSynchronizationId(syncIdParameter);
-        Synchronization synchronization = executedSynchronizations.get(syncId);
-        return new SynchronizationResource(syncId, synchronization).asDocument();
-    }
-
-    @GetMapping("/{syncId}/report")
-    public JsonApiDocument getReport(
-            @PathVariable("syncId") String syncIdParameter
-    ) throws SynchronizationNotExistsException {
-        int syncId = parseSynchronizationId(syncIdParameter);
-        Synchronization synchronization = executedSynchronizations.get(syncId);
-        return new SynchronizationReportResource(syncId, synchronization.getReport()).asDocument();
-    }
-
-    private int parseSynchronizationId(String syncId) throws SynchronizationNotExistsException {
-        try {
-            return Integer.parseInt(syncId);
-        } catch (NumberFormatException exception) {
-            throw new SynchronizationNotExistsException();
-        }
+        SnippetSynchronization synchronization = executedSynchronizations.get(snippetId);
+        return new SnippetSynchronizationResource(snippetId, synchronization).asDocument();
     }
 
     @ExceptionHandler(SynchronizationNotExistsException.class)

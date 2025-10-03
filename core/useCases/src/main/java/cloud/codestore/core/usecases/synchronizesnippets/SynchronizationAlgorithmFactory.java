@@ -13,23 +13,26 @@ import cloud.codestore.synchronization.Synchronization;
 class SynchronizationAlgorithmFactory {
     private final Status status;
     private final SnippetSetFactory snippetSetFactory;
+    private final ExecutedSynchronizations executedSynchronizations;
 
-    SynchronizationAlgorithmFactory(Status status, SnippetSetFactory snippetSetFactory) {
+    SynchronizationAlgorithmFactory(
+            Status status,
+            SnippetSetFactory snippetSetFactory,
+            ExecutedSynchronizations executedSynchronizations
+    ) {
         this.status = status;
         this.snippetSetFactory = snippetSetFactory;
+        this.executedSynchronizations = executedSynchronizations;
     }
 
     Status getStatus() {
         return status;
     }
 
-    Synchronization<Snippet> createSnippetSynchronizationAlgorithm(
-            SynchronizationReport report,
-            SynchronizationProgress progress
-    ) {
-        var progressListener = new SynchronizationProgressListener(report, progress);
-        var localSnippetSet = snippetSetFactory.createLocalSnippetSet(report);
-        var remoteSnippetSet = snippetSetFactory.createRemoteSnippetSet(report);
+    Synchronization<Snippet> createSnippetSynchronizationAlgorithm(InitialSynchronizationProgress progress) {
+        var progressListener = new SynchronizationProgressListener(executedSynchronizations, progress);
+        var localSnippetSet = snippetSetFactory.createLocalSnippetSet();
+        var remoteSnippetSet = snippetSetFactory.createRemoteSnippetSet();
 
         var synchronization = new MutableItemSynchronization<>(localSnippetSet, remoteSnippetSet, status);
         synchronization.setProgressListener(progressListener);

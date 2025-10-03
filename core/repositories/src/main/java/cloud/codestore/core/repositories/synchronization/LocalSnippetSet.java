@@ -6,7 +6,6 @@ import cloud.codestore.core.repositories.snippets.SnippetFileHelper;
 import cloud.codestore.core.usecases.createsnippet.CreateSnippetQuery;
 import cloud.codestore.core.usecases.deletesnippet.DeleteSnippetQuery;
 import cloud.codestore.core.usecases.readsnippet.ReadSnippetQuery;
-import cloud.codestore.core.usecases.synchronizesnippets.SynchronizationReport;
 import cloud.codestore.core.usecases.updatesnippet.UpdateSnippetQuery;
 import cloud.codestore.synchronization.ItemSet;
 import org.slf4j.Logger;
@@ -31,7 +30,6 @@ class LocalSnippetSet implements ItemSet<Snippet> {
     private final CreateSnippetQuery createSnippetQuery;
     private final DeleteSnippetQuery deleteSnippetQuery;
     private final UpdateSnippetQuery updateSnippetQuery;
-    private final SynchronizationReport syncReport;
     private Set<String> snippetIds;
 
     LocalSnippetSet(
@@ -39,15 +37,13 @@ class LocalSnippetSet implements ItemSet<Snippet> {
             ReadSnippetQuery readSnippetQuery,
             CreateSnippetQuery createSnippetQuery,
             DeleteSnippetQuery deleteSnippetQuery,
-            UpdateSnippetQuery updateSnippetQuery,
-            SynchronizationReport syncReport
+            UpdateSnippetQuery updateSnippetQuery
     ) {
         this.snippetsDirectory = snippetsDirectory;
         this.readSnippetQuery = readSnippetQuery;
         this.createSnippetQuery = createSnippetQuery;
         this.deleteSnippetQuery = deleteSnippetQuery;
         this.updateSnippetQuery = updateSnippetQuery;
-        this.syncReport = syncReport;
     }
 
     @Override
@@ -79,23 +75,19 @@ class LocalSnippetSet implements ItemSet<Snippet> {
 
     @Override
     public void addItem(String snippetId, Snippet snippet) {
-        LOGGER.debug("Create {} ({}) on local system.", snippetId, snippet.getTitle());
+        LOGGER.debug("Create {} on local system.", snippetId);
         createSnippetQuery.create(snippet);
-        syncReport.snippetCreatedLocally(snippet);
     }
 
     @Override
     public void delete(String snippetId) throws Exception {
-        Snippet snippet = getItem(snippetId);
-        LOGGER.debug("Delete {} ({}) on local system.", snippetId, snippet.getTitle());
+        LOGGER.debug("Delete {} on local system.", snippetId);
         deleteSnippetQuery.delete(snippetId);
-        syncReport.snippetDeletedLocally(snippet);
     }
 
     @Override
     public void updateItem(String snippetId, Snippet snippet) throws Exception {
-        LOGGER.debug("Update {} ({}) on local system.", snippetId, snippet.getTitle());
+        LOGGER.debug("Update {} on local system.", snippetId);
         updateSnippetQuery.update(snippet);
-        syncReport.snippetUpdatedLocally(snippet);
     }
 }

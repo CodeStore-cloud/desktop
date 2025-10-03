@@ -1,29 +1,24 @@
 package cloud.codestore.core.api.synchronization;
 
 import cloud.codestore.core.api.UriFactory;
-import cloud.codestore.core.usecases.synchronizesnippets.Synchronization;
-import cloud.codestore.core.usecases.synchronizesnippets.SynchronizationProgress;
-import cloud.codestore.jsonapi.relationship.Relationship;
+import cloud.codestore.core.usecases.synchronizesnippets.InitialSynchronization;
+import cloud.codestore.core.usecases.synchronizesnippets.InitialSynchronizationProgress;
+import cloud.codestore.jsonapi.error.ErrorObject;
 import cloud.codestore.jsonapi.resource.ResourceObject;
 import com.fasterxml.jackson.annotation.JsonGetter;
 
 import java.time.OffsetDateTime;
 
-class SynchronizationResource extends ResourceObject {
+class InitialSynchronizationResource extends ResourceObject {
     static final String PATH = "/synchronizations";
     private static final String RESOURCE_TYPE = "synchronization";
 
-    private final SynchronizationProgress progress;
-    private Relationship report;
+    private final InitialSynchronizationProgress progress;
 
-    SynchronizationResource(int syncId, Synchronization synchronization) {
-        super(RESOURCE_TYPE, String.valueOf(syncId));
+    InitialSynchronizationResource(InitialSynchronization synchronization) {
+        super(RESOURCE_TYPE, "1");
         progress = synchronization.getProgress();
-        setSelfLink(createLink(syncId));
-
-        if (progress.getStatus().isDone()) {
-            report = asRelationship(new SynchronizationReportResource(syncId, synchronization.getReport()));
-        }
+        setSelfLink(createLink(getId()));
     }
 
     @JsonGetter("status")
@@ -46,12 +41,18 @@ class SynchronizationResource extends ResourceObject {
         return progress.getEndTime();
     }
 
-    @JsonGetter("report")
-    public Relationship getReport() {
-        return report;
+    @JsonGetter("error")
+    public ErrorObject getError() {
+        ErrorObject errorObject = null;
+        if (progress.getError() != null) {
+            errorObject = new ErrorObject();
+            //TODO fill error object
+        }
+
+        return errorObject;
     }
 
-    static String createLink(int syncId) {
-        return UriFactory.createUri(PATH + "/" + syncId);
+    static String createLink(String id) {
+        return UriFactory.createUri(PATH + "/" + id);
     }
 }

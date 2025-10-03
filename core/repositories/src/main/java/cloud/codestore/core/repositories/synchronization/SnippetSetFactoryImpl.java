@@ -6,7 +6,6 @@ import cloud.codestore.core.usecases.createsnippet.CreateSnippetQuery;
 import cloud.codestore.core.usecases.deletesnippet.DeleteSnippetQuery;
 import cloud.codestore.core.usecases.readsnippet.ReadSnippetQuery;
 import cloud.codestore.core.usecases.synchronizesnippets.SnippetSetFactory;
-import cloud.codestore.core.usecases.synchronizesnippets.SynchronizationReport;
 import cloud.codestore.core.usecases.updatesnippet.UpdateSnippetQuery;
 import cloud.codestore.synchronization.ItemSet;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -36,19 +35,18 @@ class SnippetSetFactoryImpl implements SnippetSetFactory {
     }
 
     @Override
-    public ItemSet<Snippet> createLocalSnippetSet(SynchronizationReport syncReport) {
+    public ItemSet<Snippet> createLocalSnippetSet() {
         return new LocalSnippetSet(
                 snippetsDirectory,
                 readSnippetQuery,
                 createSnippetQuery,
                 deleteSnippetQuery,
-                updateSnippetQuery,
-                syncReport
+                updateSnippetQuery
         );
     }
 
     @Override
-    public ItemSet<Snippet> createRemoteSnippetSet(SynchronizationReport syncReport) {
-        return new RemoteSnippetSet(syncReport);
+    public ItemSet<Snippet> createRemoteSnippetSet() {
+        return new RemoteSnippetSet();
     }
 }

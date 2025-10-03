@@ -7,12 +7,15 @@ import org.slf4j.LoggerFactory;
 class SynchronizationProgressListener implements ProgressListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(SynchronizationProgressListener.class);
 
-    private final SynchronizationReport syncReport;
-    private final SynchronizationProgress progress;
+    private final ExecutedSynchronizations executedSynchronizations;
+    private final InitialSynchronizationProgress progress;
     private int processedSnippets;
 
-    SynchronizationProgressListener(SynchronizationReport syncReport, SynchronizationProgress progress) {
-        this.syncReport = syncReport;
+    SynchronizationProgressListener(
+            ExecutedSynchronizations executedSynchronizations,
+            InitialSynchronizationProgress progress
+    ) {
+        this.executedSynchronizations = executedSynchronizations;
         this.progress = progress;
     }
 
@@ -23,10 +26,21 @@ class SynchronizationProgressListener implements ProgressListener {
     }
 
     @Override
-    public void synchronizationStarted(String snippetId) {}
+    public void synchronizationStarted(String snippetId) {
+        SnippetSynchronization snippetSynchronization = new SnippetSynchronization(snippetId);
+        snippetSynchronization.start();
+        executedSynchronizations.add(snippetSynchronization);
+    }
 
     @Override
     public void synchronizationFinished(String snippetId) {
+        try {
+            SnippetSynchronization snippetSynchronization = executedSynchronizations.get(snippetId);
+            snippetSynchronization.complete();
+        } catch (SynchronizationNotExistsException exception) {
+            synchronizationFailed(snippetId, exception);
+        }
+
         progress.setProcessedSnippets(++processedSnippets);
     }
 
@@ -34,6 +48,15 @@ class SynchronizationProgressListener implements ProgressListener {
     public void synchronizationFailed(String snippetId, Throwable exception) {
         LOGGER.error("Synchronization failed for snippet {}", snippetId, exception);
         progress.setProcessedSnippets(++processedSnippets);
-        syncReport.synchronizationFailed(snippetId, exception);
+
+        SnippetSynchronization snippetSynchronization;
+        try {
+            snippetSynchronization = executedSynchronizations.get(snippetId);
+        } catch (SynchronizationNotExistsException notExistsException) {
+            exception = notExistsException;
+            snippetSynchronization = new SnippetSynchronization(snippetId);
+            executedSynchronizations.add(snippetSynchronization);
+        }
+        snippetSynchronization.fail(exception);
     }
 }

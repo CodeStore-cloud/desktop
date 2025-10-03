@@ -19,8 +19,8 @@ public class SynchronizeSnippets {
     }
 
     public void synchronizeSnippets() {
-        Synchronization synchronization = new Synchronization(algorithmFactory);
-        executedSynchronizations.add(synchronization);
-        synchronization.execute();
+        InitialSynchronization initialSynchronization = new InitialSynchronization(algorithmFactory);
+        executedSynchronizations.setInitialSynchronization(initialSynchronization);
+        initialSynchronization.execute();
     }
 }

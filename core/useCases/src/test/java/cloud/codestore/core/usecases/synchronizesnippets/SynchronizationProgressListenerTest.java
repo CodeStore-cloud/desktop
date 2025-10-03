@@ -6,13 +6,14 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("The progress listener")
 class SynchronizationProgressListenerTest {
-    private SynchronizationReport syncReport = new SynchronizationReport();
-    private SynchronizationProgress progress = new SynchronizationProgress();
+    private ExecutedSynchronizations executedSynchronizations = new ExecutedSynchronizations();
+    private InitialSynchronizationProgress progress = new InitialSynchronizationProgress();
     private SynchronizationProgressListener progressListener = new SynchronizationProgressListener(
-            syncReport, progress
+            executedSynchronizations, progress
     );
 
     @Test
@@ -20,25 +21,29 @@ class SynchronizationProgressListenerTest {
     void setTotalSnippetsInReport() {
         progressListener.numberOfItems(5);
         assertThat(progress.getProgressInPercent()).isEqualTo(0);
+        progressListener.synchronizationStarted("1");
         progressListener.synchronizationFinished("1");
         assertThat(progress.getProgressInPercent()).isEqualTo(20);
+        progressListener.synchronizationStarted("2");
         progressListener.synchronizationFinished("2");
         assertThat(progress.getProgressInPercent()).isEqualTo(40);
+        progressListener.synchronizationStarted("3");
         progressListener.synchronizationFinished("3");
         assertThat(progress.getProgressInPercent()).isEqualTo(60);
+        progressListener.synchronizationStarted("4");
         progressListener.synchronizationFailed("4", new IOException());
         assertThat(progress.getProgressInPercent()).isEqualTo(80);
+        progressListener.synchronizationStarted("5");
         progressListener.synchronizationFailed("5", new IOException());
         assertThat(progress.getProgressInPercent()).isEqualTo(100);
     }
 
     @Test
-    @DisplayName("sets the number of errors in the report")
-    void passErrorToReport() {
-        assertThat(syncReport.getErrorCount()).isEqualTo(0);
-        progressListener.synchronizationFailed("1", new IOException());
-        progressListener.synchronizationFailed("2", new IOException());
-        progressListener.synchronizationFailed("3", new IOException());
-        assertThat(syncReport.getErrorCount()).isEqualTo(3);
+    @DisplayName("adds the synchronization objects to the list of executed synchronizations")
+    void addToExecutedSynchronizations() throws SynchronizationNotExistsException {
+        assertThatThrownBy(() -> executedSynchronizations.get("1"))
+                .isInstanceOf(SynchronizationNotExistsException.class);
+        progressListener.synchronizationStarted("1");
+        assertThat(executedSynchronizations.get("1")).isNotNull();
     }
 }

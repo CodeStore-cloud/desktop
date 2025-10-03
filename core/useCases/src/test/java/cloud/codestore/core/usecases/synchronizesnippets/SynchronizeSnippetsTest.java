@@ -31,7 +31,7 @@ class SynchronizeSnippetsTest {
 
     @BeforeEach
     void setUp() {
-        when(algorithmFactory.createSnippetSynchronizationAlgorithm(any(), any())).thenReturn(synchronizationAlgorithm);
+        when(algorithmFactory.createSnippetSynchronizationAlgorithm(any())).thenReturn(synchronizationAlgorithm);
         when(algorithmFactory.getStatus()).thenReturn(status);
         useCase = new SynchronizeSnippets(algorithmFactory, executedSynchronizations);
     }
@@ -41,8 +41,8 @@ class SynchronizeSnippetsTest {
     void executeSynchronization() {
         useCase.synchronizeSnippets();
 
-        ArgumentCaptor<Synchronization> argument = ArgumentCaptor.forClass(Synchronization.class);
-        verify(executedSynchronizations).add(argument.capture());
+        ArgumentCaptor<InitialSynchronization> argument = ArgumentCaptor.forClass(InitialSynchronization.class);
+        verify(executedSynchronizations).setInitialSynchronization(argument.capture());
         var synchronization = argument.getValue();
         assertThat(synchronization.getProgress().getStatus()).isEqualTo(SynchronizationStatus.COMPLETED);
     }

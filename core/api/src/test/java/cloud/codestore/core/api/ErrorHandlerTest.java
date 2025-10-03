@@ -19,8 +19,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(DefaultLocale.class)
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({DefaultLocale.class, MockitoExtension.class})
 @DisplayName("The error handler")
 class ErrorHandlerTest {
     private ErrorHandler errorHandler = new ErrorHandler();
