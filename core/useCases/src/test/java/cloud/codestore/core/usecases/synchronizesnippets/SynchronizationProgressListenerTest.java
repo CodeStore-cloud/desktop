@@ -10,8 +10,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("The progress listener")
 class SynchronizationProgressListenerTest {
-    private ExecutedSynchronizations executedSynchronizations = new ExecutedSynchronizations();
-    private InitialSynchronizationProgress progress = new InitialSynchronizationProgress();
+    private SnippetSynchronizations executedSynchronizations = new SnippetSynchronizations();
+    private SynchronizationProgress progress = new SynchronizationProgress();
     private SynchronizationProgressListener progressListener = new SynchronizationProgressListener(
             executedSynchronizations, progress
     );

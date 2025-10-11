@@ -3,7 +3,7 @@ package cloud.codestore.core.api.security;
 import cloud.codestore.core.api.DefaultLocale;
 import cloud.codestore.core.api.TestConfig;
 import cloud.codestore.core.api.root.RootController;
-import cloud.codestore.core.usecases.synchronizesnippets.ExecutedSynchronizations;
+import cloud.codestore.core.usecases.synchronizesnippets.SynchronizationProcess;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.bytebuddy.utility.RandomString;
@@ -19,8 +19,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import java.util.Optional;
 
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -41,9 +39,9 @@ class AccessTokenFilterTest {
 
     @BeforeEach
     void setUp() {
-        ExecutedSynchronizations executedSynchronizations = mock(ExecutedSynchronizations.class);
-        lenient().when(executedSynchronizations.getOptionalInitialSynchronization()).thenReturn(Optional.empty());
-        mockMvc = MockMvcBuilders.standaloneSetup(new RootController(executedSynchronizations))
+        SynchronizationProcess synchronizationProcess = mock(SynchronizationProcess.class);
+        lenient().when(synchronizationProcess.isSkipped()).thenReturn(true);
+        mockMvc = MockMvcBuilders.standaloneSetup(new RootController(synchronizationProcess))
                                  .addFilters(new AccessTokenFilter(ACCESS_TOKEN, objectMapper))
                                  .build();
     }

@@ -1,10 +1,10 @@
 package cloud.codestore.core.api.synchronization;
 
 import cloud.codestore.core.api.ErrorResponseBuilder;
-import cloud.codestore.core.usecases.synchronizesnippets.ExecutedSynchronizations;
-import cloud.codestore.core.usecases.synchronizesnippets.InitialSynchronization;
-import cloud.codestore.core.usecases.synchronizesnippets.SnippetSynchronization;
+import cloud.codestore.core.usecases.synchronizesnippets.SnippetSynchronizationState;
+import cloud.codestore.core.usecases.synchronizesnippets.SnippetSynchronizations;
 import cloud.codestore.core.usecases.synchronizesnippets.SynchronizationNotExistsException;
+import cloud.codestore.core.usecases.synchronizesnippets.SynchronizationProcess;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
 import cloud.codestore.jsonapi.error.ErrorObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,26 +13,37 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(path = InitialSynchronizationResource.PATH, produces = JsonApiDocument.MEDIA_TYPE)
+@RequestMapping(path = SynchronizationProcessResource.PATH, produces = JsonApiDocument.MEDIA_TYPE)
 class SynchronizationController {
-    private final ExecutedSynchronizations executedSynchronizations;
+    private final SynchronizationProcess synchronizationProcess;
+    private final SnippetSynchronizations executedSynchronizations;
 
     @Autowired
-    SynchronizationController(ExecutedSynchronizations executedSynchronizations) {
+    SynchronizationController(
+            SynchronizationProcess synchronizationProcess,
+            SnippetSynchronizations executedSynchronizations
+    ) {
+        this.synchronizationProcess = synchronizationProcess;
         this.executedSynchronizations = executedSynchronizations;
     }
 
     @GetMapping("/1")
     public JsonApiDocument getInitialSynchronization() throws SynchronizationNotExistsException {
-        InitialSynchronization initialSynchronization = executedSynchronizations.getInitialSynchronization();
-        return new InitialSynchronizationResource(initialSynchronization).asDocument();
+        if (synchronizationProcess.isSkipped()) {
+            throw new SynchronizationNotExistsException();
+        }
+
+        return new SynchronizationProcessResource(
+                synchronizationProcess.getState(),
+                synchronizationProcess.getProgress()
+        ).asDocument();
     }
 
     @GetMapping("/{snippetId}")
     public JsonApiDocument getSynchronization(
             @PathVariable("snippetId") String snippetId
     ) throws SynchronizationNotExistsException {
-        SnippetSynchronization synchronization = executedSynchronizations.get(snippetId);
+        SnippetSynchronizationState synchronization = executedSynchronizations.get(snippetId);
         return new SnippetSynchronizationResource(snippetId, synchronization).asDocument();
     }
 

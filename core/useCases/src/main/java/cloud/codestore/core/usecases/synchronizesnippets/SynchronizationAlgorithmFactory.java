@@ -13,12 +13,12 @@ import cloud.codestore.synchronization.Synchronization;
 class SynchronizationAlgorithmFactory {
     private final Status status;
     private final SnippetSetFactory snippetSetFactory;
-    private final ExecutedSynchronizations executedSynchronizations;
+    private final SnippetSynchronizations executedSynchronizations;
 
     SynchronizationAlgorithmFactory(
             Status status,
             SnippetSetFactory snippetSetFactory,
-            ExecutedSynchronizations executedSynchronizations
+            SnippetSynchronizations executedSynchronizations
     ) {
         this.status = status;
         this.snippetSetFactory = snippetSetFactory;
@@ -29,7 +29,7 @@ class SynchronizationAlgorithmFactory {
         return status;
     }
 
-    Synchronization<Snippet> createSnippetSynchronizationAlgorithm(InitialSynchronizationProgress progress) {
+    Synchronization<Snippet> createSnippetSynchronizationAlgorithm(SynchronizationProgress progress) {
         var progressListener = new SynchronizationProgressListener(executedSynchronizations, progress);
         var localSnippetSet = snippetSetFactory.createLocalSnippetSet();
         var remoteSnippetSet = snippetSetFactory.createRemoteSnippetSet();

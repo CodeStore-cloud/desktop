@@ -1,6 +1,6 @@
 package cloud.codestore.core.api.synchronization;
 
-import cloud.codestore.core.usecases.synchronizesnippets.SnippetSynchronization;
+import cloud.codestore.core.usecases.synchronizesnippets.SnippetSynchronizationState;
 import cloud.codestore.jsonapi.error.ErrorObject;
 import cloud.codestore.jsonapi.resource.ResourceObject;
 import com.fasterxml.jackson.annotation.JsonGetter;
@@ -10,9 +10,9 @@ import java.time.OffsetDateTime;
 class SnippetSynchronizationResource extends ResourceObject {
     private static final String RESOURCE_TYPE = "snippet-synchronization";
 
-    private final SnippetSynchronization synchronization;
+    private final SnippetSynchronizationState synchronization;
 
-    SnippetSynchronizationResource(String snippetId, SnippetSynchronization synchronization) {
+    SnippetSynchronizationResource(String snippetId, SnippetSynchronizationState synchronization) {
         super(RESOURCE_TYPE, snippetId);
         this.synchronization = synchronization;
         setSelfLink(createLink(snippetId));
@@ -45,6 +45,6 @@ class SnippetSynchronizationResource extends ResourceObject {
     }
 
     private static String createLink(String snippetId) {
-        return InitialSynchronizationResource.createLink(snippetId);
+        return SynchronizationProcessResource.createLink(snippetId);
     }
 }

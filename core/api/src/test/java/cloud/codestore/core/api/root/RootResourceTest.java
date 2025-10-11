@@ -1,8 +1,7 @@
 package cloud.codestore.core.api.root;
 
 import cloud.codestore.core.api.AbstractControllerTest;
-import cloud.codestore.core.usecases.synchronizesnippets.ExecutedSynchronizations;
-import cloud.codestore.core.usecases.synchronizesnippets.InitialSynchronization;
+import cloud.codestore.core.usecases.synchronizesnippets.SynchronizationProcess;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,10 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import java.util.Optional;
-
 import static org.hamcrest.core.Is.is;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -23,12 +19,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DisplayName("GET /")
 class RootResourceTest extends AbstractControllerTest {
     @MockitoBean
-    private ExecutedSynchronizations executedSynchronizations;
+    private SynchronizationProcess synchronizationProcess;
 
     @Test
     @DisplayName("returns the core resource")
     void getRootResource() throws Exception {
-        when(executedSynchronizations.getOptionalInitialSynchronization()).thenReturn(Optional.empty());
+        when(synchronizationProcess.isSkipped()).thenReturn(true);
         mockMvc.perform(get("/"))
                .andExpect(status().isOk())
                .andExpect(content().contentType(JsonApiDocument.MEDIA_TYPE))
@@ -76,8 +72,7 @@ class RootResourceTest extends AbstractControllerTest {
     @Test
     @DisplayName("contains a link to the initial synchronization if present")
     void linkInitialSynchronizationResource() throws Exception {
-        when(executedSynchronizations.getOptionalInitialSynchronization())
-                .thenReturn(Optional.of(mock(InitialSynchronization.class)));
+        when(synchronizationProcess.isSkipped()).thenReturn(false);
 
         mockMvc.perform(get("/"))
                .andExpect(status().isOk())

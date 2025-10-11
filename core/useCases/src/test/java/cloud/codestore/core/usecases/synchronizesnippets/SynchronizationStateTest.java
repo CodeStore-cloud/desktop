@@ -10,9 +10,9 @@ import java.io.IOException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@DisplayName("The synchronization result")
-class SynchronizationResultTest {
-    private final SynchronizationResult result = new SynchronizationResult();
+@DisplayName("The synchronization state")
+class SynchronizationStateTest {
+    private final SynchronizationState state = new SynchronizationState();
 
     @Nested
     @DisplayName("after creation")
@@ -20,14 +20,14 @@ class SynchronizationResultTest {
         @Test
         @DisplayName("is pending")
         void initialState() {
-            var result = new SynchronizationResult();
+            var result = new SynchronizationState();
             assertThat(result.getStatus()).isEqualTo(SynchronizationStatus.PENDING);
         }
 
         @Test
         @DisplayName("has no time set")
         void noTimeSet() {
-            var result = new SynchronizationResult();
+            var result = new SynchronizationState();
             assertThat(result.getStartTime()).isNull();
             assertThat(result.getEndTime()).isNull();
             assertThat(result.getDuration()).isZero();
@@ -39,27 +39,27 @@ class SynchronizationResultTest {
     class WhenStarted {
         @BeforeEach
         void setUp() {
-            result.start();
+            state.start();
         }
 
         @Test
         @DisplayName("sets the progress to IN_PROGRESS")
         void inProgress() {
-            assertThat(result.getStatus()).isEqualTo(SynchronizationStatus.IN_PROGRESS);
+            assertThat(state.getStatus()).isEqualTo(SynchronizationStatus.IN_PROGRESS);
         }
 
         @Test
         @DisplayName("sets start time")
         void setStartTime() {
-            assertThat(result.getStartTime()).isNotNull();
-            assertThat(result.getEndTime()).isNull();
-            assertThat(result.getDuration()).isZero();
+            assertThat(state.getStartTime()).isNotNull();
+            assertThat(state.getEndTime()).isNull();
+            assertThat(state.getDuration()).isZero();
         }
 
         @Test
         @DisplayName("cannot be started twice")
         void cannotStartTwice() {
-            assertThatThrownBy(result::start).isInstanceOf(IllegalStateException.class);
+            assertThatThrownBy(state::start).isInstanceOf(IllegalStateException.class);
         }
     }
 
@@ -68,32 +68,32 @@ class SynchronizationResultTest {
     class Completed {
         @BeforeEach
         void setUp() throws InterruptedException {
-            result.start();
+            state.start();
             Thread.sleep(500);
-            result.complete();
+            state.complete();
         }
 
         @Test
         @DisplayName("sets the progress to COMPLETED")
         void inProgress() {
-            assertThat(result.getStatus()).isEqualTo(SynchronizationStatus.COMPLETED);
-            assertThat(result.getError()).isNull();
+            assertThat(state.getStatus()).isEqualTo(SynchronizationStatus.COMPLETED);
+            assertThat(state.getError()).isNull();
         }
 
         @Test
         @DisplayName("sets the end time")
         void setStartTime() {
-            assertThat(result.getStartTime()).isNotNull();
-            assertThat(result.getEndTime()).isNotNull();
-            assertThat(result.getDuration()).isGreaterThan(500);
+            assertThat(state.getStartTime()).isNotNull();
+            assertThat(state.getEndTime()).isNotNull();
+            assertThat(state.getDuration()).isGreaterThan(500);
         }
 
         @Test
         @DisplayName("cannot be restarted or finished in any way")
         void dontAllowFurtherActions() {
-            assertThatThrownBy(result::start).isInstanceOf(IllegalStateException.class);
-            assertThatThrownBy(result::complete).isInstanceOf(IllegalStateException.class);
-            assertThatThrownBy(() -> result.fail(new RuntimeException())).isInstanceOf(IllegalStateException.class);
+            assertThatThrownBy(state::start).isInstanceOf(IllegalStateException.class);
+            assertThatThrownBy(state::complete).isInstanceOf(IllegalStateException.class);
+            assertThatThrownBy(() -> state.fail(new RuntimeException())).isInstanceOf(IllegalStateException.class);
         }
     }
 
@@ -104,37 +104,37 @@ class SynchronizationResultTest {
 
         @BeforeEach
         void setUp() throws InterruptedException {
-            result.start();
+            state.start();
             Thread.sleep(500);
-            result.fail(exception);
+            state.fail(exception);
         }
 
         @Test
         @DisplayName("sets the progress to FAILED")
         void inProgress() {
-            assertThat(result.getStatus()).isEqualTo(SynchronizationStatus.FAILED);
+            assertThat(state.getStatus()).isEqualTo(SynchronizationStatus.FAILED);
         }
 
         @Test
         @DisplayName("sets the end time")
         void setStartTime() {
-            assertThat(result.getStartTime()).isNotNull();
-            assertThat(result.getEndTime()).isNotNull();
-            assertThat(result.getDuration()).isGreaterThan(500);
+            assertThat(state.getStartTime()).isNotNull();
+            assertThat(state.getEndTime()).isNotNull();
+            assertThat(state.getDuration()).isGreaterThan(500);
         }
 
         @Test
         @DisplayName("provides access to the error")
         void getError() {
-            assertThat(result.getError()).isSameAs(exception);
+            assertThat(state.getError()).isSameAs(exception);
         }
 
         @Test
         @DisplayName("cannot be restarted or finished in any way")
         void dontAllowFurtherActions() {
-            assertThatThrownBy(result::start).isInstanceOf(IllegalStateException.class);
-            assertThatThrownBy(result::complete).isInstanceOf(IllegalStateException.class);
-            assertThatThrownBy(() -> result.fail(new RuntimeException())).isInstanceOf(IllegalStateException.class);
+            assertThatThrownBy(state::start).isInstanceOf(IllegalStateException.class);
+            assertThatThrownBy(state::complete).isInstanceOf(IllegalStateException.class);
+            assertThatThrownBy(() -> state.fail(new RuntimeException())).isInstanceOf(IllegalStateException.class);
         }
     }
 }

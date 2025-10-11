@@ -7,29 +7,30 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
 /**
- * Base class for objects that contain progress and status information of the synchronization.
+ * Represents the state of the synchronization.
+ * It provides access to the status of the synchronization as well as the duration and error information.
  */
-class SynchronizationResult {
-    private SyncState syncState;
+public class SynchronizationState {
     private SynchronizationStatus status;
     private OffsetDateTime startTime;
     private OffsetDateTime endTime;
     private Throwable error;
+    private InternalState state;
 
-    SynchronizationResult() {
-        syncState = new PendingState();
+    SynchronizationState() {
+        state = new PendingState();
     }
 
     void start() {
-        syncState.start();
+        state.start();
     }
 
     void complete() {
-        syncState.complete();
+        state.complete();
     }
 
     void fail(@Nonnull Throwable error) {
-        syncState.fail(error);
+        state.fail(error);
     }
 
     @Nonnull
@@ -60,7 +61,7 @@ class SynchronizationResult {
         }
     }
 
-    private interface SyncState {
+    private interface InternalState {
         default void start() {
             throw getIllegalStateException();
         }
@@ -76,14 +77,14 @@ class SynchronizationResult {
         IllegalStateException getIllegalStateException();
     }
 
-    private class PendingState implements SyncState {
+    private class PendingState implements InternalState {
         PendingState() {
             status = SynchronizationStatus.PENDING;
         }
 
         @Override
         public void start() {
-            syncState = new InProgressState();
+            state = new InProgressState();
         }
 
         @Override
@@ -92,7 +93,7 @@ class SynchronizationResult {
         }
     }
 
-    private class InProgressState implements SyncState {
+    private class InProgressState implements InternalState {
         InProgressState() {
             status = SynchronizationStatus.IN_PROGRESS;
             startTime = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC);
@@ -100,13 +101,13 @@ class SynchronizationResult {
 
         @Override
         public void complete() {
-            syncState = new FinishedState(SynchronizationStatus.COMPLETED);
+            state = new FinishedState(SynchronizationStatus.COMPLETED);
         }
 
         @Override
         public void fail(Throwable throwable) {
             error = throwable;
-            syncState = new FinishedState(SynchronizationStatus.FAILED);
+            state = new FinishedState(SynchronizationStatus.FAILED);
         }
 
         @Override
@@ -115,7 +116,7 @@ class SynchronizationResult {
         }
     }
 
-    private class FinishedState implements SyncState {
+    private class FinishedState implements InternalState {
         FinishedState(SynchronizationStatus finalStatus) {
             status = finalStatus;
             endTime = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC);

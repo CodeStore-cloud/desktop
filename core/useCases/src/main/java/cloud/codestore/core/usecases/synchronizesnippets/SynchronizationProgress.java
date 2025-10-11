@@ -1,9 +1,6 @@
 package cloud.codestore.core.usecases.synchronizesnippets;
 
-import cloud.codestore.core.Injectable;
-
-@Injectable
-public class InitialSynchronizationProgress extends SynchronizationResult {
+public class SynchronizationProgress {
     private int totalSnippets;
     private int processedSnippets;
 

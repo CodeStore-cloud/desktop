@@ -18,20 +18,23 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("The initial synchronization object")
-class InitialSynchronizationTest {
+@DisplayName("The synchronization process")
+class SynchronizationProcessTest {
 
+    @Mock
+    private SynchronizationConfiguration configuration;
     @Mock
     private SynchronizationAlgorithmFactory algorithmFactory;
     @Mock
     private cloud.codestore.synchronization.Synchronization<Snippet> synchronizationAlgorithm;
     @Mock
     private Status status;
-    private InitialSynchronization synchronization;
+    private SynchronizationProcess synchronization;
 
     @BeforeEach
     void setUp() {
-        synchronization = new InitialSynchronization(algorithmFactory);
+        when(configuration.isCloudStorageConfigured()).thenReturn(true);
+        synchronization = new SynchronizationProcess(configuration, algorithmFactory);
         lenient().when(algorithmFactory.createSnippetSynchronizationAlgorithm(any())).thenReturn(synchronizationAlgorithm);
         lenient().when(algorithmFactory.getStatus()).thenReturn(status);
     }
@@ -56,11 +59,11 @@ class InitialSynchronizationTest {
         @DisplayName("updates the status")
         void setProgress() {
             when(algorithmFactory.createSnippetSynchronizationAlgorithm(any())).thenAnswer(invocation -> {
-                assertThat(synchronization.getProgress().getStatus()).isEqualTo(SynchronizationStatus.IN_PROGRESS);
+                assertThat(synchronization.getState().getStatus()).isEqualTo(SynchronizationStatus.IN_PROGRESS);
                 return synchronizationAlgorithm;
             });
             synchronization.execute();
-            assertThat(synchronization.getProgress().getStatus()).isEqualTo(SynchronizationStatus.COMPLETED);
+            assertThat(synchronization.getState().getStatus()).isEqualTo(SynchronizationStatus.COMPLETED);
         }
 
         @Test

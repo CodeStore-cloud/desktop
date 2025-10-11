@@ -1,30 +1,32 @@
 package cloud.codestore.core.api.synchronization;
 
 import cloud.codestore.core.api.UriFactory;
-import cloud.codestore.core.usecases.synchronizesnippets.InitialSynchronization;
-import cloud.codestore.core.usecases.synchronizesnippets.InitialSynchronizationProgress;
+import cloud.codestore.core.usecases.synchronizesnippets.SynchronizationProgress;
+import cloud.codestore.core.usecases.synchronizesnippets.SynchronizationState;
 import cloud.codestore.jsonapi.error.ErrorObject;
 import cloud.codestore.jsonapi.resource.ResourceObject;
 import com.fasterxml.jackson.annotation.JsonGetter;
 
 import java.time.OffsetDateTime;
 
-public class InitialSynchronizationResource extends ResourceObject {
+public class SynchronizationProcessResource extends ResourceObject {
     static final String PATH = "/synchronizations";
     private static final String RESOURCE_TYPE = "synchronization";
     private static final String INITIAL_SYNC_ID = "1";
 
-    private final InitialSynchronizationProgress progress;
+    private final SynchronizationState state;
+    private final SynchronizationProgress progress;
 
-    InitialSynchronizationResource(InitialSynchronization synchronization) {
+    SynchronizationProcessResource(SynchronizationState state, SynchronizationProgress progress) {
         super(RESOURCE_TYPE, INITIAL_SYNC_ID);
-        progress = synchronization.getProgress();
+        this.state = state;
+        this.progress = progress;
         setSelfLink(createLink(getId()));
     }
 
     @JsonGetter("status")
     public String getStatus() {
-        return progress.getStatus().name();
+        return state.getStatus().name();
     }
 
     @JsonGetter("progressPercent")
@@ -34,18 +36,18 @@ public class InitialSynchronizationResource extends ResourceObject {
 
     @JsonGetter("startTime")
     public OffsetDateTime getStartTime() {
-        return progress.getStartTime();
+        return state.getStartTime();
     }
 
     @JsonGetter("endTime")
     public OffsetDateTime getEndTime() {
-        return progress.getEndTime();
+        return state.getEndTime();
     }
 
     @JsonGetter("error")
     public ErrorObject getError() {
         ErrorObject errorObject = null;
-        if (progress.getError() != null) {
+        if (state.getError() != null) {
             errorObject = new ErrorObject();
             //TODO fill error object
         }

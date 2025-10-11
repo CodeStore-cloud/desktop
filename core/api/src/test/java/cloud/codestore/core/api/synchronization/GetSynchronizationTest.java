@@ -6,13 +6,13 @@ import cloud.codestore.jsonapi.document.JsonApiDocument;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.*;
@@ -24,23 +24,25 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DisplayName("GET /synchronizations/{id}")
 class GetSynchronizationTest extends AbstractControllerTest {
     @MockitoBean
-    private ExecutedSynchronizations executedSynchronizations;
-    private InitialSynchronizationProgress progress = mock(InitialSynchronizationProgress.class);
+    private SnippetSynchronizations snippetSynchronizations;
+    @MockitoBean
+    private SynchronizationProcess synchronization;
+    private SynchronizationProgress progress = mock(SynchronizationProgress.class);
+    private SynchronizationState state = mock(SynchronizationState.class);
 
     @BeforeEach
-    void setUp() throws SynchronizationNotExistsException {
-        InitialSynchronization synchronization = Mockito.mock(InitialSynchronization.class);
+    void setUp() {
         when(synchronization.getProgress()).thenReturn(progress);
-        when(executedSynchronizations.getInitialSynchronization()).thenReturn(synchronization);
+        when(synchronization.getState()).thenReturn(state);
     }
 
     @Test
     @DisplayName("returns the corresponding synchronization object")
     void getSyncObject() throws Exception {
-        var startTime = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC);
-        when(progress.getStatus()).thenReturn(SynchronizationStatus.IN_PROGRESS);
+        var startTime = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).truncatedTo(ChronoUnit.MILLIS);
+        when(state.getStatus()).thenReturn(SynchronizationStatus.IN_PROGRESS);
         when(progress.getProgressInPercent()).thenReturn(75);
-        when(progress.getStartTime()).thenReturn(startTime);
+        when(state.getStartTime()).thenReturn(startTime);
 
         mockMvc.perform(get("/synchronizations/1"))
                .andExpect(status().isOk())
@@ -56,7 +58,7 @@ class GetSynchronizationTest extends AbstractControllerTest {
     @Test
     @DisplayName("returns 404 when the object is not found")
     void invalidId() throws Exception {
-        when(executedSynchronizations.get(anyString())).thenThrow(new SynchronizationNotExistsException());
+        when(snippetSynchronizations.get(anyString())).thenThrow(new SynchronizationNotExistsException());
         mockMvc.perform(get("/synchronizations/0"))
                .andExpect(status().isNotFound());
     }
