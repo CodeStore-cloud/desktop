@@ -70,4 +70,9 @@ class RepositoryConfiguration {
         LOGGER.debug("Binary directory: {}", binDirectory);
         return binDirectory;
     }
+
+    @Bean("sync")
+    public File syncConfig(@Qualifier("data") Directory dataDirectory) {
+        return dataDirectory.getFile("sync.properties");
+    }
 }

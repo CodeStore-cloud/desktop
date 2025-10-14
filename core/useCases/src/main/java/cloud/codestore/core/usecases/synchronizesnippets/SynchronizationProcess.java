@@ -17,10 +17,19 @@ public class SynchronizationProcess {
     private final ProcessDelegate delegate;
 
     SynchronizationProcess(
-            SynchronizationConfiguration configuration,
+            ReadSynchronizationConfigurationQuery readSynchronizationConfigurationQuery,
             SynchronizationAlgorithmFactory algorithmFactory
     ) {
-        if (configuration.isCloudStorageConfigured()) {
+        SynchronizationConfiguration configuration;
+        try {
+            configuration = readSynchronizationConfigurationQuery.read();
+        } catch (Throwable exception) {
+            LOGGER.error("Failed to read synchronization configuration.", exception);
+            delegate = new FailedSynchronizationProcess(exception);
+            return;
+        }
+
+        if (configuration.isCloudServiceConfigured()) {
             delegate = new ActiveSynchronizationProcess(algorithmFactory);
         } else {
             LOGGER.info("Synchronization skipped");
@@ -99,6 +108,21 @@ public class SynchronizationProcess {
             } catch (IOException exception) {
                 LOGGER.error("Failed to save status.", exception);
             }
+        }
+    }
+
+    private static class FailedSynchronizationProcess extends ActiveSynchronizationProcess {
+        private final Throwable error;
+
+        private FailedSynchronizationProcess(@Nonnull Throwable error) {
+            super(null);
+            this.error = error;
+        }
+
+        @Override
+        public void execute() {
+            super.state.start();
+            super.state.fail(error);
         }
     }
 

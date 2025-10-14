@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -21,6 +22,8 @@ import static org.mockito.Mockito.*;
 @DisplayName("The synchronization process")
 class SynchronizationProcessTest {
 
+    @Mock
+    private ReadSynchronizationConfigurationQuery query;
     @Mock
     private SynchronizationConfiguration configuration;
     @Mock
@@ -33,8 +36,9 @@ class SynchronizationProcessTest {
 
     @BeforeEach
     void setUp() {
-        when(configuration.isCloudStorageConfigured()).thenReturn(true);
-        synchronization = new SynchronizationProcess(configuration, algorithmFactory);
+        when(query.read()).thenReturn(configuration);
+        when(configuration.isCloudServiceConfigured()).thenReturn(true);
+        synchronization = new SynchronizationProcess(query, algorithmFactory);
         lenient().when(algorithmFactory.createSnippetSynchronizationAlgorithm(any())).thenReturn(synchronizationAlgorithm);
         lenient().when(algorithmFactory.getStatus()).thenReturn(status);
     }
@@ -74,6 +78,28 @@ class SynchronizationProcessTest {
             InOrder inOrder = inOrder(synchronizationAlgorithm, status);
             inOrder.verify(synchronizationAlgorithm).synchronize();
             inOrder.verify(status).save();
+        }
+    }
+
+    @Nested
+    @DisplayName("when the configuration could not be read")
+    class ConfigurationErrorTest {
+        private static final RuntimeException ERROR = new UncheckedIOException(new IOException("Loading config failed"));
+
+        @BeforeEach
+        void setUp() {
+            when(query.read()).thenThrow(ERROR);
+        }
+
+        @Test
+        @DisplayName("fails with the original exception")
+        void failWithOriginalException() {
+            synchronization = new SynchronizationProcess(query, algorithmFactory);
+            synchronization.execute();
+
+            SynchronizationState state = synchronization.getState();
+            assertThat(state.getStatus()).isEqualTo(SynchronizationStatus.FAILED);
+            assertThat(state.getError()).isSameAs(ERROR);
         }
     }
 }

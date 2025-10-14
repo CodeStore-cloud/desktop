@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.Objects;
+import java.util.Properties;
 
 /**
  * Encapsulates the access to a file.
@@ -84,6 +85,42 @@ public record File(Path path) {
             return fileContent;
         } catch (IOException e) {
             return fallbackContent;
+        }
+    }
+
+    /**
+     * Reads this file as properties file.
+     *
+     * @return a {@link Properties} object. May be empty.
+     *
+     * @throws RepositoryException if the file could not be read, or it's not a properties file.
+     */
+    @Nonnull
+    public Properties readProperties() throws RepositoryException {
+        try {
+            Properties syncProperties = new Properties();
+            syncProperties.load(Files.newInputStream(path));
+            return syncProperties;
+        } catch (NoSuchFileException exception) {
+            throw new RepositoryException(exception, "file.notExists", path);
+        } catch (IOException exception) {
+            throw new RepositoryException(exception, "file.couldNotRead", path);
+        }
+    }
+
+    /**
+     * Saves this file as properties file.
+     * All parent directories will be created if necessary.
+     *
+     * @param properties the properties to save.
+     * @throws RepositoryException if the file could not be saved.
+     */
+    public void write(@Nonnull Properties properties) throws RepositoryException {
+        try {
+            var stream = Files.newOutputStream(path, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            properties.store(stream, null);
+        } catch (IOException exception) {
+            throw new RepositoryException(exception, "file.couldNotSave", path);
         }
     }
 
