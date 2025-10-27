@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 class SnippetSetFactoryImpl implements SnippetSetFactory {
 
     private final Directory snippetsDirectory;
+    private final Directory driveTokensDirectory;
     private final ReadSnippetQuery readSnippetQuery;
     private final CreateSnippetQuery createSnippetQuery;
     private final DeleteSnippetQuery deleteSnippetQuery;
@@ -22,12 +23,14 @@ class SnippetSetFactoryImpl implements SnippetSetFactory {
 
     SnippetSetFactoryImpl(
             @Qualifier("snippets") Directory snippetsDirectory,
+            @Qualifier("googleDriveTokens") Directory driveTokensDirectory,
             ReadSnippetQuery readSnippetQuery,
             CreateSnippetQuery createSnippetQuery,
             DeleteSnippetQuery deleteSnippetQuery,
             UpdateSnippetQuery updateSnippetQuery
     ) {
         this.snippetsDirectory = snippetsDirectory;
+        this.driveTokensDirectory = driveTokensDirectory;
         this.readSnippetQuery = readSnippetQuery;
         this.createSnippetQuery = createSnippetQuery;
         this.deleteSnippetQuery = deleteSnippetQuery;
@@ -47,6 +50,8 @@ class SnippetSetFactoryImpl implements SnippetSetFactory {
 
     @Override
     public ItemSet<Snippet> createRemoteSnippetSet() {
-        return new RemoteSnippetSet();
+        new GoogleDriveRemoteSnippetSet(driveTokensDirectory);
+
+        return null;
     }
 }

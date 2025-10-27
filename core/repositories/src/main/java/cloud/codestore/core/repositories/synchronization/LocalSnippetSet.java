@@ -63,7 +63,7 @@ class LocalSnippetSet implements ItemSet<Snippet> {
 
     @Override
     public String getEtag(String snippetId) throws Exception {
-        Snippet snippet = getItem(snippetId);
+        Snippet snippet = readSnippetQuery.read(snippetId);
         OffsetDateTime timestamp = snippet.getOptionalModified().orElseGet(snippet::getCreated);
         return timestamp.toString();
     }

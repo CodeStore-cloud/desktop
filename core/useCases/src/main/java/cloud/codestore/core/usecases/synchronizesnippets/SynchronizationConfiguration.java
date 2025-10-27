@@ -1,24 +1,30 @@
 package cloud.codestore.core.usecases.synchronizesnippets;
 
+import javax.annotation.Nonnull;
+
 /**
  * Contains information about the configured cloud service and corresponding credentials.
  */
-public class SynchronizationConfiguration {
-    private final CloudService cloudService;
-
+public record SynchronizationConfiguration(CloudService cloudService) {
     public static SynchronizationConfiguration empty() {
         return new SynchronizationConfiguration();
     }
 
-    public SynchronizationConfiguration(CloudService cloudService) {
+    public SynchronizationConfiguration(@Nonnull CloudService cloudService) {
         this.cloudService = cloudService;
     }
 
     private SynchronizationConfiguration() {
-        cloudService = null;
+        this(CloudService.NONE);
     }
 
     boolean isCloudServiceConfigured() {
-        return cloudService != null;
+        return cloudService != CloudService.NONE;
+    }
+
+    @Override
+    @Nonnull
+    public CloudService cloudService() {
+        return cloudService;
     }
 }

@@ -75,4 +75,9 @@ class RepositoryConfiguration {
     public File syncConfig(@Qualifier("data") Directory dataDirectory) {
         return dataDirectory.getFile("sync.properties");
     }
+
+    @Bean("googleDriveTokens")
+    public Directory googleDriveTokensDirectory(@Qualifier("data") Directory dataDirectory) {
+        return dataDirectory;
+    }
 }
