@@ -4,6 +4,7 @@ import cloud.codestore.core.Language;
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.SnippetNotExistsException;
 import cloud.codestore.core.usecases.readsnippet.ReadSnippet;
+import cloud.codestore.core.validation.InvalidSnippetException;
 import cloud.codestore.core.validation.SnippetValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -74,9 +75,36 @@ class UpdateSnippetTest {
         assertThat(snippet.getModified()).isCloseTo(OffsetDateTime.now(), within(3, SECONDS));
     }
 
+    @Test
+    @DisplayName("Only updates changed properties")
+    void partialUpdate() throws SnippetNotExistsException, InvalidSnippetException {
+        ArgumentCaptor<Snippet> snippetArgument = ArgumentCaptor.forClass(Snippet.class);
+
+        Snippet currentSnippet = currentSnippet();
+        when(readSnippetUseCase.read(SNIPPET_ID)).thenReturn(currentSnippet);
+
+        UpdatedSnippetDto dto = new UpdatedSnippetDto(
+                SNIPPET_ID,
+                null,
+                "new title",
+                null,
+                null,
+                "new description"
+        );
+        useCase.update(dto);
+
+        verify(query).update(snippetArgument.capture());
+        Snippet snippet = snippetArgument.getValue();
+        assertThat(snippet.getLanguage()).isEqualTo(currentSnippet.getLanguage());
+        assertThat(snippet.getTitle()).isEqualTo(dto.title());
+        assertThat(snippet.getCode()).isEqualTo(currentSnippet.getCode());
+        assertThat(snippet.getDescription()).isEqualTo(dto.description());
+        assertThat(snippet.getTags()).containsAll(snippet.getTags());
+    }
+
     private Snippet currentSnippet() {
         OffsetDateTime now = OffsetDateTime.now().truncatedTo(SECONDS);
-        OffsetDateTime fiveWeeksAgo = now.minus(5, WEEKS);
+        OffsetDateTime fiveWeeksAgo = now.minusWeeks(5);
         return Snippet.builder()
                       .id(SNIPPET_ID)
                       .language(Language.JAVASCRIPT)

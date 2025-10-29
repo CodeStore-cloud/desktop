@@ -28,7 +28,7 @@ public class UpdateSnippet {
     /**
      * Updates the code snippet represented by the given dto.
      *
-     * @param dto a dto representing the snippet to update.
+     * @param dto a (partially filled) dto representing the snippet to update.
      * @throws SnippetNotExistsException if the code snippet does not exist.
      * @throws InvalidSnippetException   if the code snippet is invalid.
      */
@@ -38,11 +38,11 @@ public class UpdateSnippet {
                                         .id(currentSnippet.getId())
                                         .created(currentSnippet.getCreated())
                                         .modified(OffsetDateTime.now())
-                                        .language(dto.language())
-                                        .title(dto.title())
-                                        .code(dto.code())
-                                        .tags(dto.tags())
-                                        .description(dto.description())
+                                        .language(dto.languageOrElse(currentSnippet.getLanguage()))
+                                        .title(dto.titleOrElse(currentSnippet.getTitle()))
+                                        .code(dto.codeOrElse(currentSnippet.getCode()))
+                                        .tags(dto.tagsOrElse(currentSnippet.getTags()))
+                                        .description(dto.descriptionOrElse(currentSnippet.getDescription()))
                                         .build();
 
         validator.validate(updatedSnippet);
