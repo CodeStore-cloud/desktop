@@ -11,7 +11,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -92,9 +94,24 @@ class FileSystemRepositoryTest {
         when(snippetFile.exists()).thenReturn(true);
         Snippet testSnippet = mock(Snippet.class);
         when(testSnippet.getId()).thenReturn(SNIPPET_ID);
+        Map<String, Object> additionalProperties = Collections.emptyMap();
+        when(snippetReader.readAdditionalProperties(any(File.class))).thenReturn(additionalProperties);
 
         repository.update(testSnippet);
-        verify(snippetWriter).write(testSnippet, snippetFile);
+        verify(snippetWriter).write(testSnippet, additionalProperties, snippetFile);
+    }
+
+    @Test
+    @DisplayName("preserves additional properties when updating a snippet")
+    void updateSnippetWithAdditionalProperties() throws SnippetNotExistsException {
+        when(snippetFile.exists()).thenReturn(true);
+        Snippet testSnippet = mock(Snippet.class);
+        when(testSnippet.getId()).thenReturn(SNIPPET_ID);
+        Map<String, Object> additionalProperties = Map.of("additionalProperty", "Hello, World!");
+        when(snippetReader.readAdditionalProperties(any(File.class))).thenReturn(additionalProperties);
+
+        repository.update(testSnippet);
+        verify(snippetWriter).write(testSnippet, additionalProperties, snippetFile);
     }
 
     @Test

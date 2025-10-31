@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
+import java.util.Map;
 import java.util.stream.Stream;
 
 /**
@@ -64,10 +65,15 @@ class FileSystemRepository implements CreateSnippetQuery, UpdateSnippetQuery, De
         return snippetReader.read(file);
     }
 
+    /**
+     * There may be a time when the JSON files contain additional properties that are not supported by this client yet.
+     * In this case, those additional properties need to be preserved.
+     */
     @Override
     public void update(@Nonnull Snippet snippet) throws SnippetNotExistsException {
         File file = existingFile(snippet.getId());
-        snippetWriter.write(snippet, file);
+        Map<String, Object> additionalProperties = snippetReader.readAdditionalProperties(file);
+        snippetWriter.write(snippet, additionalProperties, file);
     }
 
     @Override

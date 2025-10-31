@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
@@ -43,6 +44,15 @@ class SnippetWriterTest {
         Snippet snippet = testSnippet();
         snippetWriter.write(snippet, snippetFile);
         verify(snippetFile).write(expectedOutput());
+    }
+
+    @Test
+    @DisplayName("writes additional properties")
+    void writeAdditionalProperties() {
+        Map<String, Object> additionalProperties = Map.of("additionalProperty", "Hello, World!");
+        snippetWriter.write(testSnippet(), additionalProperties, snippetFile);
+        verify(snippetFile).write(
+                argThat((String content) -> content.contains("\"additionalProperty\":\"Hello, World!\"")));
     }
 
     @Test
@@ -72,14 +82,15 @@ class SnippetWriterTest {
     }
 
     private String expectedOutput() {
-        return "{" +
-               "\"language\":10," +
-               "\"title\":\"A random title\"," +
-               "\"description\":\"A random description\"," +
-               "\"code\":\"System.out.println(\\\"Hello, World!\\\")\"," +
-               "\"tags\":[\"random\",\"hello\",\"world\"]," +
-               "\"created\":\"2023-06-24T14:47:28Z\"," +
-               "\"modified\":\"2023-07-13T09:15:53Z\"" +
-               "}";
+        return """
+                {\
+                "language":10,\
+                "title":"A random title",\
+                "description":"A random description",\
+                "code":"System.out.println(\\"Hello, World!\\")",\
+                "tags":["random","hello","world"],\
+                "created":"2023-06-24T14:47:28Z",\
+                "modified":"2023-07-13T09:15:53Z"\
+                }""";
     }
 }

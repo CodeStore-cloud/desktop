@@ -7,7 +7,6 @@ import cloud.codestore.core.repositories.File;
 import cloud.codestore.core.usecases.createsnippet.CreateSnippetQuery;
 import cloud.codestore.core.usecases.deletesnippet.DeleteSnippetQuery;
 import cloud.codestore.core.usecases.readsnippet.ReadSnippetQuery;
-import cloud.codestore.core.usecases.synchronizesnippets.SynchronizationReport;
 import cloud.codestore.core.usecases.updatesnippet.UpdateSnippetQuery;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -41,8 +40,6 @@ class LocalSnippetSetTest {
     private DeleteSnippetQuery deleteSnippetQuery;
     @Mock
     private UpdateSnippetQuery updateSnippetQuery;
-    @Mock
-    private SynchronizationReport syncReport;
     private LocalSnippetSet snippetSet;
     private Snippet testSnippet = Snippet.builder().build();
 
@@ -62,8 +59,7 @@ class LocalSnippetSetTest {
                 readSnippetQuery,
                 createSnippetQuery,
                 deleteSnippetQuery,
-                updateSnippetQuery,
-                syncReport
+                updateSnippetQuery
         );
     }
 
@@ -89,7 +85,6 @@ class LocalSnippetSetTest {
     void createSnippet() {
         snippetSet.addItem(SNIPPET_ID, testSnippet);
         verify(createSnippetQuery).create(testSnippet);
-        verify(syncReport).snippetCreatedLocally(testSnippet);
     }
 
     @Test
@@ -97,7 +92,6 @@ class LocalSnippetSetTest {
     void updateSnippet() throws Exception {
         snippetSet.updateItem(SNIPPET_ID, testSnippet);
         verify(updateSnippetQuery).update(testSnippet);
-        verify(syncReport).snippetUpdatedLocally(testSnippet);
     }
 
     @Test
@@ -105,7 +99,6 @@ class LocalSnippetSetTest {
     void deleteSnippet() throws Exception {
         snippetSet.delete(SNIPPET_ID);
         verify(deleteSnippetQuery).delete(SNIPPET_ID);
-        verify(syncReport).snippetDeletedLocally(testSnippet);
     }
 
     @Nested

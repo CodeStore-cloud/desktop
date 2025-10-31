@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
+import java.util.Map;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.assertj.core.api.Assertions.*;
@@ -91,5 +92,25 @@ class SnippetReaderTest {
         assertThatThrownBy(() -> snippetReader.read(testFile))
                 .isInstanceOf(RepositoryException.class)
                 .hasMessage("The format of the file test.json is invalid.");
+    }
+
+    @Test
+    @DisplayName("caches the most recently read snippet DTO")
+    void cacheLastReadSnippet() {
+        String fileContent = """
+                {
+                  "title":"Test Snippet",
+                  "code":"System.out.println(\\"Hello, World!\\");",
+                  "language":10,
+                  "created":"2022-06-25T10:55:45Z",
+                  "additionalProperty":"Hello, World!"
+                }""";
+        when(testFile.readOrElse(anyString())).thenReturn(fileContent);
+        snippetReader.read(testFile);
+
+        Map<String, Object> additionalProperties = snippetReader.readAdditionalProperties(testFile);
+
+        assertThat(additionalProperties).hasSize(1).containsEntry("additionalProperty", "Hello, World!");
+        verify(testFile, times(1)).readOrElse(anyString());
     }
 }
