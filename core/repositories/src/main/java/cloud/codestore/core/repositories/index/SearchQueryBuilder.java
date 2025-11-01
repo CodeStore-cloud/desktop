@@ -1,4 +1,4 @@
-package cloud.codestore.core.repositories.snippets;
+package cloud.codestore.core.repositories.index;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static cloud.codestore.core.repositories.snippets.SnippetIndex.SnippetField.*;
+import static cloud.codestore.core.repositories.index.SnippetIndex.SnippetField.*;
 
 class SearchQueryBuilder {
     private static final float LANGUAGE_WEIGHT = 1.5f;

@@ -1,8 +1,7 @@
-package cloud.codestore.core.repositories.snippets;
+package cloud.codestore.core.repositories.index;
 
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.SnippetNotExistsException;
-import cloud.codestore.core.repositories.tags.TagRepository;
 import cloud.codestore.core.usecases.listsnippets.FilterProperties;
 import cloud.codestore.core.usecases.listsnippets.SortProperties;
 import org.apache.lucene.search.SortField;

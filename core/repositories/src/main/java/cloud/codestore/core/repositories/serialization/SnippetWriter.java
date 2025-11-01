@@ -1,4 +1,4 @@
-package cloud.codestore.core.repositories.snippets;
+package cloud.codestore.core.repositories.serialization;
 
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.repositories.File;
@@ -13,14 +13,14 @@ import java.util.Map;
 import java.util.Objects;
 
 @Component
-class SnippetWriter {
+public class SnippetWriter {
     private final ObjectMapper objectMapper;
 
     SnippetWriter(@Qualifier("snippetMapper") ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 
-    void write(Snippet snippet, File file) {
+    public void write(Snippet snippet, File file) {
         Map<String, Object> additionalProperties;
         if (snippet instanceof ExtendedSnippet extendedSnippet) {
             additionalProperties = extendedSnippet.getAdditionalProperties();

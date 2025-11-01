@@ -1,9 +1,12 @@
-package cloud.codestore.core.repositories.snippets;
+package cloud.codestore.core.repositories.index;
 
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.SnippetNotExistsException;
 import cloud.codestore.core.repositories.Directory;
 import cloud.codestore.core.repositories.File;
+import cloud.codestore.core.repositories.serialization.SnippetFileHelper;
+import cloud.codestore.core.repositories.serialization.SnippetReader;
+import cloud.codestore.core.repositories.serialization.SnippetWriter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

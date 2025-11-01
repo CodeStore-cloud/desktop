@@ -1,4 +1,4 @@
-package cloud.codestore.core.repositories.snippets;
+package cloud.codestore.core.repositories.index;
 
 import cloud.codestore.core.usecases.listsnippets.FilterProperties;
 import org.apache.lucene.search.BooleanClause;

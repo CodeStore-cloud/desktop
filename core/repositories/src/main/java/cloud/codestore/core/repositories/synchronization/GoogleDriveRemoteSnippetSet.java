@@ -3,7 +3,7 @@ package cloud.codestore.core.repositories.synchronization;
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.repositories.Directory;
 import cloud.codestore.core.repositories.RepositoryException;
-import cloud.codestore.core.repositories.snippets.SnippetFileHelper;
+import cloud.codestore.core.repositories.serialization.SnippetFileHelper;
 import cloud.codestore.synchronization.ItemSet;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -16,6 +16,7 @@ import com.google.api.client.http.ByteArrayContent;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.client.util.DateTime;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
@@ -25,12 +26,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.time.OffsetDateTime;
 import java.util.*;
 
 /**
@@ -42,7 +45,7 @@ class GoogleDriveRemoteSnippetSet implements ItemSet<Snippet> {
     private static final String CREDENTIALS_FILE_PATH = "/google.drive.auth.json";
     private static final List<String> SCOPES = Collections.singletonList(DriveScopes.DRIVE_METADATA_READONLY);
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-    private static final String CONTENT_TYPE = "application/json";
+    private static final String CONTENT_TYPE_JSON = "application/json";
 
     private final Drive service;
     private File googleDriveSnippetsFolder;
@@ -110,7 +113,7 @@ class GoogleDriveRemoteSnippetSet implements ItemSet<Snippet> {
     @Override
     public Snippet getItem(String snippetId) throws Exception {
         File remoteFile = remoteSnippets.get(snippetId);
-        String content = readFile(remoteFile.getId());
+        String content = readFile(remoteFile);
         //TODO return Snippet/Content
         return null;
     }
@@ -121,7 +124,7 @@ class GoogleDriveRemoteSnippetSet implements ItemSet<Snippet> {
 
         String content = ""; //TODO content
         String fileName = SnippetFileHelper.getFileName(snippetId);
-        createFile(fileName, googleDriveSnippetsFolder, content);
+        createFile(fileName, googleDriveSnippetsFolder, content, snippet.getCreated(), snippet.getModified());
     }
 
     @Override
@@ -134,10 +137,11 @@ class GoogleDriveRemoteSnippetSet implements ItemSet<Snippet> {
     @Override
     public void updateItem(String snippetId, Snippet snippet) throws Exception {
         LOGGER.debug("Update {} on remote system.", snippetId);
+        Objects.requireNonNull(snippet.getModified(), "Modified snippet has no 'modified' timestamp.");
 
         File file = remoteSnippets.get(snippetId);
         String content = ""; //TODO content
-        updateFile(file, content);
+        updateFile(file, snippet.getModified(), content);
     }
 
     private Optional<File> getFolder(String folderName, String parentFolderId) throws IOException {
@@ -174,7 +178,7 @@ class GoogleDriveRemoteSnippetSet implements ItemSet<Snippet> {
                        "and '" + folder.getId() + "' in parents " +
                        "and trashed = false";
 
-        Map<String, File> snippetMap = Collections.emptyMap();
+        Map<String, File> snippetMap = new HashMap<>();
         String pageToken = null;
         do {
             FileList result = service.files()
@@ -186,11 +190,7 @@ class GoogleDriveRemoteSnippetSet implements ItemSet<Snippet> {
                                      .execute();
 
             List<File> files = result.getFiles();
-            if (files == null || files.isEmpty()) {
-                //TODO folder not exists - create?
-                System.out.println("No files found.");
-            } else {
-                snippetMap = new HashMap<>(files.size());
+            if (files != null && !files.isEmpty()) {
                 for (File file : files) {
                     String snippetId = SnippetFileHelper.getSnippetId(file.getName());
                     snippetMap.put(snippetId, file);
@@ -203,24 +203,27 @@ class GoogleDriveRemoteSnippetSet implements ItemSet<Snippet> {
         return snippetMap;
     }
 
-    private String readFile(String fileId) throws IOException {
+    private String readFile(File file) throws IOException {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         service.files()
-               .get(fileId)
+               .get(file.getId())
                .executeMediaAndDownloadTo(stream);
 
         return stream.toString(StandardCharsets.UTF_8);
     }
 
-    private void createFile(String fileName, File parentFolder, String content) throws IOException {
+    private void createFile(
+            String fileName, File parentFolder, String content, OffsetDateTime created, OffsetDateTime modified
+    ) throws IOException {
+        OffsetDateTime modifiedTime = Optional.ofNullable(modified).orElse(created);
         File fileMetadata = new File().setName(fileName)
                                       .setParents(Collections.singletonList(parentFolder.getId()))
-                                      .setMimeType(CONTENT_TYPE)
-                                      .setCreatedTime(null) //TODO creation time
-                                      .setModifiedTime(null); //TODO modified time
+                                      .setMimeType(CONTENT_TYPE_JSON)
+                                      .setCreatedTime(toDateTime(created))
+                                      .setModifiedTime(toDateTime(modifiedTime));
 
         AbstractInputStreamContent mediaContent = new ByteArrayContent(
-                CONTENT_TYPE,
+                CONTENT_TYPE_JSON,
                 content.getBytes(StandardCharsets.UTF_8)
         );
 
@@ -229,10 +232,10 @@ class GoogleDriveRemoteSnippetSet implements ItemSet<Snippet> {
                .execute();
     }
 
-    private void updateFile(File file, String content) throws IOException {
-        File fileMetadata = new File().setModifiedTime(null); //TODO modified time
+    private void updateFile(File file, OffsetDateTime modified, String content) throws IOException {
+        File fileMetadata = new File().setModifiedTime(toDateTime(modified));
         AbstractInputStreamContent mediaContent = new ByteArrayContent(
-                CONTENT_TYPE,
+                CONTENT_TYPE_JSON,
                 content.getBytes(StandardCharsets.UTF_8)
         );
 
@@ -245,5 +248,15 @@ class GoogleDriveRemoteSnippetSet implements ItemSet<Snippet> {
         service.files()
                .delete(file.getId())
                .execute();
+    }
+
+    @Nullable
+    private DateTime toDateTime(@Nullable OffsetDateTime offsetDateTime) {
+        if (offsetDateTime == null) {
+            return null;
+        }
+
+        TimeZone timeZone = TimeZone.getTimeZone(offsetDateTime.toZonedDateTime().getZone());
+        return new DateTime(new Date(offsetDateTime.toInstant().toEpochMilli()), timeZone);
     }
 }

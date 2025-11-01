@@ -1,4 +1,4 @@
-package cloud.codestore.core.repositories.snippets;
+package cloud.codestore.core.repositories.index;
 
 import org.apache.lucene.search.Query;
 import org.junit.jupiter.api.DisplayName;

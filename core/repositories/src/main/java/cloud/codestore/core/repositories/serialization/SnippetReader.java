@@ -1,4 +1,4 @@
-package cloud.codestore.core.repositories.snippets;
+package cloud.codestore.core.repositories.serialization;
 
 import cloud.codestore.core.Language;
 import cloud.codestore.core.Snippet;
@@ -14,14 +14,14 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 
 @Component
-class SnippetReader {
+public class SnippetReader {
     private final ObjectMapper objectMapper;
 
     SnippetReader(@Qualifier("snippetMapper") ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 
-    Snippet read(File file) {
+    public Snippet read(File file) {
         var dto = readDto(file);
         return new ExtendedSnippetBuilder(dto.getAdditionalProperties())
                 .id(SnippetFileHelper.getSnippetId(file))

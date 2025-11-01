@@ -1,8 +1,7 @@
-package cloud.codestore.core.repositories.snippets;
+package cloud.codestore.core.repositories.index;
 
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.SnippetNotExistsException;
-import cloud.codestore.core.repositories.tags.TagRepository;
 import cloud.codestore.core.usecases.createsnippet.CreateSnippetQuery;
 import cloud.codestore.core.usecases.deletesnippet.DeleteSnippetQuery;
 import cloud.codestore.core.usecases.listsnippets.FilterProperties;
@@ -22,7 +21,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static cloud.codestore.core.repositories.snippets.SnippetIndex.SnippetField;
+import static cloud.codestore.core.repositories.index.SnippetIndex.SnippetField;
 
 /**
  * A decorator around the {@link FileSystemRepository} which stores code snippets in the {@link SnippetIndex}.

@@ -1,4 +1,4 @@
-package cloud.codestore.core.repositories.snippets;
+package cloud.codestore.core.repositories.index;
 
 import cloud.codestore.core.usecases.listsnippets.FilterProperties;
 import org.apache.lucene.index.Term;
@@ -6,8 +6,8 @@ import org.apache.lucene.search.*;
 
 import java.util.Collection;
 
-import static cloud.codestore.core.repositories.snippets.SnippetIndex.SnippetField.LANGUAGE;
-import static cloud.codestore.core.repositories.snippets.SnippetIndex.SnippetField.TAG;
+import static cloud.codestore.core.repositories.index.SnippetIndex.SnippetField.LANGUAGE;
+import static cloud.codestore.core.repositories.index.SnippetIndex.SnippetField.TAG;
 
 class FilterQueryBuilder {
     private final FilterProperties filterProperties;

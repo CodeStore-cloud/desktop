@@ -1,4 +1,4 @@
-package cloud.codestore.core.repositories.snippets;
+package cloud.codestore.core.repositories.serialization;
 
 import cloud.codestore.core.repositories.File;
 

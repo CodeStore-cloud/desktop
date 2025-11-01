@@ -1,4 +1,4 @@
-package cloud.codestore.core.repositories.tags;
+package cloud.codestore.core.repositories.index;
 
 import cloud.codestore.core.usecases.createtag.CreateTagQuery;
 import cloud.codestore.core.usecases.readtags.ReadTagsQuery;
@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Component
-public class TagRepository implements ReadTagsQuery, CreateTagQuery {
+class TagRepository implements ReadTagsQuery, CreateTagQuery {
     private final Set<String> tags = new HashSet<>();
 
     @Override
@@ -23,7 +23,7 @@ public class TagRepository implements ReadTagsQuery, CreateTagQuery {
         tags.add(tag);
     }
 
-    public void add(Collection<String> tags) {
+    void add(Collection<String> tags) {
         this.tags.addAll(tags);
     }
 }

@@ -1,4 +1,4 @@
-package cloud.codestore.core.repositories.snippets;
+package cloud.codestore.core.repositories.index;
 
 import cloud.codestore.core.Language;
 import cloud.codestore.core.Snippet;
@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static cloud.codestore.core.repositories.snippets.SnippetIndex.SnippetField;
+import static cloud.codestore.core.repositories.index.SnippetIndex.SnippetField;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("The snippet index")
