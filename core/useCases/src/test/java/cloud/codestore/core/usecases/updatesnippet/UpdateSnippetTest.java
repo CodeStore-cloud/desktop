@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
-import static java.time.temporal.ChronoUnit.WEEKS;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -51,8 +50,8 @@ class UpdateSnippetTest {
         assertThatThrownBy(() -> useCase.update(dto)).isInstanceOf(SnippetNotExistsException.class);
     }
 
-    @DisplayName("puts the updated code snippet into the repository")
     @Test
+    @DisplayName("puts the updated code snippet into the repository")
     void passSnippetToRepository() throws Exception {
         ArgumentCaptor<Snippet> snippetArgument = ArgumentCaptor.forClass(Snippet.class);
 

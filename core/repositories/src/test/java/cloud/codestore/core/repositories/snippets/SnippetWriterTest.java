@@ -47,10 +47,11 @@ class SnippetWriterTest {
     }
 
     @Test
-    @DisplayName("writes additional properties")
-    void writeAdditionalProperties() {
+    @DisplayName("preserves additional properties")
+    void preserveAdditionalProperties() {
         Map<String, Object> additionalProperties = Map.of("additionalProperty", "Hello, World!");
-        snippetWriter.write(testSnippet(), additionalProperties, snippetFile);
+        ExtendedSnippet snippet = new ExtendedSnippet(testSnippet(), additionalProperties);
+        snippetWriter.write(snippet, snippetFile);
         verify(snippetFile).write(
                 argThat((String content) -> content.contains("\"additionalProperty\":\"Hello, World!\"")));
     }

@@ -94,7 +94,7 @@ class FileTest {
 
         @Test
         @DisplayName("creates not existing parent directories")
-        void createParentDirectories() throws RepositoryException, IOException {
+        void createParentDirectories() throws RepositoryException {
             Path subDir = testDir.resolve("subDir").resolve("subSubDir");
             assertThat(subDir).doesNotExist();
 

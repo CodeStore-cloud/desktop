@@ -23,7 +23,7 @@ public class Snippet {
     private final OffsetDateTime created;
     private final OffsetDateTime modified;
 
-    Snippet(
+    protected Snippet(
             @Nonnull String id,
             @Nonnull String title,
             @Nonnull String description,
@@ -47,6 +47,10 @@ public class Snippet {
 
     public static SnippetBuilder builder() {
         return new SnippetBuilder();
+    }
+
+    public SnippetBuilder toBuilder() {
+        return new SnippetBuilder(this);
     }
 
     @Nonnull

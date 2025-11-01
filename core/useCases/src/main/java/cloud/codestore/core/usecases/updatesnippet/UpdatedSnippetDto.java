@@ -3,16 +3,17 @@ package cloud.codestore.core.usecases.updatesnippet;
 import cloud.codestore.core.Language;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
 public record UpdatedSnippetDto(
-        String id,
-        Language language,
-        String title,
-        String code,
-        List<String> tags,
-        String description
+        @Nonnull String id,
+        @Nullable Language language,
+        @Nullable String title,
+        @Nullable String code,
+        @Nullable List<String> tags,
+        @Nullable String description
 ) {
     @Nonnull
     Language languageOrElse(@Nonnull Language language) {

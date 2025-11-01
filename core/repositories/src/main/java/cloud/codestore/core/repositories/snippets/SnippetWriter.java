@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
@@ -20,10 +21,13 @@ class SnippetWriter {
     }
 
     void write(Snippet snippet, File file) {
-        write(snippet, Map.of(), file);
-    }
+        Map<String, Object> additionalProperties;
+        if (snippet instanceof ExtendedSnippet extendedSnippet) {
+            additionalProperties = extendedSnippet.getAdditionalProperties();
+        } else {
+            additionalProperties = Collections.emptyMap();
+        }
 
-    void write(Snippet snippet, Map<String, Object> additionalProperties, File file) {
         var dto = new PersistentSnippetDto(
                 snippet.getLanguage().getId(),
                 snippet.getTitle(),

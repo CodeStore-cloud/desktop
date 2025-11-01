@@ -11,14 +11,11 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 @Component
 class SnippetReader {
     private final ObjectMapper objectMapper;
-    private Map<String, PersistentSnippetDto> cachedDto = new HashMap<>(1);
 
     SnippetReader(@Qualifier("snippetMapper") ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
@@ -26,24 +23,16 @@ class SnippetReader {
 
     Snippet read(File file) {
         var dto = readDto(file);
-        cachedDto.clear();
-        cachedDto.put(file.getName(), dto);
-
-        return Snippet.builder()
-                      .id(SnippetFileHelper.getSnippetId(file))
-                      .title(dto.getTitle())
-                      .description(dto.getDescription())
-                      .code(dto.getCode())
-                      .tags(dto.getTags())
-                      .language(getLanguageById(dto.getLanguage()))
-                      .created(parseDateTime(dto.getCreated()))
-                      .modified(parseDateTime(dto.getModified()))
-                      .build();
-    }
-
-    Map<String, Object> readAdditionalProperties(File file) {
-        var dto = cachedDto.computeIfAbsent(file.getName(), fileName -> readDto(file));
-        return dto.getAdditionalProperties();
+        return new ExtendedSnippetBuilder(dto.getAdditionalProperties())
+                .id(SnippetFileHelper.getSnippetId(file))
+                .title(dto.getTitle())
+                .description(dto.getDescription())
+                .code(dto.getCode())
+                .tags(dto.getTags())
+                .language(getLanguageById(dto.getLanguage()))
+                .created(parseDateTime(dto.getCreated()))
+                .modified(parseDateTime(dto.getModified()))
+                .build();
     }
 
     private PersistentSnippetDto readDto(File file) {

@@ -18,7 +18,18 @@ public class SnippetBuilder {
     private OffsetDateTime created;
     private OffsetDateTime modified;
 
-    SnippetBuilder() {}
+    protected SnippetBuilder() {}
+
+    protected SnippetBuilder(Snippet snippet) {
+        id(snippet.getId());
+        language(snippet.getLanguage());
+        title(snippet.getTitle());
+        description(snippet.getDescription());
+        code(snippet.getCode());
+        tags(snippet.getTags());
+        created(snippet.getCreated());
+        modified(snippet.getModified());
+    }
 
     public SnippetBuilder id(String id) {
         this.id = id;

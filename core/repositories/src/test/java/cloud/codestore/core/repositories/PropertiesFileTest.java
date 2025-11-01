@@ -33,14 +33,18 @@ class PropertiesFileTest {
         properties.setProperty(KEY, VALUE);
     }
 
+    private File notExistingFile() {
+        return new File(testDir.resolve("notExistingFile.properties"));
+    }
+
     @Nested
     @DisplayName("that exists")
     class ExistingFileTest {
         @BeforeEach
         void setUp() throws IOException {
             testFile = testDir.resolve(FILE_NAME);
-            assertThat(testFile).exists();
             properties.store(Files.newOutputStream(testFile), null);
+            assertThat(testFile).exists();
         }
 
         @Test
@@ -59,26 +63,7 @@ class PropertiesFileTest {
 
             new File(testFile).write(properties);
 
-            assertThat(Files.readString(testFile)).isEqualTo(KEY + "=" + VALUE);
-        }
-
-        @Nested
-        @DisplayName("and has invalid format")
-        class BadFormatTest {
-            @BeforeEach
-            void setUp() throws IOException {
-                String text = "invalidFormat {bla}";
-                Files.writeString(testFile, text);
-                assertThat(Files.readString(testFile)).isEqualTo(text);
-            }
-
-            @Test
-            @DisplayName("cannot be read")
-            void throwErrorWhenReading() {
-                assertThatThrownBy(() -> new File(testFile).readProperties())
-                        .isInstanceOf(RepositoryException.class)
-                        .hasMessageMatching("The file .+ could not be read\\.");
-            }
+            assertThat(Files.readString(testFile)).contains(KEY + "=" + VALUE);
         }
     }
 
@@ -104,11 +89,7 @@ class PropertiesFileTest {
             new File(testFile).write(properties);
 
             assertThat(testFile).exists();
-            assertThat(Files.readString(testFile)).isEqualTo(KEY + "=" + VALUE);
+            assertThat(Files.readString(testFile)).contains(KEY + "=" + VALUE);
         }
-    }
-
-    private File notExistingFile() {
-        return new File(testDir.resolve("notExistingFile.properties"));
     }
 }

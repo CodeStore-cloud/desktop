@@ -15,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
-import java.util.Map;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.assertj.core.api.Assertions.*;
@@ -95,22 +94,20 @@ class SnippetReaderTest {
     }
 
     @Test
-    @DisplayName("caches the most recently read snippet DTO")
-    void cacheLastReadSnippet() {
+    @DisplayName("preserves additional properties")
+    void preserveAdditionalProperties() {
         String fileContent = """
                 {
                   "title":"Test Snippet",
-                  "code":"System.out.println(\\"Hello, World!\\");",
-                  "language":10,
-                  "created":"2022-06-25T10:55:45Z",
                   "additionalProperty":"Hello, World!"
                 }""";
         when(testFile.readOrElse(anyString())).thenReturn(fileContent);
-        snippetReader.read(testFile);
 
-        Map<String, Object> additionalProperties = snippetReader.readAdditionalProperties(testFile);
+        Snippet snippet = snippetReader.read(testFile);
 
-        assertThat(additionalProperties).hasSize(1).containsEntry("additionalProperty", "Hello, World!");
-        verify(testFile, times(1)).readOrElse(anyString());
+        assertThat(snippet).isNotNull();
+        assertThat(snippet).isInstanceOf(ExtendedSnippet.class);
+        ExtendedSnippet extendedSnippet = (ExtendedSnippet) snippet;
+        assertThat(extendedSnippet.getAdditionalProperties()).containsEntry("additionalProperty", "Hello, World!");
     }
 }

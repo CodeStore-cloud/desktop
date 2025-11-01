@@ -34,16 +34,14 @@ public class UpdateSnippet {
      */
     public void update(@Nonnull UpdatedSnippetDto dto) throws SnippetNotExistsException, InvalidSnippetException {
         Snippet currentSnippet = readSnippetUseCase.read(dto.id());
-        Snippet updatedSnippet = Snippet.builder()
-                                        .id(currentSnippet.getId())
-                                        .created(currentSnippet.getCreated())
-                                        .modified(OffsetDateTime.now())
-                                        .language(dto.languageOrElse(currentSnippet.getLanguage()))
-                                        .title(dto.titleOrElse(currentSnippet.getTitle()))
-                                        .code(dto.codeOrElse(currentSnippet.getCode()))
-                                        .tags(dto.tagsOrElse(currentSnippet.getTags()))
-                                        .description(dto.descriptionOrElse(currentSnippet.getDescription()))
-                                        .build();
+        Snippet updatedSnippet = currentSnippet.toBuilder()
+                                               .modified(OffsetDateTime.now())
+                                               .language(dto.languageOrElse(currentSnippet.getLanguage()))
+                                               .title(dto.titleOrElse(currentSnippet.getTitle()))
+                                               .code(dto.codeOrElse(currentSnippet.getCode()))
+                                               .tags(dto.tagsOrElse(currentSnippet.getTags()))
+                                               .description(dto.descriptionOrElse(currentSnippet.getDescription()))
+                                               .build();
 
         validator.validate(updatedSnippet);
         query.update(updatedSnippet);
