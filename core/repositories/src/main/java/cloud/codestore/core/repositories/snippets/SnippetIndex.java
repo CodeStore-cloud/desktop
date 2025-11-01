@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -78,7 +79,7 @@ class SnippetIndex {
 
             return Collections.emptyList();
         } catch (IOException exception) {
-            throw new RuntimeException(exception);
+            throw new UncheckedIOException(exception);
         }
     }
 
@@ -89,7 +90,7 @@ class SnippetIndex {
         try (IndexWriter writer = createWriter()) {
             snippets.forEach(snippet -> add(snippet, writer));
         } catch (IOException exception) {
-            throw new RuntimeException(exception);
+            throw new UncheckedIOException(exception);
         }
     }
 
@@ -100,7 +101,7 @@ class SnippetIndex {
         try (IndexWriter writer = createWriter()) {
             add(snippet, writer);
         } catch (IOException exception) {
-            throw new RuntimeException(exception);
+            throw new UncheckedIOException(exception);
         }
     }
 
@@ -111,7 +112,7 @@ class SnippetIndex {
         try (IndexWriter writer = createWriter()) {
             writer.updateDocument(new Term(SnippetField.ID, snippet.getId()), document(snippet));
         } catch (IOException exception) {
-            throw new RuntimeException(exception);
+            throw new UncheckedIOException(exception);
         }
     }
 
@@ -122,7 +123,7 @@ class SnippetIndex {
         try (IndexWriter writer = createWriter()) {
             writer.deleteDocuments(new Term(SnippetField.ID, snippetId));
         } catch (IOException exception) {
-            throw new RuntimeException(exception);
+            throw new UncheckedIOException(exception);
         }
     }
 
@@ -130,7 +131,7 @@ class SnippetIndex {
         try {
             writer.addDocument(document(snippet));
         } catch (IOException exception) {
-            throw new RuntimeException(exception);
+            throw new UncheckedIOException(exception);
         }
     }
 
@@ -156,7 +157,7 @@ class SnippetIndex {
             Document document = reader.storedFields().document(docId, Collections.singleton(SnippetField.ID));
             return document.get(SnippetField.ID);
         } catch (IOException exception) {
-            throw new RuntimeException(exception);
+            throw new UncheckedIOException(exception);
         }
     }
 
