@@ -1,5 +1,7 @@
 package cloud.codestore.core.repositories;
 
+import cloud.codestore.synchronization.Status;
+import cloud.codestore.synchronization.helper.CsvMutableItemStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -72,12 +74,19 @@ class RepositoryConfiguration {
     }
 
     @Bean("sync")
-    public File syncConfig(@Qualifier("data") Directory dataDirectory) {
-        return dataDirectory.getFile("sync.properties");
+    public Directory syncDirectory(@Qualifier("data") Directory dataDirectory) {
+        return dataDirectory.getSubDirectory("synchronization");
     }
 
-    @Bean("googleDriveTokens")
-    public Directory googleDriveTokensDirectory(@Qualifier("data") Directory dataDirectory) {
-        return dataDirectory;
+    @Bean("syncProperties")
+    public File syncConfig(@Qualifier("sync") Directory syncDirectory) {
+        return syncDirectory.getFile("sync.properties");
+    }
+
+    @Bean
+    public Status getStatus(@Qualifier("sync") Directory syncDirectory) {
+        File statusFile = syncDirectory.getFile("SyncStatus.csv");
+        return CsvMutableItemStatus.loadSilently(statusFile.path());
+        // TODO log exception in case of error
     }
 }

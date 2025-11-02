@@ -29,10 +29,13 @@ class SynchronizationAlgorithmFactory {
         return status;
     }
 
-    Synchronization<Snippet> createSnippetSynchronizationAlgorithm(SynchronizationProgress progress) {
+    Synchronization<Snippet> createSnippetSynchronizationAlgorithm(
+            SynchronizationProgress progress,
+            CloudService cloudService
+    ) {
         var progressListener = new SynchronizationProgressListener(executedSynchronizations, progress);
         var localSnippetSet = snippetSetFactory.createLocalSnippetSet();
-        var remoteSnippetSet = snippetSetFactory.createRemoteSnippetSet();
+        var remoteSnippetSet = snippetSetFactory.createRemoteSnippetSet(cloudService);
 
         var synchronization = new MutableItemSynchronization<>(localSnippetSet, remoteSnippetSet, status);
         synchronization.setProgressListener(progressListener);

@@ -1,13 +1,10 @@
 package cloud.codestore.core.repositories.synchronization;
 
 import cloud.codestore.core.Snippet;
-import cloud.codestore.core.SnippetNotExistsException;
 import cloud.codestore.core.repositories.Directory;
 import cloud.codestore.core.repositories.File;
-import cloud.codestore.core.usecases.createsnippet.CreateSnippetQuery;
-import cloud.codestore.core.usecases.deletesnippet.DeleteSnippetQuery;
-import cloud.codestore.core.usecases.readsnippet.ReadSnippetQuery;
-import cloud.codestore.core.usecases.updatesnippet.UpdateSnippetQuery;
+import cloud.codestore.core.repositories.serialization.SnippetReader;
+import cloud.codestore.core.repositories.serialization.SnippetWriter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -29,23 +26,22 @@ import static org.mockito.Mockito.*;
 @DisplayName("The local snippet set")
 class LocalSnippetSetTest {
     private static final String SNIPPET_ID = "snippet-1";
+    private static final String FILE_NAME =  SNIPPET_ID + ".json";
 
     @Mock
     private Directory snippetsDirectory;
     @Mock
-    private ReadSnippetQuery readSnippetQuery;
+    private File testFile;
     @Mock
-    private CreateSnippetQuery createSnippetQuery;
+    private SnippetReader snippetReader;
     @Mock
-    private DeleteSnippetQuery deleteSnippetQuery;
-    @Mock
-    private UpdateSnippetQuery updateSnippetQuery;
+    private SnippetWriter snippetWriter;
     private LocalSnippetSet snippetSet;
     private Snippet testSnippet = Snippet.builder().build();
 
     @BeforeEach
-    void setUp() throws SnippetNotExistsException {
-        lenient().when(readSnippetQuery.read(anyString())).thenReturn(testSnippet);
+    void setUp() {
+        lenient().when(snippetsDirectory.getFile(FILE_NAME)).thenReturn(testFile);
         when(snippetsDirectory.getFiles()).thenReturn(List.of(
                 new File(Path.of("snippet-1.json")),
                 new File(Path.of("snippet-2.json")),
@@ -54,13 +50,8 @@ class LocalSnippetSetTest {
                 new File(Path.of("snippet-5.json"))
         ));
 
-        snippetSet = new LocalSnippetSet(
-                snippetsDirectory,
-                readSnippetQuery,
-                createSnippetQuery,
-                deleteSnippetQuery,
-                updateSnippetQuery
-        );
+        snippetSet = new LocalSnippetSet(snippetsDirectory, snippetReader, snippetWriter);
+        snippetSet.getItemIds();
     }
 
     @Test
@@ -81,24 +72,31 @@ class LocalSnippetSetTest {
     }
 
     @Test
+    @DisplayName("reads a code snippet from the file system")
+    void readSnippet() {
+        snippetSet.getItem(SNIPPET_ID);
+        verify(snippetReader).read(testFile);
+    }
+
+    @Test
     @DisplayName("creates a new snippet on the system and adds it to the report")
     void createSnippet() {
         snippetSet.addItem(SNIPPET_ID, testSnippet);
-        verify(createSnippetQuery).create(testSnippet);
+        verify(snippetWriter).write(testSnippet, testFile);
     }
 
     @Test
     @DisplayName("updates a snippet on the system and adds it to the report")
-    void updateSnippet() throws Exception {
+    void updateSnippet() {
         snippetSet.updateItem(SNIPPET_ID, testSnippet);
-        verify(updateSnippetQuery).update(testSnippet);
+        verify(snippetWriter).write(testSnippet, testFile);
     }
 
     @Test
     @DisplayName("deletes a snippet on the system and adds it to the report")
     void deleteSnippet() throws Exception {
         snippetSet.delete(SNIPPET_ID);
-        verify(deleteSnippetQuery).delete(SNIPPET_ID);
+        verify(testFile).delete();
     }
 
     @Nested
@@ -109,9 +107,9 @@ class LocalSnippetSetTest {
 
         @Test
         @DisplayName("from the modified-timestamp")
-        void modifiedTimestamp() throws Exception {
+        void modifiedTimestamp() {
             testSnippet = Snippet.builder().modified(MODIFIED_TIME).build();
-            when(readSnippetQuery.read(anyString())).thenReturn(testSnippet);
+            when(snippetReader.read(testFile)).thenReturn(testSnippet);
 
             String etag = snippetSet.getEtag(SNIPPET_ID);
             String expectedEtag = MODIFIED_TIME.truncatedTo(ChronoUnit.SECONDS)
@@ -122,9 +120,9 @@ class LocalSnippetSetTest {
 
         @Test
         @DisplayName("from the creation-timestamp if the modified-timestamp is not set")
-        void creationTimestamp() throws Exception {
+        void creationTimestamp() {
             testSnippet = Snippet.builder().created(CREATED_TIME).build();
-            when(readSnippetQuery.read(anyString())).thenReturn(testSnippet);
+            when(snippetReader.read(testFile)).thenReturn(testSnippet);
 
             String etag = snippetSet.getEtag(SNIPPET_ID);
             String expectedEtag = CREATED_TIME.truncatedTo(ChronoUnit.SECONDS)

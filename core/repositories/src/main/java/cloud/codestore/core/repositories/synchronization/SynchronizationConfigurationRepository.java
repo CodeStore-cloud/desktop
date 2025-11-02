@@ -14,7 +14,7 @@ import java.util.Properties;
 class SynchronizationConfigurationRepository implements ReadSynchronizationConfigurationQuery {
     private final File syncConfig;
 
-    SynchronizationConfigurationRepository(@Nonnull @Qualifier("sync") File syncConfig) {
+    SynchronizationConfigurationRepository(@Nonnull @Qualifier("syncProperties") File syncConfig) {
         this.syncConfig = syncConfig;
     }
 

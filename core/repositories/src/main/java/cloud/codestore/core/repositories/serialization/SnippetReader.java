@@ -22,9 +22,18 @@ public class SnippetReader {
     }
 
     public Snippet read(File file) {
-        var dto = readDto(file);
+        try {
+            String snippetId = SnippetFileHelper.getSnippetId(file);
+            return read(snippetId, file.readOrElse("{}"));
+        } catch (JsonProcessingException exception) {
+            throw new RepositoryException(exception, "file.invalidFormat", file.path());
+        }
+    }
+
+    public Snippet read(String snippetId, String fileContent) throws JsonProcessingException {
+        var dto = parse(fileContent);
         return new ExtendedSnippetBuilder(dto.getAdditionalProperties())
-                .id(SnippetFileHelper.getSnippetId(file))
+                .id(snippetId)
                 .title(dto.getTitle())
                 .description(dto.getDescription())
                 .code(dto.getCode())
@@ -35,13 +44,8 @@ public class SnippetReader {
                 .build();
     }
 
-    private PersistentSnippetDto readDto(File file) {
-        try {
-            String fileContent = file.readOrElse("{}");
-            return objectMapper.readValue(fileContent, PersistentSnippetDto.class);
-        } catch (JsonProcessingException exception) {
-            throw new RepositoryException(exception, "file.invalidFormat", file.path());
-        }
+    private PersistentSnippetDto parse(String fileContent) throws JsonProcessingException {
+        return objectMapper.readValue(fileContent, PersistentSnippetDto.class);
     }
 
     @Nullable

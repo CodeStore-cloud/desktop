@@ -39,7 +39,7 @@ class SynchronizationProcessTest {
         when(query.read()).thenReturn(configuration);
         when(configuration.isCloudServiceConfigured()).thenReturn(true);
         synchronization = new SynchronizationProcess(query, algorithmFactory);
-        lenient().when(algorithmFactory.createSnippetSynchronizationAlgorithm(any())).thenReturn(synchronizationAlgorithm);
+        lenient().when(algorithmFactory.createSnippetSynchronizationAlgorithm(any(), any())).thenReturn(synchronizationAlgorithm);
         lenient().when(algorithmFactory.getStatus()).thenReturn(status);
     }
 
@@ -62,7 +62,7 @@ class SynchronizationProcessTest {
         @Test
         @DisplayName("updates the status")
         void setProgress() {
-            when(algorithmFactory.createSnippetSynchronizationAlgorithm(any())).thenAnswer(invocation -> {
+            when(algorithmFactory.createSnippetSynchronizationAlgorithm(any(), any())).thenAnswer(invocation -> {
                 assertThat(synchronization.getState().getStatus()).isEqualTo(SynchronizationStatus.IN_PROGRESS);
                 return synchronizationAlgorithm;
             });

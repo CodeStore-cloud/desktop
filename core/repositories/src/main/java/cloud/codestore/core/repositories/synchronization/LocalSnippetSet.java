@@ -2,11 +2,10 @@ package cloud.codestore.core.repositories.synchronization;
 
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.repositories.Directory;
+import cloud.codestore.core.repositories.File;
 import cloud.codestore.core.repositories.serialization.SnippetFileHelper;
-import cloud.codestore.core.usecases.createsnippet.CreateSnippetQuery;
-import cloud.codestore.core.usecases.deletesnippet.DeleteSnippetQuery;
-import cloud.codestore.core.usecases.readsnippet.ReadSnippetQuery;
-import cloud.codestore.core.usecases.updatesnippet.UpdateSnippetQuery;
+import cloud.codestore.core.repositories.serialization.SnippetReader;
+import cloud.codestore.core.repositories.serialization.SnippetWriter;
 import cloud.codestore.synchronization.ItemSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,24 +25,18 @@ class LocalSnippetSet implements ItemSet<Snippet> {
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalSnippetSet.class);
 
     private final Directory snippetsDirectory;
-    private final ReadSnippetQuery readSnippetQuery;
-    private final CreateSnippetQuery createSnippetQuery;
-    private final DeleteSnippetQuery deleteSnippetQuery;
-    private final UpdateSnippetQuery updateSnippetQuery;
+    private final SnippetReader snippetReader;
+    private final SnippetWriter snippetWriter;
     private Set<String> snippetIds;
 
     LocalSnippetSet(
             @Qualifier("snippets") Directory snippetsDirectory,
-            ReadSnippetQuery readSnippetQuery,
-            CreateSnippetQuery createSnippetQuery,
-            DeleteSnippetQuery deleteSnippetQuery,
-            UpdateSnippetQuery updateSnippetQuery
+            SnippetReader snippetReader,
+            SnippetWriter snippetWriter
     ) {
         this.snippetsDirectory = snippetsDirectory;
-        this.readSnippetQuery = readSnippetQuery;
-        this.createSnippetQuery = createSnippetQuery;
-        this.deleteSnippetQuery = deleteSnippetQuery;
-        this.updateSnippetQuery = updateSnippetQuery;
+        this.snippetReader = snippetReader;
+        this.snippetWriter = snippetWriter;
     }
 
     @Override
@@ -62,32 +55,36 @@ class LocalSnippetSet implements ItemSet<Snippet> {
     }
 
     @Override
-    public String getEtag(String snippetId) throws Exception {
-        Snippet snippet = readSnippetQuery.read(snippetId);
+    public String getEtag(String snippetId) {
+        Snippet snippet = getItem(snippetId);
         OffsetDateTime timestamp = snippet.getOptionalModified().orElseGet(snippet::getCreated);
         return timestamp.toString();
     }
 
     @Override
-    public Snippet getItem(String snippetId) throws Exception {
-        return readSnippetQuery.read(snippetId);
+    public Snippet getItem(String snippetId) {
+        return snippetReader.read(file(snippetId));
     }
 
     @Override
     public void addItem(String snippetId, Snippet snippet) {
         LOGGER.debug("Create {} on local system.", snippetId);
-        createSnippetQuery.create(snippet);
+        snippetWriter.write(snippet, file(snippetId));
     }
 
     @Override
     public void delete(String snippetId) throws Exception {
         LOGGER.debug("Delete {} on local system.", snippetId);
-        deleteSnippetQuery.delete(snippetId);
+        file(snippetId).delete();
     }
 
     @Override
-    public void updateItem(String snippetId, Snippet snippet) throws Exception {
+    public void updateItem(String snippetId, Snippet snippet) {
         LOGGER.debug("Update {} on local system.", snippetId);
-        updateSnippetQuery.update(snippet);
+        snippetWriter.write(snippet, file(snippetId));
+    }
+
+    private File file(String snippetId) {
+        return snippetsDirectory.getFile(SnippetFileHelper.getFileName(snippetId));
     }
 }

@@ -1,87 +1,48 @@
 package cloud.codestore.core.repositories.synchronization;
 
 import cloud.codestore.core.Snippet;
-import cloud.codestore.core.repositories.Directory;
 import cloud.codestore.core.repositories.RepositoryException;
 import cloud.codestore.core.repositories.serialization.SnippetFileHelper;
+import cloud.codestore.core.repositories.serialization.SnippetReader;
+import cloud.codestore.core.repositories.serialization.SnippetWriter;
 import cloud.codestore.synchronization.ItemSet;
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
-import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.AbstractInputStreamContent;
 import com.google.api.client.http.ByteArrayContent;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.DateTime;
-import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
 import java.time.OffsetDateTime;
 import java.util.*;
 
 /**
  * Represents the set of code snippets on the remote system. Usually a cloud storage.
  */
-class GoogleDriveRemoteSnippetSet implements ItemSet<Snippet> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GoogleDriveRemoteSnippetSet.class);
-    private static final String APPLICATION_NAME = "CodeStore Desktop Application";
-    private static final String CREDENTIALS_FILE_PATH = "/google.drive.auth.json";
-    private static final List<String> SCOPES = Collections.singletonList(DriveScopes.DRIVE_METADATA_READONLY);
-    private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
+class GoogleDriveSnippetSet implements ItemSet<Snippet> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GoogleDriveSnippetSet.class);
     private static final String CONTENT_TYPE_JSON = "application/json";
 
+    private final SnippetReader snippetReader;
+    private final SnippetWriter snippetWriter;
     private final Drive service;
     private File googleDriveSnippetsFolder;
     private Map<String, File> remoteSnippets;
 
-    GoogleDriveRemoteSnippetSet(@Nonnull Directory tokensDirectory) {
-        service = createGoogleDriveService(tokensDirectory);
-    }
-
-    private static Drive createGoogleDriveService(Directory tokensDirectory) {
-        try {
-            NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            Credential credentials = getCredentials(httpTransport, tokensDirectory);
-            return new Drive.Builder(httpTransport, JSON_FACTORY, credentials)
-                    .setApplicationName(APPLICATION_NAME)
-                    .build();
-        } catch (GeneralSecurityException | IOException exception) {
-            throw new RepositoryException("Login to Google Drive failed.", exception);
-        }
-    }
-
-    private static Credential getCredentials(
-            NetHttpTransport httpTransport,
-            Directory tokensDirectory
-    ) throws IOException {
-        InputStream in = GoogleDriveRemoteSnippetSet.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
-        Objects.requireNonNull(in, "Resource not found: " + CREDENTIALS_FILE_PATH);
-        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
-
-        GoogleAuthorizationCodeFlow authFlow = new GoogleAuthorizationCodeFlow.Builder(
-                httpTransport, JSON_FACTORY, clientSecrets, SCOPES)
-                .setDataStoreFactory(new FileDataStoreFactory(tokensDirectory.path().toFile()))
-                .setAccessType("offline")
-                .build();
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder().build();
-        return new AuthorizationCodeInstalledApp(authFlow, receiver).authorize("user");
+    GoogleDriveSnippetSet(
+            GoogleDriveAuthenticator authenticator,
+            SnippetReader snippetReader,
+            SnippetWriter snippetWriter
+    ) {
+        this.snippetReader = snippetReader;
+        this.snippetWriter = snippetWriter;
+        service = authenticator.authenticate();
     }
 
     @Override
@@ -94,7 +55,7 @@ class GoogleDriveRemoteSnippetSet implements ItemSet<Snippet> {
             googleDriveSnippetsFolder = optional.isPresent() ? optional.get() : createFolder("snippets", codestoreFolder.getId());
             remoteSnippets = listSnippetsInFolder(googleDriveSnippetsFolder);
         } catch (IOException exception) {
-            throw new RepositoryException("Failed to list snippets on remote system.", exception);
+            throw new RepositoryException("cloud.couldNotListFiles", exception);
         }
         return remoteSnippets.keySet();
     }
@@ -114,17 +75,16 @@ class GoogleDriveRemoteSnippetSet implements ItemSet<Snippet> {
     public Snippet getItem(String snippetId) throws Exception {
         File remoteFile = remoteSnippets.get(snippetId);
         String content = readFile(remoteFile);
-        //TODO return Snippet/Content
-        return null;
+        return snippetReader.read(snippetId, content);
     }
 
     @Override
     public void addItem(String snippetId, Snippet snippet) throws Exception {
         LOGGER.debug("Create {} on remote system.", snippetId);
-
-        String content = ""; //TODO content
+        String content = snippetWriter.stringify(snippet);
         String fileName = SnippetFileHelper.getFileName(snippetId);
-        createFile(fileName, googleDriveSnippetsFolder, content, snippet.getCreated(), snippet.getModified());
+        createFile(fileName, googleDriveSnippetsFolder, content, snippet.getCreated(),
+                snippet.getOptionalModified().orElse(snippet.getCreated()));
     }
 
     @Override
@@ -140,7 +100,7 @@ class GoogleDriveRemoteSnippetSet implements ItemSet<Snippet> {
         Objects.requireNonNull(snippet.getModified(), "Modified snippet has no 'modified' timestamp.");
 
         File file = remoteSnippets.get(snippetId);
-        String content = ""; //TODO content
+        String content = snippetWriter.stringify(snippet);
         updateFile(file, snippet.getModified(), content);
     }
 
@@ -215,12 +175,11 @@ class GoogleDriveRemoteSnippetSet implements ItemSet<Snippet> {
     private void createFile(
             String fileName, File parentFolder, String content, OffsetDateTime created, OffsetDateTime modified
     ) throws IOException {
-        OffsetDateTime modifiedTime = Optional.ofNullable(modified).orElse(created);
         File fileMetadata = new File().setName(fileName)
                                       .setParents(Collections.singletonList(parentFolder.getId()))
                                       .setMimeType(CONTENT_TYPE_JSON)
                                       .setCreatedTime(toDateTime(created))
-                                      .setModifiedTime(toDateTime(modifiedTime));
+                                      .setModifiedTime(toDateTime(modified));
 
         AbstractInputStreamContent mediaContent = new ByteArrayContent(
                 CONTENT_TYPE_JSON,

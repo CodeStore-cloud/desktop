@@ -13,7 +13,7 @@ public interface SnippetSetFactory {
     ItemSet<Snippet> createLocalSnippetSet();
 
     /**
-     * @return the {@link ItemSet} that represents the set of snippets located on the remote system.
+     * @return the {@link ItemSet} that represents the set of snippets located on the given cloud system.
      */
-    ItemSet<Snippet> createRemoteSnippetSet();
+    ItemSet<Snippet> createRemoteSnippetSet(CloudService cloudService);
 }

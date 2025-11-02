@@ -21,6 +21,14 @@ public class SnippetWriter {
     }
 
     public void write(Snippet snippet, File file) {
+        try {
+            file.write(stringify(snippet));
+        } catch (JsonProcessingException exception) {
+            throw new RepositoryException(exception, "file.couldNotSave", file);
+        }
+    }
+
+    public String stringify(Snippet snippet) throws JsonProcessingException {
         Map<String, Object> additionalProperties;
         if (snippet instanceof ExtendedSnippet extendedSnippet) {
             additionalProperties = extendedSnippet.getAdditionalProperties();
@@ -39,10 +47,6 @@ public class SnippetWriter {
                 additionalProperties
         );
 
-        try {
-            file.write(objectMapper.writeValueAsString(dto));
-        } catch (JsonProcessingException exception) {
-            throw new RepositoryException(exception, "file.couldNotSave", file);
-        }
+        return objectMapper.writeValueAsString(dto);
     }
 }

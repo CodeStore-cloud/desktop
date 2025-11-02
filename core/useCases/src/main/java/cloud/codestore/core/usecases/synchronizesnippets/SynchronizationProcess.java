@@ -30,7 +30,7 @@ public class SynchronizationProcess {
         }
 
         if (configuration.isCloudServiceConfigured()) {
-            delegate = new ActiveSynchronizationProcess(algorithmFactory);
+            delegate = new ActiveSynchronizationProcess(algorithmFactory, configuration);
         } else {
             LOGGER.info("Synchronization skipped");
             delegate = new SkippedSynchronizationProcess();
@@ -66,9 +66,14 @@ public class SynchronizationProcess {
         private final SynchronizationProgress progress = new SynchronizationProgress();
         private final SynchronizationState state = new SynchronizationState();
         private final SynchronizationAlgorithmFactory algorithmFactory;
+        private final SynchronizationConfiguration configuration;
 
-        private ActiveSynchronizationProcess(SynchronizationAlgorithmFactory algorithmFactory) {
+        private ActiveSynchronizationProcess(
+                SynchronizationAlgorithmFactory algorithmFactory,
+                SynchronizationConfiguration configuration
+        ) {
             this.algorithmFactory = algorithmFactory;
+            this.configuration = configuration;
         }
 
         @Override
@@ -82,7 +87,8 @@ public class SynchronizationProcess {
 
             try {
                 LOGGER.info("===== Snippet synchronization startet =====");
-                algorithmFactory.createSnippetSynchronizationAlgorithm(progress).synchronize();
+                algorithmFactory.createSnippetSynchronizationAlgorithm(progress, configuration.cloudService())
+                                .synchronize();
                 saveStatus();
                 state.complete();
                 LOGGER.info("===== Snippet synchronization finished in {}ms =====", state.getDuration());
@@ -115,7 +121,7 @@ public class SynchronizationProcess {
         private final Throwable error;
 
         private FailedSynchronizationProcess(@Nonnull Throwable error) {
-            super(null);
+            super(null, null);
             this.error = error;
         }
 
