@@ -29,7 +29,7 @@ import java.util.Objects;
 class GoogleDriveAuthenticator {
     private static final String APPLICATION_NAME = "CodeStore Desktop Application";
     private static final String CREDENTIALS_FILE_PATH = "/google.drive.auth.json";
-    private static final List<String> SCOPES = Collections.singletonList(DriveScopes.DRIVE_METADATA_READONLY);
+    private static final List<String> SCOPES = Collections.singletonList(DriveScopes.DRIVE_FILE);
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
 
     private final Directory tokensDirectory;
