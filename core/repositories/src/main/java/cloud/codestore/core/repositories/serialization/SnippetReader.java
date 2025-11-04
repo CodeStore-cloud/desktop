@@ -4,6 +4,7 @@ import cloud.codestore.core.Language;
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.repositories.File;
 import cloud.codestore.core.repositories.RepositoryException;
+import cloud.codestore.core.repositories.synchronization.RemoteFile;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,8 +31,17 @@ public class SnippetReader {
         }
     }
 
-    public Snippet read(String snippetId, String fileContent) throws JsonProcessingException {
-        var dto = parse(fileContent);
+    public Snippet read(RemoteFile file) {
+        try {
+            String snippetId = SnippetFileHelper.getSnippetId(file.getName());
+            return read(snippetId, file.read());
+        } catch (JsonProcessingException exception) {
+            throw new RepositoryException(exception, "cloud.file.invalidFormat", file.getPath());
+        }
+    }
+
+    private Snippet read(String snippetId, String fileContent) throws JsonProcessingException {
+        var dto = objectMapper.readValue(fileContent, PersistentSnippetDto.class);
         return new ExtendedSnippetBuilder(dto.getAdditionalProperties())
                 .id(snippetId)
                 .title(dto.getTitle())
@@ -42,10 +52,6 @@ public class SnippetReader {
                 .created(parseDateTime(dto.getCreated()))
                 .modified(parseDateTime(dto.getModified()))
                 .build();
-    }
-
-    private PersistentSnippetDto parse(String fileContent) throws JsonProcessingException {
-        return objectMapper.readValue(fileContent, PersistentSnippetDto.class);
     }
 
     @Nullable

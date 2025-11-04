@@ -3,6 +3,7 @@ package cloud.codestore.core.repositories.serialization;
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.repositories.File;
 import cloud.codestore.core.repositories.RepositoryException;
+import cloud.codestore.core.repositories.synchronization.RemoteFile;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,7 +29,15 @@ public class SnippetWriter {
         }
     }
 
-    public String stringify(Snippet snippet) throws JsonProcessingException {
+    public void write(Snippet snippet, RemoteFile file) {
+        try {
+            file.write(stringify(snippet));
+        } catch (JsonProcessingException exception) {
+            throw new RepositoryException(exception, "cloud.file.couldNotSave", file.getPath());
+        }
+    }
+
+    private String stringify(Snippet snippet) throws JsonProcessingException {
         Map<String, Object> additionalProperties;
         if (snippet instanceof ExtendedSnippet extendedSnippet) {
             additionalProperties = extendedSnippet.getAdditionalProperties();
