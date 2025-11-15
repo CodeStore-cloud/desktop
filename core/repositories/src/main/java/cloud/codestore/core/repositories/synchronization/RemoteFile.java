@@ -1,6 +1,7 @@
 package cloud.codestore.core.repositories.synchronization;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 
 /**
@@ -27,7 +28,7 @@ public interface RemoteFile {
     /**
      * @return the time when this file was last updated.
      */
-    @Nonnull
+    @Nullable
     OffsetDateTime getModified();
 
     /**

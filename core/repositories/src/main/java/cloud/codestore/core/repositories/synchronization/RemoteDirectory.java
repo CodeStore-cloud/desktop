@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Represents a directory on the remote cloud system.
  */
-interface RemoteDirectory {
+public interface RemoteDirectory {
     /**
      * @return whether the directory exists.
      */

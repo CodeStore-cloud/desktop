@@ -1,6 +1,7 @@
-package cloud.codestore.core.repositories.synchronization;
+package cloud.codestore.core.repositories.synchronization.service;
 
 import cloud.codestore.core.repositories.RepositoryException;
+import cloud.codestore.core.repositories.synchronization.RemoteFile;
 import com.google.api.client.http.AbstractInputStreamContent;
 import com.google.api.client.http.ByteArrayContent;
 import com.google.api.client.util.DateTime;
@@ -20,7 +21,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 class GoogleDriveFile implements RemoteFile {
-    private static final String CONTENT_TYPE = "application/json";
+    static final String CONTENT_TYPE = "application/json";
 
     private final Drive service;
     private final String name;
@@ -60,12 +61,12 @@ class GoogleDriveFile implements RemoteFile {
     }
 
     @Override
-    @Nonnull
+    @Nullable
     public OffsetDateTime getModified() {
         if (modified == null && exists()) {
             DateTime modifiedTime = driveFile.getModifiedTime();
             Instant instant = Instant.ofEpochMilli(modifiedTime.getValue());
-            modified = OffsetDateTime.ofInstant(instant, ZoneOffset.UTC);
+            return OffsetDateTime.ofInstant(instant, ZoneOffset.UTC);
         }
         return modified;
     }
@@ -83,6 +84,8 @@ class GoogleDriveFile implements RemoteFile {
     @Override
     @Nonnull
     public String read() {
+        verifyFileExists();
+
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         try {
             service.files()
@@ -97,6 +100,10 @@ class GoogleDriveFile implements RemoteFile {
 
     @Override
     public void write(@Nonnull String content) {
+        if (modified == null) {
+            throw new IllegalStateException("Modified timestamp must be set");
+        }
+
         try {
             if (exists()) {
                 updateFile(content);
@@ -110,6 +117,8 @@ class GoogleDriveFile implements RemoteFile {
 
     @Override
     public void delete() {
+        verifyFileExists();
+
         try {
             service.files()
                    .delete(driveFile.getId())
@@ -156,5 +165,11 @@ class GoogleDriveFile implements RemoteFile {
 
         TimeZone timeZone = TimeZone.getTimeZone(offsetDateTime.toZonedDateTime().getZone());
         return new DateTime(new Date(offsetDateTime.toInstant().toEpochMilli()), timeZone);
+    }
+
+    private void verifyFileExists() {
+        if (!exists()) {
+            throw new IllegalStateException("file does not exist");
+        }
     }
 }

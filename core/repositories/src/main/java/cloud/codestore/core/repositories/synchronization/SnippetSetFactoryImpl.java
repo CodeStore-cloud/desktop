@@ -4,6 +4,7 @@ import cloud.codestore.core.Snippet;
 import cloud.codestore.core.repositories.Directory;
 import cloud.codestore.core.repositories.serialization.SnippetReader;
 import cloud.codestore.core.repositories.serialization.SnippetWriter;
+import cloud.codestore.core.repositories.synchronization.service.GoogleDriveAuthenticator;
 import cloud.codestore.core.usecases.synchronizesnippets.CloudService;
 import cloud.codestore.core.usecases.synchronizesnippets.SnippetSetFactory;
 import cloud.codestore.synchronization.ItemSet;

@@ -1,6 +1,8 @@
-package cloud.codestore.core.repositories.synchronization;
+package cloud.codestore.core.repositories.synchronization.service;
 
 import cloud.codestore.core.repositories.RepositoryException;
+import cloud.codestore.core.repositories.synchronization.RemoteDirectory;
+import cloud.codestore.core.repositories.synchronization.RemoteFile;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
@@ -53,6 +55,10 @@ class GoogleDriveDirectory implements RemoteDirectory {
 
     @Override
     public void create() {
+        if (exists()) {
+            throw new IllegalStateException("directory already exists");
+        }
+
         File folderMetadata = new File();
         folderMetadata.setName(name);
         folderMetadata.setMimeType(MIME_TYPE);
@@ -70,13 +76,15 @@ class GoogleDriveDirectory implements RemoteDirectory {
 
     @Override
     public RemoteDirectory getSubDirectory(String name) {
+        verifyDirectoryExists();
         return new GoogleDriveDirectory(service, this, name);
     }
 
     @Override
     public List<RemoteFile> getFiles() {
+        verifyDirectoryExists();
         String query = "mimeType != '" + MIME_TYPE + "' " +
-                       "and '" + parentFolder.getId() + "' in parents " +
+                       "and '" + driveFile.getId() + "' in parents " +
                        "and trashed = false";
 
         List<RemoteFile> snippetFiles = new LinkedList<>();
@@ -109,6 +117,7 @@ class GoogleDriveDirectory implements RemoteDirectory {
 
     @Override
     public RemoteFile newFile(String name) {
+        verifyDirectoryExists();
         return new GoogleDriveFile(service, this, name);
     }
 
@@ -133,5 +142,11 @@ class GoogleDriveDirectory implements RemoteDirectory {
 
         List<File> folders = result.getFiles();
         return folders == null || folders.isEmpty() ? null : folders.getFirst();
+    }
+
+    private void verifyDirectoryExists() {
+        if (!exists()) {
+            throw new IllegalStateException("directory does not exist");
+        }
     }
 }

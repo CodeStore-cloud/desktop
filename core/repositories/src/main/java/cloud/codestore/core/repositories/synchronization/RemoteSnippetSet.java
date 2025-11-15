@@ -8,6 +8,7 @@ import cloud.codestore.synchronization.ItemSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
@@ -60,10 +61,14 @@ class RemoteSnippetSet implements ItemSet<Snippet> {
     @Override
     public String getEtag(String snippetId) {
         RemoteFile file = remoteFiles.get(snippetId);
-        return file.getModified()
-                   .truncatedTo(ChronoUnit.SECONDS)
-                   .withOffsetSameInstant(ZoneOffset.UTC)
-                   .toString();
+        OffsetDateTime modified = file.getModified();
+        if (modified == null) {
+            throw new IllegalStateException(String.format("Remote file %s has no modified timestamp", file.getPath()));
+        }
+
+        return modified.truncatedTo(ChronoUnit.SECONDS)
+                       .withOffsetSameInstant(ZoneOffset.UTC)
+                       .toString();
     }
 
     @Override
@@ -77,7 +82,7 @@ class RemoteSnippetSet implements ItemSet<Snippet> {
         LOGGER.debug("Create {} on remote system.", snippetId);
         RemoteFile file = snippetsDirectory.newFile(SnippetFileHelper.getFileName(snippetId));
         file.setCreated(snippet.getCreated());
-        file.setModified(snippet.getModified());
+        file.setModified(snippet.getOptionalModified().orElse(snippet.getCreated()));
         snippetWriter.write(snippet, file);
     }
 

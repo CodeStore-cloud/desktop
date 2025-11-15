@@ -1,7 +1,8 @@
-package cloud.codestore.core.repositories.synchronization;
+package cloud.codestore.core.repositories.synchronization.service;
 
 import cloud.codestore.core.repositories.Directory;
 import cloud.codestore.core.repositories.RepositoryException;
+import cloud.codestore.core.repositories.synchronization.RemoteDirectory;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -15,7 +16,6 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,8 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-@Component
-class GoogleDriveAuthenticator {
+public class GoogleDriveService {
     private static final String APPLICATION_NAME = "CodeStore Desktop Application";
     private static final String CREDENTIALS_FILE_PATH = "/google.drive.auth.json";
     private static final List<String> SCOPES = Collections.singletonList(DriveScopes.DRIVE_FILE);
@@ -34,11 +33,15 @@ class GoogleDriveAuthenticator {
 
     private final Directory tokensDirectory;
 
-    GoogleDriveAuthenticator(@Qualifier("sync") Directory syncDirectory) {
+    GoogleDriveService(@Qualifier("sync") Directory syncDirectory) {
         this.tokensDirectory = syncDirectory;
     }
 
-    Drive authenticate() {
+    public RemoteDirectory login() {
+        return null;
+    }
+
+    private Drive authenticate() {
         try {
             NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             Credential credentials = getCredentials(httpTransport);
@@ -51,7 +54,7 @@ class GoogleDriveAuthenticator {
     }
 
     private Credential getCredentials(NetHttpTransport httpTransport) throws IOException {
-        InputStream in = GoogleDriveSnippetSet.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
+        InputStream in = getClass().getResourceAsStream(CREDENTIALS_FILE_PATH);
         Objects.requireNonNull(in, "Resource not found: " + CREDENTIALS_FILE_PATH);
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 

@@ -1,12 +1,14 @@
-package cloud.codestore.core.repositories.synchronization;
+package cloud.codestore.core.repositories.synchronization.service;
 
 import cloud.codestore.core.repositories.RepositoryException;
+import cloud.codestore.core.repositories.synchronization.RemoteFile;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.WriteMode;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -24,10 +26,8 @@ class DropboxFile implements RemoteFile {
     private OffsetDateTime modified;
     private FileMetadata metadata;
 
-    DropboxFile(DbxClientV2 client, FileMetadata metadata) {
-        this.client = client;
-        this.name = metadata.getName();
-        this.path = "/" + name;
+    DropboxFile(DbxClientV2 client, DropboxDirectory parent, FileMetadata metadata) {
+        this(client, parent, metadata.getName());
         this.metadata = metadata;
     }
 
@@ -55,11 +55,11 @@ class DropboxFile implements RemoteFile {
     }
 
     @Override
-    @Nonnull
+    @Nullable
     public OffsetDateTime getModified() {
         if (modified == null && exists()) {
             Instant instant = metadata.getClientModified().toInstant();
-            modified = OffsetDateTime.ofInstant(instant, ZoneOffset.UTC);
+            return OffsetDateTime.ofInstant(instant, ZoneOffset.UTC);
         }
 
         return modified;
@@ -89,10 +89,14 @@ class DropboxFile implements RemoteFile {
 
     @Override
     public void write(@Nonnull String content) {
+        if (modified == null) {
+            throw new IllegalStateException("Modified timestamp must be set");
+        }
+
         try (InputStream in = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8))) {
             client.files()
                   .uploadBuilder(path)
-                  .withClientModified(new Date(getModified().toInstant().toEpochMilli()))
+                  .withClientModified(new Date(modified.toInstant().toEpochMilli()))
                   .withMode(exists() ? WriteMode.OVERWRITE : WriteMode.ADD)
                   .uploadAndFinish(in);
         } catch (IOException | DbxException exception) {

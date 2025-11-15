@@ -1,6 +1,8 @@
-package cloud.codestore.core.repositories.synchronization;
+package cloud.codestore.core.repositories.synchronization.service;
 
 import cloud.codestore.core.repositories.RepositoryException;
+import cloud.codestore.core.repositories.synchronization.RemoteDirectory;
+import cloud.codestore.core.repositories.synchronization.RemoteFile;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.*;
@@ -50,18 +52,20 @@ class DropboxDirectory implements RemoteDirectory {
 
     @Override
     public RemoteDirectory getSubDirectory(String name) {
+        verifyDirectoryExists();
         return new DropboxDirectory(client, this, name);
     }
 
     @Override
     public List<RemoteFile> getFiles() {
+        verifyDirectoryExists();
         List<RemoteFile> snippetFiles = new LinkedList<>();
 
         try {
             ListFolderResult result = client.files().listFolder(path);
             for (Metadata metadata : result.getEntries()) {
                 if (metadata instanceof FileMetadata fileMeta) {
-                    snippetFiles.add(new DropboxFile(client, fileMeta));
+                    snippetFiles.add(new DropboxFile(client, this, fileMeta));
                 }
             }
 
@@ -69,7 +73,7 @@ class DropboxDirectory implements RemoteDirectory {
                 result = client.files().listFolderContinue(result.getCursor());
                 for (Metadata metadata : result.getEntries()) {
                     if (metadata instanceof FileMetadata fileMeta) {
-                        snippetFiles.add(new DropboxFile(client, fileMeta));
+                        snippetFiles.add(new DropboxFile(client, this, fileMeta));
                     }
                 }
             }
@@ -82,6 +86,7 @@ class DropboxDirectory implements RemoteDirectory {
 
     @Override
     public RemoteFile newFile(String name) {
+        verifyDirectoryExists();
         return new DropboxFile(client, this, name);
     }
 
@@ -102,5 +107,11 @@ class DropboxDirectory implements RemoteDirectory {
         }
 
         return null;
+    }
+
+    private void verifyDirectoryExists() {
+        if (!exists()) {
+            throw new IllegalStateException("directory does not exist");
+        }
     }
 }
