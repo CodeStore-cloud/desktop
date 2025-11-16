@@ -1,6 +1,6 @@
 package cloud.codestore.client.ui.selection.sort;
 
-import cloud.codestore.client.ui.FxController;
+import cloud.codestore.client.Injectable;
 import cloud.codestore.client.ui.UiMessages;
 import cloud.codestore.client.usecases.listsnippets.SortProperties;
 import javafx.beans.property.ObjectProperty;
@@ -14,7 +14,7 @@ import java.util.Arrays;
 import static cloud.codestore.client.usecases.listsnippets.SortProperties.SnippetProperty.RELEVANCE;
 import static cloud.codestore.client.usecases.listsnippets.SortProperties.SnippetProperty.TITLE;
 
-@FxController
+@Injectable
 public class Sort {
     @FXML
     private Pane sortPanel;

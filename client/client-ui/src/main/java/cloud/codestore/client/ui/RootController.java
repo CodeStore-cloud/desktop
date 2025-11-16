@@ -1,5 +1,6 @@
 package cloud.codestore.client.ui;
 
+import cloud.codestore.client.Injectable;
 import cloud.codestore.client.ui.selection.SelectionController;
 import cloud.codestore.client.ui.snippet.SnippetController;
 import com.google.common.eventbus.EventBus;
@@ -12,7 +13,7 @@ import javax.annotation.Nonnull;
 /**
  * The root controller acts as bridge between the selection component and the snippet editor.
  */
-@FxController
+@Injectable
 public class RootController {
     @FXML
     private Pane root;

@@ -1,9 +1,9 @@
 package cloud.codestore.client.ui.snippet;
 
+import cloud.codestore.client.Injectable;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.ChangeSnippetsEvent;
-import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.SnippetsChangedEvent;
 import cloud.codestore.client.ui.selection.history.History;
 import cloud.codestore.client.ui.snippet.footer.ControlEvent;
@@ -20,7 +20,7 @@ import javafx.scene.layout.Pane;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-@FxController
+@Injectable
 public class SnippetController {
     private static final Snippet EMPTY_SNIPPET = Snippet.builder().build();
 

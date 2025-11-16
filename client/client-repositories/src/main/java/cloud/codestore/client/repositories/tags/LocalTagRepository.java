@@ -1,7 +1,7 @@
 package cloud.codestore.client.repositories.tags;
 
+import cloud.codestore.client.Injectable;
 import cloud.codestore.client.repositories.HttpClient;
-import cloud.codestore.client.repositories.Repository;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * A repository which saves/loads tags from the local {CodeStore} Core.
  */
-@Repository
+@Injectable
 public class LocalTagRepository {
     private final HttpClient client;
 

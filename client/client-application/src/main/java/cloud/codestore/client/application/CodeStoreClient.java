@@ -1,12 +1,10 @@
 package cloud.codestore.client.application;
 
-import cloud.codestore.client.UseCase;
+import cloud.codestore.client.Injectable;
 import cloud.codestore.client.repositories.HttpClient;
-import cloud.codestore.client.repositories.Repository;
 import cloud.codestore.client.ui.ApplicationReadyEvent;
 import cloud.codestore.client.ui.FXMLLoaderFactory;
 import cloud.codestore.client.ui.FxApplication;
-import cloud.codestore.client.ui.FxController;
 import com.google.common.eventbus.EventBus;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -29,7 +27,7 @@ import java.util.concurrent.CompletableFuture;
         basePackages = "cloud.codestore.client",
         includeFilters = @ComponentScan.Filter(
                 type = FilterType.ANNOTATION,
-                classes = {UseCase.class, FxController.class, Repository.class}
+                classes = {Injectable.class}
         )
 )
 @PropertySources({

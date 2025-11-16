@@ -1,13 +1,13 @@
 package cloud.codestore.client.ui.footer;
 
+import cloud.codestore.client.Injectable;
 import cloud.codestore.client.ui.DefaultBrowser;
-import cloud.codestore.client.ui.FxController;
 import javafx.fxml.FXML;
 
 /**
  * The controller of the footer of the main window.
  */
-@FxController
+@Injectable
 public class Footer {
     /**
      * Shows the {CodeStore} imprint in the default browser.
