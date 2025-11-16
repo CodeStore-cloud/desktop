@@ -42,6 +42,10 @@ class DropboxDirectory implements RemoteDirectory {
 
     @Override
     public void create() {
+        if (exists()) {
+            throw new IllegalStateException("directory already exists");
+        }
+
         try {
             CreateFolderResult result = client.files().createFolderV2(path);
             metadata = result.getMetadata();

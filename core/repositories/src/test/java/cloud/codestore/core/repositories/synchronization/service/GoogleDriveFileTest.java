@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -55,14 +56,8 @@ class GoogleDriveFileTest {
     private File driveFile;
 
     @BeforeEach
-    void setUp() throws IOException {
-        when(service.files()).thenReturn(filesRequest);
-        when(filesRequest.list()).thenReturn(listRequest);
-        when(listRequest.setQ(anyString())).thenReturn(listRequest);
-        when(listRequest.setSpaces(anyString())).thenReturn(listRequest);
-        when(listRequest.setFields(anyString())).thenReturn(listRequest);
-        when(listRequest.setPageToken(any())).thenReturn(listRequest);
-
+    void setUp() {
+        lenient().when(service.files()).thenReturn(filesRequest);
         when(parentDirectory.getPath()).thenReturn("parent/path");
         when(parentDirectory.getDriveFile()).thenReturn(parentDir);
 
@@ -115,7 +110,7 @@ class GoogleDriveFileTest {
             when(filesRequest.update(anyString(), any(File.class), any(AbstractInputStreamContent.class)))
                     .thenReturn(updateRequest);
 
-            OffsetDateTime modified = OffsetDateTime.now();
+            OffsetDateTime modified = OffsetDateTime.now().truncatedTo(ChronoUnit.MILLIS);
             file.setModified(modified);
             assertThat(file.getModified()).isEqualTo(modified);
 
@@ -125,7 +120,7 @@ class GoogleDriveFileTest {
             verify(updateRequest).execute();
             verify(filesRequest).update(anyString(), metadataArgument.capture(), contentArgument.capture());
             File metadata = metadataArgument.getValue();
-            assertThat(toOffsetDateTime(metadata.getModifiedTime())).isEqualTo(modified);
+            assertThat(toOffsetDateTime(metadata.getModifiedTime())).isAtSameInstantAs(modified);
 
             AbstractInputStreamContent contentStream = contentArgument.getValue();
             assertThat(contentStream.getType()).isEqualTo(GoogleDriveFile.CONTENT_TYPE);
@@ -137,16 +132,18 @@ class GoogleDriveFileTest {
 
         @Test
         @DisplayName("must have a modified timestamp set when being created")
-        void modifiedTimestampNotSet() throws IOException {
+        void modifiedTimestampNotSet() {
             assertThatThrownBy(() -> file.write("Hello, World!"))
                     .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("Modified timestamp not set");
+                    .hasMessage("Modified timestamp must be set");
         }
 
         @Test
-        @DisplayName("cannot be deleted")
-        void delete() {
-            assertThatThrownBy(file::delete).isInstanceOf(IllegalStateException.class);
+        @DisplayName("can be deleted")
+        void delete() throws IOException {
+            when(filesRequest.delete(anyString())).thenReturn(deleteRequest);
+            file.delete();
+            verify(deleteRequest).execute();
         }
     }
 
@@ -174,8 +171,8 @@ class GoogleDriveFileTest {
             when(filesRequest.create(any(File.class), any(AbstractInputStreamContent.class))).thenReturn(createRequest);
             when(parentDir.getId()).thenReturn(parentId);
 
-            OffsetDateTime created = OffsetDateTime.now();
-            OffsetDateTime modified = OffsetDateTime.now().plusHours(2);
+            OffsetDateTime created = OffsetDateTime.now().truncatedTo(ChronoUnit.MILLIS);
+            OffsetDateTime modified = created.plusHours(2);
             file.setModified(modified);
             file.setCreated(created);
 
@@ -186,8 +183,8 @@ class GoogleDriveFileTest {
             verify(filesRequest).create(metadataArgument.capture(), contentArgument.capture());
             File metadata = metadataArgument.getValue();
             assertThat(metadata.getMimeType()).isEqualTo(GoogleDriveFile.CONTENT_TYPE);
-            assertThat(toOffsetDateTime(metadata.getModifiedTime())).isEqualTo(modified);
-            assertThat(toOffsetDateTime(metadata.getCreatedTime())).isEqualTo(created);
+            assertThat(toOffsetDateTime(metadata.getModifiedTime())).isAtSameInstantAs(modified);
+            assertThat(toOffsetDateTime(metadata.getCreatedTime())).isAtSameInstantAs(created);
 
             AbstractInputStreamContent contentStream = contentArgument.getValue();
             assertThat(contentStream.getType()).isEqualTo(GoogleDriveFile.CONTENT_TYPE);
@@ -199,18 +196,16 @@ class GoogleDriveFileTest {
 
         @Test
         @DisplayName("must have a modified timestamp set when being created")
-        void modifiedTimestampNotSet() throws IOException {
+        void modifiedTimestampNotSet() {
             assertThatThrownBy(() -> file.write("Hello, World!"))
                     .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("Modified timestamp not set");
+                    .hasMessage("Modified timestamp must be set");
         }
 
         @Test
-        @DisplayName("can be deleted")
-        void delete() throws IOException {
-            when(filesRequest.delete(anyString())).thenReturn(deleteRequest);
-            file.delete();
-            verify(deleteRequest).execute();
+        @DisplayName("cannot be deleted")
+        void delete() {
+            assertThatThrownBy(file::delete).isInstanceOf(IllegalStateException.class);
         }
     }
 

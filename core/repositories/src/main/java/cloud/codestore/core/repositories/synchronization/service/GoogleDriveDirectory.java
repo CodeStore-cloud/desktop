@@ -43,6 +43,10 @@ class GoogleDriveDirectory implements RemoteDirectory {
         return driveFile;
     }
 
+    File getParent() {
+        return parentFolder;
+    }
+
     @Override
     public boolean exists() {
         return driveFile != null;

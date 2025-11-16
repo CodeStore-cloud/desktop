@@ -14,14 +14,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("a Google Drive directory")
@@ -45,7 +45,6 @@ class GoogleDriveDirectoryTest {
         when(listRequest.setQ(anyString())).thenReturn(listRequest);
         when(listRequest.setSpaces(anyString())).thenReturn(listRequest);
         when(listRequest.setFields(anyString())).thenReturn(listRequest);
-        when(listRequest.setPageToken(any())).thenReturn(listRequest);
 
         driveDir = new File().setId("123");
         when(listRequest.execute()).thenReturn(new FileList().setFiles(List.of(driveDir)));
@@ -56,7 +55,7 @@ class GoogleDriveDirectoryTest {
     @Test
     @DisplayName("checks for its existence after creation")
     void checkForExistence() {
-        verify(listRequest).setQ("mimeType = application/vnd.google-apps.folder " +
+        verify(listRequest).setQ("mimeType = 'application/vnd.google-apps.folder' " +
                                  "and name = 'test' " +
                                  "and 'root' in parents " +
                                  "and trashed = false");
@@ -69,8 +68,8 @@ class GoogleDriveDirectoryTest {
     @DisplayName("has the root directory as parent by default")
     void rootParent() {
         assertThat(directory.getPath()).isEqualTo("/test");
-        assertThat(directory.getDriveFile()).isNotNull();
-        assertThat(directory.getDriveFile().getId()).isEqualTo("root");
+        assertThat(directory.getParent()).isNotNull();
+        assertThat(directory.getParent().getId()).isEqualTo("root");
     }
 
     @Nested
@@ -94,28 +93,26 @@ class GoogleDriveDirectoryTest {
         @Test
         @DisplayName("may have files")
         void getFiles() throws IOException {
-            var file11 = new File().setName("p1f1");
-            var file12 = new File().setName("p1f2");
-            var file13 = new File().setName("p1f3");
-            FileList page1 = new FileList().setFiles(List.of(file11, file12, file13)).setNextPageToken("p2");
-            var file21 = new File().setName("p2f1");
-            var file22 = new File().setName("p2f2");
-            var file23 = new File().setName("p2f3");
-            FileList page2 = new FileList().setFiles(List.of(file21, file22, file23)).setNextPageToken("p3");
-            var file31 = new File().setName("p3f1");
-            var file32 = new File().setName("p3f2");
-            FileList page3 = new FileList().setFiles(List.of(file31, file32)).setNextPageToken(null);
+            clearInvocations(listRequest);
+            String[] fileNames = {"file1", "file2", "file3", "file4", "file5", "file6", "file7", "file8"};
+            File[] files = Arrays.stream(fileNames)
+                                 .map(name -> new File().setName(name))
+                                 .toArray(File[]::new);
+
+            FileList page1 = new FileList().setFiles(List.of(files[0], files[1], files[2])).setNextPageToken("p2");
+            FileList page2 = new FileList().setFiles(List.of(files[3], files[4], files[5])).setNextPageToken("p3");
+            FileList page3 = new FileList().setFiles(List.of(files[6], files[7])).setNextPageToken(null);
+            when(listRequest.setPageToken(any())).thenReturn(listRequest);
             when(listRequest.execute()).thenReturn(page1, page2, page3);
 
-            List<RemoteFile> files = directory.getFiles();
+            List<RemoteFile> remoteFiles = directory.getFiles();
 
-            verify(listRequest).setQ("mimeType != application/vnd.google-apps.folder " +
-                                     "and 'test' in parents " +
-                                     "and trashed = false");
-            assertThat(files).hasSize(8);
-            List<String> fileNames = files.stream().map(RemoteFile::getName).toList();
-            assertThat(fileNames).containsExactlyInAnyOrder(
-                    "p1f1", "p1f2", "p1f3", "p2f1", "p2f2", "p2f3", "p3f1", "p3f2");
+            verify(listRequest, times(3)).setQ("mimeType != 'application/vnd.google-apps.folder' " +
+                                               "and '123' in parents " +
+                                               "and trashed = false");
+            assertThat(files).hasSize(files.length);
+            List<String> remoteFileNames = remoteFiles.stream().map(RemoteFile::getName).toList();
+            assertThat(remoteFileNames).containsExactlyInAnyOrder(fileNames);
         }
 
         @Test

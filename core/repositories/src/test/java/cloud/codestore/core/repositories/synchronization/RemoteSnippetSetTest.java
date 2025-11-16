@@ -15,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -42,13 +44,9 @@ class RemoteSnippetSetTest {
 
     @BeforeEach
     void setUp() {
-        when(remoteFile.getName()).thenReturn(SnippetFileHelper.getFileName(SNIPPET_ID));
         when(codestoreDirectory.exists()).thenReturn(true);
         when(snippetsDirectory.exists()).thenReturn(true);
         when(codestoreDirectory.getSubDirectory("snippets")).thenReturn(snippetsDirectory);
-        when(snippetsDirectory.getFiles()).thenReturn(List.of(remoteFile));
-
-        snippetSet = new RemoteSnippetSet(snippetReader, snippetWriter, codestoreDirectory);
     }
 
     @Test
@@ -58,12 +56,15 @@ class RemoteSnippetSetTest {
         List<RemoteFile> files = Stream.of(snippetIds)
                                        .map(id -> {
                                            RemoteFile file = mock(RemoteFile.class);
-                                           when(file.getName()).thenReturn(id);
+                                           when(file.getName()).thenReturn(SnippetFileHelper.getFileName(id));
                                            return file;
-                                       }).toList();
+                                       })
+                                       .toList();
         when(snippetsDirectory.getFiles()).thenReturn(files);
 
+        snippetSet = new RemoteSnippetSet(snippetReader, snippetWriter, codestoreDirectory);
         Set<String> itemIds = snippetSet.getItemIds();
+
         assertThat(itemIds).containsExactlyInAnyOrder(snippetIds);
         for (String id : itemIds) {
             assertThat(snippetSet.contains(id)).isTrue();
@@ -73,14 +74,16 @@ class RemoteSnippetSetTest {
     @Test
     @DisplayName("calculates the etag from the modified timestamp")
     void getEtag() {
+        initSnippetSet();
         when(remoteFile.getModified()).thenReturn(OffsetDateTime.parse("2025-11-08T13:34:35.2415+01:00"));
         String etag = snippetSet.getEtag(SNIPPET_ID);
-        assertThat(etag).isEqualTo("2025-11-08T12:34:35");
+        assertThat(etag).isEqualTo("2025-11-08T12:34:35Z");
     }
 
     @Test
     @DisplayName("reads the content of the code snippet")
     void getItem() {
+        initSnippetSet();
         Snippet snippet = Snippet.builder()
                                  .id(SNIPPET_ID)
                                  .title("Hello, World!")
@@ -94,6 +97,7 @@ class RemoteSnippetSetTest {
     @Test
     @DisplayName("deletes a code snippet on the remote system")
     void deleteItem() {
+        initSnippetSet();
         snippetSet.delete(SNIPPET_ID);
         verify(remoteFile).delete();
     }
@@ -125,6 +129,12 @@ class RemoteSnippetSetTest {
         private final OffsetDateTime modified = OffsetDateTime.now().plusDays(2);
         private final SnippetBuilder builder = Snippet.builder().id(SNIPPET_ID).created(created);
 
+        @BeforeEach
+        void setUp() {
+            initEmptySnippetSet();
+            when(snippetsDirectory.newFile(anyString())).thenReturn(remoteFile);
+        }
+
         @Test
         @DisplayName("sets the modified timestamp if it exists")
         void setModifiedTimestamp() {
@@ -132,8 +142,8 @@ class RemoteSnippetSetTest {
 
             snippetSet.addItem(SNIPPET_ID, snippet);
 
-            verify(remoteFile).setCreated(created);
-            verify(remoteFile).setModified(modified);
+            verify(remoteFile).setCreated(truncatedToSecondsUTC(created));
+            verify(remoteFile).setModified(truncatedToSecondsUTC(modified));
             verify(snippetWriter).write(snippet, remoteFile);
         }
 
@@ -144,8 +154,9 @@ class RemoteSnippetSetTest {
 
             snippetSet.addItem(SNIPPET_ID, snippet);
 
-            verify(remoteFile).setCreated(created);
-            verify(remoteFile).setModified(created);
+            OffsetDateTime timestamp = truncatedToSecondsUTC(created);
+            verify(remoteFile).setCreated(timestamp);
+            verify(remoteFile).setModified(timestamp);
         }
     }
 
@@ -156,6 +167,11 @@ class RemoteSnippetSetTest {
         private final OffsetDateTime modified = OffsetDateTime.now().plusDays(2);
         private final SnippetBuilder builder = Snippet.builder().id(SNIPPET_ID).created(created);
 
+        @BeforeEach
+        void setUp() {
+            initSnippetSet();
+        }
+
         @Test
         @DisplayName("sets the modified timestamp if it exists")
         void setModifiedTimestamp() {
@@ -164,7 +180,7 @@ class RemoteSnippetSetTest {
             snippetSet.updateItem(SNIPPET_ID, snippet);
 
             verify(remoteFile, never()).setCreated(any());
-            verify(remoteFile).setModified(modified);
+            verify(remoteFile).setModified(truncatedToSecondsUTC(modified));
             verify(snippetWriter).write(snippet, remoteFile);
         }
 
@@ -176,8 +192,23 @@ class RemoteSnippetSetTest {
             snippetSet.updateItem(SNIPPET_ID, snippet);
 
             verify(remoteFile, never()).setCreated(any());
-            verify(remoteFile).setModified(created);
+            verify(remoteFile).setModified(truncatedToSecondsUTC(created));
             verify(snippetWriter).write(snippet, remoteFile);
         }
+    }
+
+    private void initSnippetSet() {
+        when(remoteFile.getName()).thenReturn(SnippetFileHelper.getFileName(SNIPPET_ID));
+        when(snippetsDirectory.getFiles()).thenReturn(List.of(remoteFile));
+        snippetSet = new RemoteSnippetSet(snippetReader, snippetWriter, codestoreDirectory);
+        snippetSet.getItemIds();
+    }
+
+    private void initEmptySnippetSet() {
+        snippetSet = new RemoteSnippetSet(snippetReader, snippetWriter, codestoreDirectory);
+    }
+
+    private OffsetDateTime truncatedToSecondsUTC(OffsetDateTime time) {
+        return time.truncatedTo(ChronoUnit.SECONDS).withOffsetSameInstant(ZoneOffset.UTC);
     }
 }

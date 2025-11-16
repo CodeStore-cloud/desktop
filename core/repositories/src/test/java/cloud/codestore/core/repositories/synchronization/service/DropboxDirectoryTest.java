@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,7 +48,7 @@ class DropboxDirectoryTest {
         var metaError = GetMetadataError.path(LookupError.NOT_FOUND);
         var metaErrorException = new GetMetadataErrorException("<routeName>", "<requestId>", null, metaError);
         doThrow(metaErrorException).when(filesRequests).getMetadata(anyString());
-        new DropboxDirectory(client, DIR_NAME);
+        directory = new DropboxDirectory(client, DIR_NAME);
         assertThat(directory.exists()).isFalse();
     }
 
@@ -60,6 +61,11 @@ class DropboxDirectoryTest {
     @Nested
     @DisplayName("that does exist")
     class Existing {
+        @BeforeEach
+        void setUp() {
+            assertThat(directory.exists()).isTrue();
+        }
+
         @Test
         @DisplayName("cannot be created")
         void failCreation() {
@@ -76,27 +82,25 @@ class DropboxDirectoryTest {
         @Test
         @DisplayName("may have files")
         void getFiles() throws DbxException {
-            FileMetadata file1 = fileMetadata("file1");
-            FileMetadata file2 = fileMetadata("file2");
-            FileMetadata file3 = fileMetadata("file3");
-            ListFolderResult page1 = new ListFolderResult(List.of(file1, file2, file3), "page1", true);
-            FileMetadata file4 = fileMetadata("file4");
-            FileMetadata file5 = fileMetadata("file5");
-            FileMetadata file6 = fileMetadata("file6");
-            ListFolderResult page2 = new ListFolderResult(List.of(file4, file5, file6), "page2", true);
-            FileMetadata file7 = fileMetadata("file7");
-            FileMetadata file8 = fileMetadata("file8");
-            ListFolderResult page3 = new ListFolderResult(List.of(file7, file8), "page3", false);
+            String[] fileNames = {"file1", "file2", "file3", "file4", "file5", "file6", "file7", "file8"};
+            FileMetadata[] meta = Arrays.stream(fileNames)
+                                 .map(name -> {
+                                     FileMetadata file = mock(FileMetadata.class);
+                                     when(file.getName()).thenReturn(name);
+                                     return file;
+                                 })
+                                 .toArray(FileMetadata[]::new);
 
+            ListFolderResult page1 = new ListFolderResult(List.of(meta[0], meta[1], meta[2]), "page1", true);
+            ListFolderResult page2 = new ListFolderResult(List.of(meta[3], meta[4], meta[5]), "page2", true);
+            ListFolderResult page3 = new ListFolderResult(List.of(meta[6], meta[7]), "page3", false);
             when(filesRequests.listFolder(anyString())).thenReturn(page1);
-            when(filesRequests.listFolderContinue(anyString())).thenReturn(page2);
-            when(filesRequests.listFolderContinue(anyString())).thenReturn(page3);
+            when(filesRequests.listFolderContinue(anyString())).thenReturn(page2, page3);
 
             List<RemoteFile> files = directory.getFiles();
-            assertThat(files).hasSize(8);
-            List<String> fileNames = files.stream().map(RemoteFile::getName).toList();
-            assertThat(fileNames).containsExactlyInAnyOrder(
-                    "file1", "file2", "file3", "file4", "file5", "file6", "file7", "file8");
+            assertThat(files).hasSize(meta.length);
+            List<String> remoteFileNames = files.stream().map(RemoteFile::getName).toList();
+            assertThat(remoteFileNames).containsExactlyInAnyOrder(fileNames);
         }
 
         @Test

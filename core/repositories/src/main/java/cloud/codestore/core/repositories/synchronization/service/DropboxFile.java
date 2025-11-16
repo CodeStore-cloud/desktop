@@ -76,6 +76,7 @@ class DropboxFile implements RemoteFile {
     @Override
     @Nonnull
     public String read() {
+        verifyFileExists();
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             client.files()
                   .downloadBuilder(path)
@@ -106,10 +107,17 @@ class DropboxFile implements RemoteFile {
 
     @Override
     public void delete() {
+        verifyFileExists();
         try {
             client.files().deleteV2(path);
         } catch (DbxException exception) {
             throw new RepositoryException(exception, "cloud.file.couldNotDelete", path);
+        }
+    }
+
+    private void verifyFileExists() {
+        if (!exists()) {
+            throw new IllegalStateException("file does not exist");
         }
     }
 }

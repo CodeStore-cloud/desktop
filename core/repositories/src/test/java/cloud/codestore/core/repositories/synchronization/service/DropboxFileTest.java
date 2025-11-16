@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,6 +44,7 @@ class DropboxFileTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(client.files()).thenReturn(filesRequests);
         when(parentDirectory.getPath()).thenReturn("/parent/path");
         file = new DropboxFile(client, parentDirectory, FILE_NAME);
     }
@@ -97,13 +99,14 @@ class DropboxFileTest {
         void modifiedTimestampNotSet() {
             assertThatThrownBy(() -> file.write("Hello, World!"))
                     .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("Modified timestamp not set");
+                    .hasMessage("Modified timestamp must be set");
         }
 
         @Test
-        @DisplayName("cannot be deleted")
-        void delete() {
-            assertThatThrownBy(file::delete).isInstanceOf(IllegalStateException.class);
+        @DisplayName("can be deleted")
+        void delete() throws DbxException {
+            file.delete();
+            verify(filesRequests).deleteV2(file.getPath());
         }
     }
 
@@ -132,14 +135,13 @@ class DropboxFileTest {
         void modifiedTimestampNotSet() {
             assertThatThrownBy(() -> file.write("Hello, World!"))
                     .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("Modified timestamp not set");
+                    .hasMessage("Modified timestamp must be set");
         }
 
         @Test
-        @DisplayName("can be deleted")
-        void delete() throws DbxException {
-            file.delete();
-            verify(filesRequests).deleteV2(file.getPath());
+        @DisplayName("cannot be deleted")
+        void delete() {
+            assertThatThrownBy(file::delete).isInstanceOf(IllegalStateException.class);
         }
     }
 
@@ -152,7 +154,7 @@ class DropboxFileTest {
         when(uploadBuilder.withClientModified(any())).thenReturn(uploadBuilder);
         when(uploadBuilder.withMode(any())).thenReturn(uploadBuilder);
 
-        OffsetDateTime modified = OffsetDateTime.now();
+        OffsetDateTime modified = OffsetDateTime.now().truncatedTo(ChronoUnit.MILLIS);
         file.setModified(modified);
         assertThat(file.getModified()).isEqualTo(modified);
 
