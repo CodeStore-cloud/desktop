@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,7 @@ import java.util.Objects;
 
 @Component
 @ConditionalOnProperty(name = "server.authentication.required", havingValue = "true", matchIfMissing = true)
+@Order(2)
 class AccessTokenFilter extends OncePerRequestFilter {
     private final String accessToken;
     private final ObjectMapper objectMapper;
@@ -38,7 +40,9 @@ class AccessTokenFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+    protected void doFilterInternal(
+            HttpServletRequest request, HttpServletResponse response, FilterChain filterChain
+    ) throws IOException, ServletException {
         try {
             validateAccessToken(request);
             filterChain.doFilter(request, response);

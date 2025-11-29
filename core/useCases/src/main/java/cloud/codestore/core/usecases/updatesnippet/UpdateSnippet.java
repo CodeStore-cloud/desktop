@@ -6,6 +6,8 @@ import cloud.codestore.core.SnippetNotExistsException;
 import cloud.codestore.core.usecases.readsnippet.ReadSnippet;
 import cloud.codestore.core.validation.InvalidSnippetException;
 import cloud.codestore.core.validation.SnippetValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.time.OffsetDateTime;
@@ -15,6 +17,8 @@ import java.time.OffsetDateTime;
  */
 @Injectable
 public class UpdateSnippet {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UpdateSnippet.class);
+
     private final ReadSnippet readSnippetUseCase;
     private final UpdateSnippetQuery query;
     private final SnippetValidator validator;
@@ -47,5 +51,6 @@ public class UpdateSnippet {
 
         validator.validate(updatedSnippet);
         query.update(updatedSnippet);
+        LOGGER.info("Updated Snippet {}", updatedSnippet.getId());
     }
 }
