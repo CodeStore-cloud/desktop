@@ -1,0 +1,8 @@
+Package: codestore
+Version: @VERSION@
+Section: devel
+Priority: optional
+Architecture: amd64
+Maintainer: Franz Deschler <webmaster@codestore.cloud>
+Description: {CodeStore} is a free code snippet manager that makes it easy for programmers to store and find code examples.
+  It offers a variety of features, such as syntax highlighting, tagging, and full text search.

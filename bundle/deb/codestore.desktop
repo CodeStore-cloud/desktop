@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name={CodeStore}
+Comment=Developer tool for managing code snippets
+Exec=/usr/bin/codestore
+Icon=codestore
+Terminal=false
+Type=Application
+Categories=Development;Utility;
