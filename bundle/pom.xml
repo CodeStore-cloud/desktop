@@ -15,6 +15,7 @@
     <properties>
         <spring.profile>default</spring.profile>
         <jdk.path>%JAVA_HOME%</jdk.path>
+        <target.platform>windows</target.platform>
     </properties>
 
     <dependencies>
@@ -22,12 +23,12 @@
         <dependency>
             <groupId>cloud.codestore</groupId>
             <artifactId>client-application</artifactId>
-            <version>2.0.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>cloud.codestore</groupId>
             <artifactId>application</artifactId>
-            <version>2.0.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
@@ -39,6 +40,21 @@
             </properties>
         </profile>
 
+        <profile>
+            <id>windows</id>
+            <properties>
+                <target.platform>windows</target.platform>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>linux</id>
+            <properties>
+                <target.platform>linux</target.platform>
+            </properties>
+        </profile>
+
+        <!-- ===== Windows Executable ===== -->
         <profile>
             <id>windows-installer</id>
             <activation>
@@ -63,6 +79,106 @@
                                     <executable>${inno.setup.path}/ISCC.exe</executable>
                                     <arguments>
                                         <argument>windows-bundle-config.iss</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- ===== Creating Debian package under Linux ===== -->
+        <profile>
+            <id>deb-native</id>
+            <activation>
+                <property>
+                    <name>target.platform</name>
+                    <value>linux</value>
+                </property>
+                <os>
+                    <name>Linux</name>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <executions>
+                            <execution>
+                                <id>build debian package</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>bash</executable>
+                                    <arguments>
+                                        <argument>deb/build-deb.sh</argument>
+                                        <argument>${project.version}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- ===== Creating Debian package under Windows ===== -->
+        <profile>
+            <id>deb-docker</id>
+            <activation>
+                <property>
+                    <name>target.platform</name>
+                    <value>linux</value>
+                </property>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <executions>
+                            <execution>
+                                <id>build docker image</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>docker</executable>
+                                    <workingDirectory>${project.basedir}/deb</workingDirectory>
+                                    <arguments>
+                                        <argument>build</argument>
+                                        <argument>-t</argument>
+                                        <argument>codestore-deb-builder</argument>
+                                        <argument>.</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>run docker container</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>docker</executable>
+                                    <workingDirectory>${project.basedir}</workingDirectory>
+                                    <arguments>
+                                        <argument>run</argument>
+                                        <argument>--rm</argument>
+                                        <argument>-v</argument>
+                                        <argument>./target:/bundle/target</argument>
+                                        <argument>codestore-deb-builder</argument>
+                                        <argument>${project.version}</argument>
                                     </arguments>
                                 </configuration>
                             </execution>

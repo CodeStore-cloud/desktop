@@ -6,17 +6,19 @@ if [[ $# -lt 1 ]]; then
   exit 1
 fi
 
+cd "$(dirname "${BASH_SOURCE[0]}")"
+
 VERSION=$1
-BUILD_DIR=../target/deb
-DEBIAN=$BUILD_DIR/DEBIAN
-USR_BIN=$BUILD_DIR/usr/bin
-USR_SHARE_CODESTORE=$BUILD_DIR/usr/share/codestore
-USR_SHARE_APPLICATIONS=$BUILD_DIR/usr/share/applications
-USR_SHARE_ICONS=$BUILD_DIR/usr/share/icons/hicolor/64x64/apps
+TARGET=../target
+DEB_DIR=$TARGET/deb
+DEBIAN=$DEB_DIR/DEBIAN
+USR_BIN=$DEB_DIR/usr/bin
+USR_SHARE_CODESTORE=$DEB_DIR/usr/share/codestore
+USR_SHARE_APPLICATIONS=$DEB_DIR/usr/share/applications
+USR_SHARE_ICONS=$DEB_DIR/usr/share/icons/hicolor/64x64/apps
 WRAPPER_SCRIPT=$USR_BIN/codestore
 
 echo "Creating folder structure ..."
-mkdir -p $BUILD_DIR
 mkdir -p \
   $DEBIAN \
   $USR_BIN \
@@ -28,7 +30,7 @@ echo "Copying files ..."
 sed "s/@VERSION@/$VERSION/" control > $DEBIAN/control
 cp codestore.desktop $USR_SHARE_APPLICATIONS
 cp icon.png $USR_SHARE_ICONS
-cp -r ../target/application/* $USR_SHARE_CODESTORE
+cp -r $TARGET/application/* $USR_SHARE_CODESTORE
 
 echo "Creating wrapper script ..."
 cat > $WRAPPER_SCRIPT <<EOF
@@ -39,7 +41,6 @@ EOF
 chmod +x $WRAPPER_SCRIPT
 
 echo "Building Debian package ..."
-dpkg-deb --build $BUILD_DIR
-mv $BUILD_DIR/codestore.deb "codestore_${VERSION}_amd64.deb"
+dpkg-deb --build $DEB_DIR $TARGET
 
 echo "Package created successfully"

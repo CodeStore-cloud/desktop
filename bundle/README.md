@@ -23,5 +23,8 @@ installation folder on your system. If the property is not set, this is omitted.
 `mvn clean package -Djdk.path=<path to jdk> -Djavafx.path=<path to javafx jmods> -Dinno.setup.path=<path to Inno Setup>`
 
 ## Linux Debian Package
-To create a .deb package for installing {CodeStore} on a Linux system, execute the `deb/build-deb.sh` script
-after the application was fully built including the custom runtime.
+To create a `.deb` package for installing {CodeStore} on a Linux system, add the `linux` Profile to the Maven call.
+This will work on Linux as well as Windows.
+On Windows, Docker is used to create the package. So make sure Docker is installed and ready to use.
+
+`mvn clean package -Plinux`
