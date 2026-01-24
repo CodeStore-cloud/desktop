@@ -21,3 +21,7 @@ To perform this step, you need to set the property `inno.setup.path`, which cont
 installation folder on your system. If the property is not set, this is omitted.
 
 `mvn clean package -Djdk.path=<path to jdk> -Djavafx.path=<path to javafx jmods> -Dinno.setup.path=<path to Inno Setup>`
+
+## Linux Debian Package
+To create a .deb package for installing {CodeStore} on a Linux system, execute the `deb/build-deb.sh` script
+after the application was fully built including the custom runtime.
