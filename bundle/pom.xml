@@ -15,7 +15,8 @@
     <properties>
         <spring.profile>default</spring.profile>
         <jdk.path>%JAVA_HOME%</jdk.path>
-        <target.platform>windows</target.platform>
+        <create.runtime.script/>
+        <start.scripts/>
     </properties>
 
     <dependencies>
@@ -41,16 +42,30 @@
         </profile>
 
         <profile>
-            <id>windows</id>
+            <id>target-platform-windows</id>
+            <activation>
+                <property>
+                    <name>target.platform</name>
+                    <value>windows</value>
+                </property>
+            </activation>
             <properties>
-                <target.platform>windows</target.platform>
+                <create.runtime.script>createRuntime.cmd</create.runtime.script>
+                <start.scripts>*.cmd</start.scripts>
             </properties>
         </profile>
 
         <profile>
-            <id>linux</id>
+            <id>target-platform-linux</id>
+            <activation>
+                <property>
+                    <name>target.platform</name>
+                    <value>linux</value>
+                </property>
+            </activation>
             <properties>
-                <target.platform>linux</target.platform>
+                <create.runtime.script>createRuntime.sh</create.runtime.script>
+                <start.scripts>*.sh</start.scripts>
             </properties>
         </profile>
 
@@ -221,6 +236,10 @@
                             <fail>true</fail>
                             <rules>
                                 <requireProperty>
+                                    <property>target.platform</property>
+                                    <message>The "target.platform" property is not set.</message>
+                                </requireProperty>
+                                <requireProperty>
                                     <property>jdk.path</property>
                                     <message>The "jdk.path" property is not set.</message>
                                 </requireProperty>
@@ -285,7 +304,7 @@
                                 <resource>
                                     <directory>${project.basedir}/${spring.profile}</directory>
                                     <includes>
-                                        <include>*.cmd</include>
+                                        <include>${start.scripts}</include>
                                     </includes>
                                 </resource>
                             </resources>
@@ -307,7 +326,7 @@
                             <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <executable>createRuntime.cmd</executable>
+                            <executable>${create.runtime.script}</executable>
                             <arguments>
                                 <argument>${jdk.path}</argument>
                                 <argument>${javafx.path}</argument>

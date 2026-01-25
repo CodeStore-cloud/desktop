@@ -9,6 +9,7 @@ Java runtime which contains only the JDK- and JavaFX-modules required by the app
 The target platform of the runtime may not be the same as the current platform.
 To make this work, you need to set the following properties:
 
+- `target.platform` the target platform `windows` or `linux`
 - `jdk.path` the path to the platform specific JDK to be used for the runtime (optional - default is JAVA_HOME)
 - `javafx.path` the path to the platform specific JavaFX jmods.
 
@@ -23,8 +24,7 @@ installation folder on your system. If the property is not set, this is omitted.
 `mvn clean package -Djdk.path=<path to jdk> -Djavafx.path=<path to javafx jmods> -Dinno.setup.path=<path to Inno Setup>`
 
 ## Linux Debian Package
-To create a `.deb` package for installing {CodeStore} on a Linux system, add the `linux` Profile to the Maven call.
-This will work on Linux as well as Windows.
-On Windows, Docker is used to create the package. So make sure Docker is installed and ready to use.
+To create a `.deb` package for installing {CodeStore} on a Linux system, set the `target.platform` property to `linux`.
+This will work on Linux as well as Windows. On Windows, Docker is used to create the package.
 
-`mvn clean package -Plinux`
+`mvn clean package -Dtarget.platform=linux ...`
