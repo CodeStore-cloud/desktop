@@ -14,7 +14,6 @@
 
     <properties>
         <spring.profile>default</spring.profile>
-        <jdk.path>%JAVA_HOME%</jdk.path>
         <create.runtime.script/>
         <start.scripts/>
     </properties>
@@ -213,21 +212,6 @@
                 <executions>
                     <!-- https://maven.apache.org/enforcer/enforcer-rules/index.html -->
                     <execution>
-                        <id>check optional properties</id>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <fail>false</fail>
-                            <rules>
-                                <requireEnvironmentVariable>
-                                    <variableName>JAVA_HOME</variableName>
-                                    <message>The "JAVA_HOME" environment variable is not set.</message>
-                                </requireEnvironmentVariable>
-                            </rules>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>check required properties</id>
                         <goals>
                             <goal>enforce</goal>
@@ -238,14 +222,6 @@
                                 <requireProperty>
                                     <property>target.platform</property>
                                     <message>The "target.platform" property is not set.</message>
-                                </requireProperty>
-                                <requireProperty>
-                                    <property>jdk.path</property>
-                                    <message>The "jdk.path" property is not set.</message>
-                                </requireProperty>
-                                <requireProperty>
-                                    <property>javafx.path</property>
-                                    <message>The "javafx.path" property is not set.</message>
                                 </requireProperty>
                             </rules>
                         </configuration>
@@ -327,10 +303,6 @@
                         </goals>
                         <configuration>
                             <executable>${create.runtime.script}</executable>
-                            <arguments>
-                                <argument>${jdk.path}</argument>
-                                <argument>${javafx.path}</argument>
-                            </arguments>
                         </configuration>
                     </execution>
                 </executions>
