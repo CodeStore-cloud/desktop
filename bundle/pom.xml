@@ -14,8 +14,11 @@
 
     <properties>
         <spring.profile>default</spring.profile>
+        <target.platform/>
         <create.runtime.script/>
+        <create.package.script/>
         <start.scripts/>
+        <inno.setup.path/>
     </properties>
 
     <dependencies>
@@ -41,165 +44,43 @@
         </profile>
 
         <profile>
-            <id>target-platform-windows</id>
-            <activation>
-                <property>
-                    <name>target.platform</name>
-                    <value>windows</value>
-                </property>
-            </activation>
+            <id>windows</id>
             <properties>
-                <create.runtime.script>createRuntime.cmd</create.runtime.script>
+                <target.platform>windows</target.platform>
                 <start.scripts>*.cmd</start.scripts>
             </properties>
         </profile>
-
         <profile>
-            <id>target-platform-linux</id>
+            <id>source-platform-windows</id>
             <activation>
-                <property>
-                    <name>target.platform</name>
-                    <value>linux</value>
-                </property>
-            </activation>
-            <properties>
-                <create.runtime.script>createRuntime.sh</create.runtime.script>
-                <start.scripts>*.sh</start.scripts>
-            </properties>
-        </profile>
-
-        <!-- ===== Windows Executable ===== -->
-        <profile>
-            <id>windows-installer</id>
-            <activation>
-                <property>
-                    <name>inno.setup.path</name>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <version>3.0.0</version>
-                        <executions>
-                            <execution>
-                                <id>create Windows installation file</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-                                <configuration>
-                                    <executable>${inno.setup.path}/ISCC.exe</executable>
-                                    <arguments>
-                                        <argument>windows-bundle-config.iss</argument>
-                                    </arguments>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <!-- ===== Creating Debian package under Linux ===== -->
-        <profile>
-            <id>deb-native</id>
-            <activation>
-                <property>
-                    <name>target.platform</name>
-                    <value>linux</value>
-                </property>
-                <os>
-                    <name>Linux</name>
-                </os>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <version>3.0.0</version>
-                        <executions>
-                            <execution>
-                                <id>build debian package</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-                                <configuration>
-                                    <executable>bash</executable>
-                                    <arguments>
-                                        <argument>deb/build-deb.sh</argument>
-                                        <argument>${project.version}</argument>
-                                    </arguments>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <!-- ===== Creating Debian package under Windows ===== -->
-        <profile>
-            <id>deb-docker</id>
-            <activation>
-                <property>
-                    <name>target.platform</name>
-                    <value>linux</value>
-                </property>
                 <os>
                     <family>windows</family>
                 </os>
             </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <version>3.0.0</version>
-                        <executions>
-                            <execution>
-                                <id>build docker image</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-                                <configuration>
-                                    <executable>docker</executable>
-                                    <workingDirectory>${project.basedir}/deb</workingDirectory>
-                                    <arguments>
-                                        <argument>build</argument>
-                                        <argument>-t</argument>
-                                        <argument>codestore-deb-builder</argument>
-                                        <argument>.</argument>
-                                    </arguments>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>run docker container</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-                                <configuration>
-                                    <executable>docker</executable>
-                                    <workingDirectory>${project.basedir}</workingDirectory>
-                                    <arguments>
-                                        <argument>run</argument>
-                                        <argument>--rm</argument>
-                                        <argument>-v</argument>
-                                        <argument>./target:/bundle/target</argument>
-                                        <argument>codestore-deb-builder</argument>
-                                        <argument>${project.version}</argument>
-                                    </arguments>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
+            <properties>
+                <create.runtime.script>createRuntime.cmd</create.runtime.script>
+                <create.package.script>createPackage.cmd</create.package.script>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>linux</id>
+            <properties>
+                <target.platform>linux</target.platform>
+                <start.scripts>*.sh</start.scripts>
+            </properties>
+        </profile>
+        <profile>
+            <id>source-platform-linux</id>
+            <activation>
+                <os>
+                    <name>Linux</name>
+                </os>
+            </activation>
+            <properties>
+                <create.runtime.script>createRuntime.sh</create.runtime.script>
+                <create.package.script>createPackage.sh</create.package.script>
+            </properties>
         </profile>
     </profiles>
 
@@ -278,7 +159,7 @@
                             <outputDirectory>${project.build.directory}/application</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.basedir}/${spring.profile}</directory>
+                                    <directory>${project.basedir}/profile/${spring.profile}</directory>
                                     <includes>
                                         <include>${start.scripts}</include>
                                     </includes>
@@ -290,7 +171,6 @@
             </plugin>
 
             <plugin>
-                <!-- Create custom runtime -->
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.0.0</version>
@@ -302,7 +182,21 @@
                             <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <executable>${create.runtime.script}</executable>
+                            <executable>${target.platform}/${create.runtime.script}</executable>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>create package</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>${target.platform}/${create.package.script}</executable>
+                            <arguments>
+                                <argument>${project.version}</argument>
+                                <argument>${inno.setup.path}</argument>
+                            </arguments>
                         </configuration>
                     </execution>
                 </executions>

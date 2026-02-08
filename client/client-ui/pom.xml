@@ -12,6 +12,7 @@
     <artifactId>client-ui</artifactId>
 
     <properties>
+        <!-- remember to update the createRuntime scripts in the bundle module -->
         <javafx.version>21.0.5</javafx.version>
     </properties>
 

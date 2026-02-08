@@ -2,14 +2,14 @@
 set -euo pipefail
 
 if [[ $# -lt 1 ]]; then
-  echo "Usage: $0 <version>"
+  echo "Error: No version specified"
   exit 1
 fi
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
 VERSION=$1
-TARGET=../target
+TARGET=../../target
 DEB_DIR=$TARGET/deb
 DEBIAN=$DEB_DIR/DEBIAN
 USR_BIN=$DEB_DIR/usr/bin

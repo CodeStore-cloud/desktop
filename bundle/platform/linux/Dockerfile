@@ -16,8 +16,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-WORKDIR /bundle/deb
-COPY . /bundle/deb
-RUN chmod +x build-deb.sh
-
-ENTRYPOINT ["/bundle/deb/build-deb.sh"]
+WORKDIR /bundle/platform/linux
+COPY . /bundle/platform/linux
+RUN chmod +x createRuntime.sh
+RUN chmod +x createPackage.sh
