@@ -25,7 +25,7 @@ DisableProgramGroupPage=yes
 ; Remove the following line to run in administrative install mode (install for all users.)
 PrivilegesRequired=lowest
 ; Directory and name of the final executable
-OutputDir=target
+OutputDir=..\..\target
 OutputBaseFilename={CodeStore} Setup
 SetupIconFile=icon.ico
 Compression=lzma
@@ -39,7 +39,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "target\application\*"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
+Source: "..\..\target\application\*"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
