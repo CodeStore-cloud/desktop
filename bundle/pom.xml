@@ -65,7 +65,6 @@
                                 </goals>
                                 <configuration>
                                     <skip>${inno.setup.skip}</skip>
-                                    <workingDirectory>${project.basedir}</workingDirectory>
                                     <executable>${inno.setup.path}/ISCC.exe</executable>
                                     <arguments>
                                         <argument>

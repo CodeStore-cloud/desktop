@@ -36,10 +36,10 @@ if [ -d $JAVAFX_JMODS ]; then
   echo Using cached JavaFX
 else
   echo Downloading JavaFX $JAVAFX_VERSION jmods ...
-  TAR_FILE=$CACHE_DIR/javafx-$JAVAFX_VERSION.tar.gz
-  curl -L -o $TAR_FILE $JAVAFX_URL
-  tar -xf $TAR_FILE -C $CACHE_DIR
-  rm -f $TAR_FILE
+  ZIP_FILE=$CACHE_DIR/javafx-$JAVAFX_VERSION.zip
+  curl -L -o $ZIP_FILE $JAVAFX_URL
+  unzip $ZIP_FILE -d $CACHE_DIR
+  rm -f $ZIP_FILE
 fi
 
 OUTPUT_PATH=target/application/runtime

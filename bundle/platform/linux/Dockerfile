@@ -12,7 +12,8 @@ RUN apt-get update && \
       coreutils \
       sed \
       gettext \
-      imagemagick && \
+      imagemagick \
+      curl && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
