@@ -18,8 +18,8 @@ installation folder on your system. If the property is not set, this is omitted.
 
 `mvn clean package -Pwindows -Dinno.setup.path=<path to Inno Setup>`
 
-## Linux Debian Package
-Creating a Debian package will work on Linux as well as Windows.
+## Linux Snap Package
+Creating a Snap package will work on Linux as well as Windows.
 On Windows, Docker is used to create the package. So make sure that Docker is installed and ready to go.
 
 `mvn clean package -Plinux`

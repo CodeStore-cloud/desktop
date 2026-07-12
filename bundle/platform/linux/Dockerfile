@@ -1,21 +1,10 @@
 FROM ubuntu:24.04
 
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y \
-      build-essential \
-      dpkg-dev \
-      debhelper \
-      fakeroot \
-      wget \
-      unzip \
-      bash \
-      coreutils \
-      sed \
-      gettext \
-      imagemagick \
-      curl && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt update
+RUN apt install -y software-properties-common squashfs-tools sudo git curl snapd
+RUN snap install snapcraft --classic
 
 WORKDIR /bundle/platform/linux
 COPY . /bundle/platform/linux

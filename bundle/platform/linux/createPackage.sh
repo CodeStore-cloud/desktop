@@ -6,41 +6,52 @@ if [[ $# -lt 1 ]]; then
   exit 1
 fi
 
-cd "$(dirname "${BASH_SOURCE[0]}")"
+cd "$(dirname "${BASH_SOURCE[0]}")" #/bundle/platform/linux
 
 VERSION=$1
-TARGET=../../target
-DEB_DIR=$TARGET/deb
-DEBIAN=$DEB_DIR/DEBIAN
-USR_BIN=$DEB_DIR/usr/bin
-USR_SHARE_CODESTORE=$DEB_DIR/usr/share/codestore
-USR_SHARE_APPLICATIONS=$DEB_DIR/usr/share/applications
-USR_SHARE_ICONS=$DEB_DIR/usr/share/icons/hicolor/64x64/apps
-WRAPPER_SCRIPT=$USR_BIN/codestore
+TARGET=/bundle/target
+SNAP_DIR=$TARGET/snap
+CODESTORE_DIR=$SNAP_DIR/codestore
 
 echo "Creating folder structure ..."
-mkdir -p \
-  $DEBIAN \
-  $USR_BIN \
-  $USR_SHARE_CODESTORE \
-  $USR_SHARE_APPLICATIONS \
-  $USR_SHARE_ICONS
+mkdir -p $CODESTORE_DIR
+cp -r ./icon.png $CODESTORE_DIR
+cp -r ./codestore.desktop $CODESTORE_DIR
+cp -r $TARGET/application/* $CODESTORE_DIR
 
-echo "Copying files ..."
-sed "s/@VERSION@/$VERSION/" control > $DEBIAN/control
-cp codestore.desktop $USR_SHARE_APPLICATIONS
-cp icon.png $USR_SHARE_ICONS
-cp -r $TARGET/application/* $USR_SHARE_CODESTORE
+cat << EOF > $SNAP_DIR/snapcraft.yaml
+name: {CodeStore}
+base: core24
+version: "$VERSION"
+summary: Developer tool for managing code snippets
+description: |
+  {CodeStore} is a free code snippet manager that makes it easy for programmers to store and organize code snippets.
+  It provides syntax highlighting, tagging and full text search.
+icon: codestore/icon.png
+grade: stable
+confinement: strict
 
-echo "Creating wrapper script ..."
-cat > $WRAPPER_SCRIPT <<EOF
-#!/usr/bin/env bash
-cd /usr/share/codestore
-exec ./CodeStore.sh
+apps:
+  codestore:
+    command: codestore/codestore.sh
+    desktop: codestore/codestore.desktop
+    plugs:
+      - home
+      - network
+      - network-bind
+      - desktop
+      - desktop-legacy
+      - opengl
+      - wayland
+      - x11
+
+parts:
+  application:
+    plugin: dump
+    source: .
 EOF
-chmod +x $WRAPPER_SCRIPT
 
-echo "Building Debian package ..."
-dpkg-deb --build $DEB_DIR $TARGET
-
+echo "Building Snap package ..."
+cd $SNAP_DIR
+snapcraft --destructive-mode
 echo "Package created successfully"

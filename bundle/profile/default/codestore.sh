@@ -1,3 +1,3 @@
 #!/bin/bash
-./startCore.sh &
+./startcore.sh &
 ./runtime/bin/java -jar ./client/CodeStoreClient.jar &

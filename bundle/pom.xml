@@ -116,7 +116,7 @@
                         <version>3.0.0</version>
                         <executions>
                             <execution>
-                                <id>create deb package</id>
+                                <id>create snap package</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>exec</goal>

@@ -1,5 +1,5 @@
 :: ------------------------------------------------------------
-:: Create Debian package under Windows using Docker
+:: Create Snap package under Windows using Docker
 :: ------------------------------------------------------------
 
 @echo off
