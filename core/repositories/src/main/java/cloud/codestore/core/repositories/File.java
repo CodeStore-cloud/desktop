@@ -98,9 +98,9 @@ public record File(Path path) {
     @Nonnull
     public Properties readProperties() throws RepositoryException {
         try {
-            Properties syncProperties = new Properties();
-            syncProperties.load(Files.newInputStream(path));
-            return syncProperties;
+            Properties properties = new Properties();
+            properties.load(Files.newInputStream(path));
+            return properties;
         } catch (NoSuchFileException exception) {
             throw new RepositoryException(exception, "file.notExists", path);
         } catch (IOException exception) {

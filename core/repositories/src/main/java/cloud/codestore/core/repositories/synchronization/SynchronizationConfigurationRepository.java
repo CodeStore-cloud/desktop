@@ -12,24 +12,33 @@ import java.util.Properties;
 
 @Component
 class SynchronizationConfigurationRepository implements ReadSynchronizationConfigurationQuery {
-    private final File syncConfig;
+    private static final String SERVICE_NAME = "serviceName";
 
-    SynchronizationConfigurationRepository(@Nonnull @Qualifier("syncProperties") File syncConfig) {
-        this.syncConfig = syncConfig;
+    private final File syncConfigFile;
+
+    SynchronizationConfigurationRepository(@Nonnull @Qualifier("syncProperties") File syncConfigFile) {
+        this.syncConfigFile = syncConfigFile;
     }
 
     @Nonnull
     @Override
     public SynchronizationConfiguration read() {
-        if (syncConfig.exists()) {
-            Properties properties = syncConfig.readProperties();
+        if (syncConfigFile.exists()) {
+            Properties properties = syncConfigFile.readProperties();
             if (!properties.isEmpty()) {
-                String serviceName = properties.getProperty("serviceName");
+                String serviceName = properties.getProperty(SERVICE_NAME);
                 CloudService service = CloudService.valueOf(serviceName);
                 return new SynchronizationConfiguration(service);
             }
         }
 
         return SynchronizationConfiguration.empty();
+    }
+
+    @Override
+    public void write(@Nonnull SynchronizationConfiguration synchronizationConfiguration) {
+        Properties properties = new Properties();
+        properties.put(SERVICE_NAME, synchronizationConfiguration.cloudService().name());
+        syncConfigFile.write(properties);
     }
 }
