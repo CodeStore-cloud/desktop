@@ -1,8 +1,8 @@
 package cloud.codestore.client.repositories.language;
 
+import cloud.codestore.client.Injectable;
 import cloud.codestore.client.Language;
 import cloud.codestore.client.repositories.HttpClient;
-import cloud.codestore.client.repositories.Repository;
 import cloud.codestore.client.usecases.readlanguages.ReadLanguagesUseCase;
 
 import javax.annotation.Nonnull;
@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * A repository which loads the available programming languages from the local {CodeStore} Core.
  */
-@Repository
+@Injectable
 public class LocalLanguageRepository implements ReadLanguagesUseCase {
     private final HttpClient client;
 

@@ -2,6 +2,8 @@ package cloud.codestore.core.usecases.deletesnippet;
 
 import cloud.codestore.core.Injectable;
 import cloud.codestore.core.SnippetNotExistsException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 
@@ -10,6 +12,8 @@ import javax.annotation.Nonnull;
  */
 @Injectable
 public class DeleteSnippet {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DeleteSnippet.class);
+
     private final DeleteSnippetQuery query;
 
     public DeleteSnippet(DeleteSnippetQuery query) {
@@ -23,5 +27,6 @@ public class DeleteSnippet {
      */
     public void delete(@Nonnull String snippetId) throws SnippetNotExistsException {
         query.delete(snippetId);
+        LOGGER.info("Deleted Snippet {}", snippetId);
     }
 }

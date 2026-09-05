@@ -1,8 +1,8 @@
 package cloud.codestore.client.ui.snippet.details;
 
+import cloud.codestore.client.Injectable;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
-import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.QuickFilterEvent;
 import cloud.codestore.client.ui.snippet.SnippetForm;
 import javafx.fxml.FXML;
@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-@FxController
+@Injectable
 public class SnippetDetails implements SnippetForm {
     private static final DateTimeFormatter DATE_TIME_FORMATTER;
 

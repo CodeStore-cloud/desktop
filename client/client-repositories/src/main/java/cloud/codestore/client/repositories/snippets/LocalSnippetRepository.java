@@ -1,10 +1,10 @@
 package cloud.codestore.client.repositories.snippets;
 
+import cloud.codestore.client.Injectable;
 import cloud.codestore.client.Language;
 import cloud.codestore.client.Permission;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.repositories.HttpClient;
-import cloud.codestore.client.repositories.Repository;
 import cloud.codestore.client.repositories.ResourceMetaInfo;
 import cloud.codestore.client.repositories.language.LanguageResource;
 import cloud.codestore.client.repositories.language.LocalLanguageRepository;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 /**
  * A repository which saves/loads code snippets from the local {CodeStore} Core.
  */
-@Repository
+@Injectable
 class LocalSnippetRepository implements ReadSnippetsUseCase, ReadSnippetUseCase, CreateSnippetUseCase, UpdateSnippetUseCase, DeleteSnippetUseCase {
 
     private static final String FILTER_TAGS_PARAM = "filter[tags]";

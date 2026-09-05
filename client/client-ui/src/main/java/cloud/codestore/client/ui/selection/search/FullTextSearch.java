@@ -1,6 +1,6 @@
 package cloud.codestore.client.ui.selection.search;
 
-import cloud.codestore.client.ui.FxController;
+import cloud.codestore.client.Injectable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
@@ -13,7 +13,7 @@ import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 
-@FxController
+@Injectable
 public class FullTextSearch {
     @FXML
     private TextField inputField;

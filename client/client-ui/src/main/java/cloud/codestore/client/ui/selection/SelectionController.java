@@ -1,6 +1,6 @@
 package cloud.codestore.client.ui.selection;
 
-import cloud.codestore.client.ui.FxController;
+import cloud.codestore.client.Injectable;
 import cloud.codestore.client.ui.QuickFilterEvent;
 import cloud.codestore.client.ui.selection.filter.Filter;
 import cloud.codestore.client.ui.selection.list.SnippetList;
@@ -23,7 +23,7 @@ import static cloud.codestore.client.usecases.listsnippets.SortProperties.Snippe
  * The top most controller for handling the interaction between search, filter and sort components.
  * This controller also handles the visibility of the sort and filter components.
  */
-@FxController
+@Injectable
 public class SelectionController {
     private static final String FILLED_FILTER_BUTTON_STYLE = "filled";
 

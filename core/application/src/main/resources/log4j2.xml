@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" xmlns="http://logging.apache.org/log4j/2.0/config">
+    <Properties>
+        <Property name="layout">%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger - %msg%n</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="ConsoleAppender" target="SYSTEM_OUT">
+            <PatternLayout pattern="${layout}"/>
+        </Console>
+        <File name="FileAppender" fileName="CodeStore-Core.log" append="false">
+            <PatternLayout pattern="${layout}"/>
+        </File>
+        <BufferedRequestAppender name="BufferedRequestAppender">
+            <AppenderRef ref="ConsoleAppender"/>
+            <AppenderRef ref="FileAppender"/>
+        </BufferedRequestAppender>
+    </Appenders>
+
+    <Loggers>
+        <Root level="WARN">
+            <AppenderRef ref="BufferedRequestAppender"/>
+        </Root>
+
+        <!-- Don't change the log level. -->
+        <!-- The BufferedRequestAppender dynamically logs debug statements in case of an error.-->
+        <Logger name="cloud.codestore" level="debug" />
+    </Loggers>
+</Configuration>

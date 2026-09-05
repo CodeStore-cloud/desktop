@@ -1,10 +1,10 @@
 package cloud.codestore.client.ui.snippet.code;
 
+import cloud.codestore.client.Injectable;
 import cloud.codestore.client.Language;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
 import cloud.codestore.client.ui.ApplicationReadyEvent;
-import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.QuickFilterEvent;
 import cloud.codestore.client.ui.snippet.SnippetForm;
 import cloud.codestore.client.usecases.readlanguages.ReadLanguagesUseCase;
@@ -26,7 +26,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Objects;
 
-@FxController
+@Injectable
 public class SnippetCode implements SnippetForm {
     private static final Logger LOGGER = LogManager.getLogger(SnippetCode.class);
 

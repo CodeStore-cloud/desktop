@@ -1,9 +1,9 @@
 package cloud.codestore.client.ui.snippet.footer;
 
+import cloud.codestore.client.Injectable;
 import cloud.codestore.client.Permission;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.ui.ChangeSnippetsEvent;
-import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.snippet.SnippetForm;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -15,7 +15,7 @@ import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.Set;
 
-@FxController
+@Injectable
 public class SnippetFooter implements SnippetForm {
     @FXML
     private Button saveButton;

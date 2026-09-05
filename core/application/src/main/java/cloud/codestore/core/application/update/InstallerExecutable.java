@@ -64,7 +64,7 @@ class InstallerExecutable {
     void execute() throws IOException {
         if (file != null && Files.exists(file)) {
             try {
-                LOGGER.info("Executing {}", file);
+                LOGGER.debug("Executing {}", file);
                 ProcessBuilder processBuilder = new ProcessBuilder(file.toString());
                 processBuilder.start();
             } catch (IOException exception) {

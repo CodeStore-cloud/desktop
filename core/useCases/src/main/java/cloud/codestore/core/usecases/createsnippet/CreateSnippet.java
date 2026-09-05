@@ -4,6 +4,8 @@ import cloud.codestore.core.Injectable;
 import cloud.codestore.core.Snippet;
 import cloud.codestore.core.validation.InvalidSnippetException;
 import cloud.codestore.core.validation.SnippetValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.time.OffsetDateTime;
@@ -14,6 +16,8 @@ import java.util.UUID;
  */
 @Injectable
 public class CreateSnippet {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CreateSnippet.class);
+
     private final CreateSnippetQuery query;
     private final SnippetValidator validator;
 
@@ -43,6 +47,8 @@ public class CreateSnippet {
 
         validator.validate(snippet);
         query.create(snippet);
+        LOGGER.info("Created Snippet {}", snippet.getId());
+
         return snippet;
     }
 }

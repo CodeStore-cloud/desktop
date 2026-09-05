@@ -1,8 +1,8 @@
 package cloud.codestore.client.ui.selection.filter;
 
+import cloud.codestore.client.Injectable;
 import cloud.codestore.client.Language;
 import cloud.codestore.client.ui.ApplicationReadyEvent;
-import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.QuickFilterEvent;
 import cloud.codestore.client.ui.UiMessages;
 import cloud.codestore.client.usecases.listsnippets.FilterProperties;
@@ -19,7 +19,7 @@ import javafx.scene.layout.Pane;
 import javax.annotation.Nonnull;
 import java.util.*;
 
-@FxController
+@Injectable
 public class Filter {
     private final ReadLanguagesUseCase readLanguagesUseCase;
 

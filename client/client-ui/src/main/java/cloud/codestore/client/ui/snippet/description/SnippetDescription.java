@@ -1,15 +1,15 @@
 package cloud.codestore.client.ui.snippet.description;
 
+import cloud.codestore.client.Injectable;
 import cloud.codestore.client.Snippet;
 import cloud.codestore.client.SnippetBuilder;
-import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.ui.snippet.SnippetForm;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 
 import javax.annotation.Nonnull;
 
-@FxController
+@Injectable
 public class SnippetDescription implements SnippetForm {
     @FXML
     private TextArea snippetDescription;

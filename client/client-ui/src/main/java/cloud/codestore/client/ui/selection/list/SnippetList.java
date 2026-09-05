@@ -1,8 +1,8 @@
 package cloud.codestore.client.ui.selection.list;
 
+import cloud.codestore.client.Injectable;
 import cloud.codestore.client.Permission;
 import cloud.codestore.client.ui.ChangeSnippetsEvent;
-import cloud.codestore.client.ui.FxController;
 import cloud.codestore.client.usecases.listsnippets.*;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -21,7 +21,7 @@ import javafx.scene.input.KeyCombination;
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-@FxController
+@Injectable
 public class SnippetList {
     private final ReadSnippetsUseCase readSnippetsUseCase;
     private final StringProperty nextPageUrl = new SimpleStringProperty();
