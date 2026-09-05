@@ -20,8 +20,8 @@ class RemoteSnippetSet implements ItemSet<Snippet> {
 
     private final SnippetReader snippetReader;
     private final SnippetWriter snippetWriter;
-    private RemoteDirectory snippetsDirectory;
-    private Map<String, RemoteFile> remoteFiles = new HashMap<>();
+    private final RemoteDirectory snippetsDirectory;
+    private final Map<String, RemoteFile> remoteFiles = new HashMap<>();
 
     RemoteSnippetSet(
             SnippetReader snippetReader,

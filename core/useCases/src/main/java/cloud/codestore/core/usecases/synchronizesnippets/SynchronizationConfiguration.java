@@ -6,6 +6,7 @@ import javax.annotation.Nonnull;
  * Contains information about the configured cloud service and corresponding credentials.
  */
 public record SynchronizationConfiguration(@Nonnull CloudService cloudService) {
+    @Nonnull
     public static SynchronizationConfiguration empty() {
         return new SynchronizationConfiguration(CloudService.NONE);
     }

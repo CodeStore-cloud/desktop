@@ -16,6 +16,7 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,27 +26,30 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+@Component
 public class GoogleDriveService {
     private static final String APPLICATION_NAME = "CodeStore Desktop Application";
     private static final String CREDENTIALS_FILE_PATH = "/google.drive.auth.json";
-    private static final List<String> SCOPES = Collections.singletonList(DriveScopes.DRIVE_FILE);
-    private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
+    private static final String ROOT_DIRECTORY_NAME = "CodeStore";
 
     private final Directory tokensDirectory;
+    private JsonFactory jsonFactory;
 
     GoogleDriveService(@Qualifier("sync") Directory syncDirectory) {
         this.tokensDirectory = syncDirectory;
     }
 
     public RemoteDirectory login() {
-        return null;
+        jsonFactory = GsonFactory.getDefaultInstance();
+        Drive service = authenticate();
+        return new GoogleDriveDirectory(service, ROOT_DIRECTORY_NAME);
     }
 
     private Drive authenticate() {
         try {
             NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             Credential credentials = getCredentials(httpTransport);
-            return new Drive.Builder(httpTransport, JSON_FACTORY, credentials)
+            return new Drive.Builder(httpTransport, jsonFactory, credentials)
                     .setApplicationName(APPLICATION_NAME)
                     .build();
         } catch (GeneralSecurityException | IOException exception) {
@@ -56,10 +60,11 @@ public class GoogleDriveService {
     private Credential getCredentials(NetHttpTransport httpTransport) throws IOException {
         InputStream in = getClass().getResourceAsStream(CREDENTIALS_FILE_PATH);
         Objects.requireNonNull(in, "Resource not found: " + CREDENTIALS_FILE_PATH);
-        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(jsonFactory, new InputStreamReader(in));
 
+        List<String> scopes = Collections.singletonList(DriveScopes.DRIVE_FILE);
         GoogleAuthorizationCodeFlow authFlow = new GoogleAuthorizationCodeFlow.Builder(
-                httpTransport, JSON_FACTORY, clientSecrets, SCOPES)
+                httpTransport, jsonFactory, clientSecrets, scopes)
                 .setDataStoreFactory(new FileDataStoreFactory(tokensDirectory.path().toFile()))
                 .setAccessType("offline")
                 .build();
