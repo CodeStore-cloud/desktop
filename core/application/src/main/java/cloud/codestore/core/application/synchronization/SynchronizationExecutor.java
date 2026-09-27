@@ -15,8 +15,6 @@ class SynchronizationExecutor {
 
     @EventListener(ApplicationReadyEvent.class)
     void synchronizeSnippets() {
-        if (!synchronizationProcess.isSkipped()) {
-            synchronizationProcess.execute();
-        }
+        synchronizationProcess.execute();
     }
 }

@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 class SynchronizationProcessTest {
 
     @Mock
-    private ReadSynchronizationConfigurationQuery query;
+    private ReadSynchronizationConfigurationQuery readConfigQuery;
     @Mock
     private SynchronizationConfiguration configuration;
     @Mock
@@ -36,9 +36,9 @@ class SynchronizationProcessTest {
 
     @BeforeEach
     void setUp() {
-        when(query.read()).thenReturn(configuration);
-        when(configuration.isCloudServiceConfigured()).thenReturn(true);
-        synchronization = new SynchronizationProcess(query, algorithmFactory);
+        when(readConfigQuery.read()).thenReturn(configuration);
+        lenient().when(configuration.isCloudServiceConfigured()).thenReturn(true);
+        synchronization = new SynchronizationProcess(readConfigQuery, algorithmFactory);
         lenient().when(algorithmFactory.createSnippetSynchronizationAlgorithm(any(), any())).thenReturn(synchronizationAlgorithm);
         lenient().when(algorithmFactory.getStatus()).thenReturn(status);
     }
@@ -46,6 +46,7 @@ class SynchronizationProcessTest {
     @Test
     @DisplayName("provides access to the progress")
     void providesAccessToProgressAndReport() {
+        synchronization.execute();
         assertThat(synchronization.getProgress()).isNotNull();
     }
 
@@ -88,13 +89,12 @@ class SynchronizationProcessTest {
 
         @BeforeEach
         void setUp() {
-            when(query.read()).thenThrow(ERROR);
+            when(readConfigQuery.read()).thenThrow(ERROR);
         }
 
         @Test
         @DisplayName("fails with the original exception")
         void failWithOriginalException() {
-            synchronization = new SynchronizationProcess(query, algorithmFactory);
             synchronization.execute();
 
             SynchronizationState state = synchronization.getState();

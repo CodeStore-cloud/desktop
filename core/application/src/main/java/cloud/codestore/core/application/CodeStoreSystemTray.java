@@ -1,7 +1,9 @@
 package cloud.codestore.core.application;
 
+import cloud.codestore.core.application.synchronization.CloudSelectionDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,14 +24,19 @@ import java.util.ResourceBundle;
 public class CodeStoreSystemTray {
     private static final Logger LOGGER = LoggerFactory.getLogger(CodeStoreSystemTray.class);
     private final ResourceBundle resourceBundle;
-
     private final SystemTray systemTray;
     private final TrayIcon trayIcon;
+    private final ObjectProvider<CloudSelectionDialog> cloudSelectionDialogProvider;
 
     @Autowired
-    CodeStoreSystemTray(@Nullable SystemTray systemTray) {
+    CodeStoreSystemTray(
+            @Nullable SystemTray systemTray,
+            ObjectProvider<CloudSelectionDialog> cloudSelectionDialogProvider
+    ) {
+        this.cloudSelectionDialogProvider = cloudSelectionDialogProvider;
         this.resourceBundle = ResourceBundle.getBundle("tray-messages");
         this.systemTray = systemTray;
+
         if (this.systemTray == null) {
             LOGGER.warn("System Tray is not supported");
             trayIcon = null;
@@ -54,26 +61,33 @@ public class CodeStoreSystemTray {
     }
 
     public void setUpdateHandler(ActionListener listener) {
-        PopupMenu menu = trayIcon.getPopupMenu();
-        for (int i = 0; i < menu.getItemCount(); i++) {
-            MenuItem item = menu.getItem(i);
-            if ("update".equals(item.getName())) {
-                item.addActionListener(listener);
-                item.setEnabled(true);
+        if (trayIcon != null) {
+            PopupMenu menu = trayIcon.getPopupMenu();
+            for (int i = 0; i < menu.getItemCount(); i++) {
+                MenuItem item = menu.getItem(i);
+                if ("update".equals(item.getName())) {
+                    item.addActionListener(listener);
+                    item.setEnabled(true);
+                }
             }
         }
     }
 
     private PopupMenu createPopupMenu() {
-        MenuItem exit = new MenuItem(resourceBundle.getString("tray.menu.exit"));
-        exit.setName("exit");
-        exit.addActionListener(this::exit);
+        MenuItem cloudSelection = new MenuItem(resourceBundle.getString("tray.menu.cloudSelection"));
+        cloudSelection.setName("cloudSelection");
+        cloudSelection.addActionListener(this::cloudSelection);
 
         MenuItem update = new MenuItem(resourceBundle.getString("tray.menu.update"));
         update.setName("update");
         update.setEnabled(false);
 
+        MenuItem exit = new MenuItem(resourceBundle.getString("tray.menu.exit"));
+        exit.setName("exit");
+        exit.addActionListener(this::exit);
+
         PopupMenu menu = new PopupMenu();
+        menu.add(cloudSelection);
         menu.add(update);
         menu.add(exit);
 
@@ -94,5 +108,10 @@ public class CodeStoreSystemTray {
         }
 
         System.exit(0);
+    }
+
+    private void cloudSelection(ActionEvent e) {
+        CloudSelectionDialog dialog = cloudSelectionDialogProvider.getObject();
+        dialog.show();
     }
 }

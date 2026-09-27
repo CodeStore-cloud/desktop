@@ -5,6 +5,4 @@ import javax.annotation.Nonnull;
 public interface ReadSynchronizationConfigurationQuery {
     @Nonnull
     SynchronizationConfiguration read();
-
-    void write(@Nonnull SynchronizationConfiguration synchronizationConfiguration);
 }

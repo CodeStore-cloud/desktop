@@ -14,34 +14,39 @@ import java.io.IOException;
 public class SynchronizationProcess {
     private static final Logger LOGGER = LoggerFactory.getLogger(SynchronizationProcess.class);
 
-    private final ProcessDelegate delegate;
+    private final ReadSynchronizationConfigurationQuery readSynchronizationConfigurationQuery;
+    private final SynchronizationAlgorithmFactory algorithmFactory;
+    private ProcessDelegate delegate;
 
     SynchronizationProcess(
             ReadSynchronizationConfigurationQuery readSynchronizationConfigurationQuery,
             SynchronizationAlgorithmFactory algorithmFactory
     ) {
-        SynchronizationConfiguration configuration;
-        try {
-            configuration = readSynchronizationConfigurationQuery.read();
-        } catch (Throwable exception) {
-            LOGGER.error("Failed to read synchronization configuration.", exception);
-            delegate = new FailedSynchronizationProcess(exception);
-            return;
-        }
-
-        if (configuration.isCloudServiceConfigured()) {
-            delegate = new ActiveSynchronizationProcess(algorithmFactory, configuration);
-        } else {
-            LOGGER.info("Synchronization skipped");
-            delegate = new SkippedSynchronizationProcess();
-        }
+        this.readSynchronizationConfigurationQuery = readSynchronizationConfigurationQuery;
+        this.algorithmFactory = algorithmFactory;
+        delegate = new NotExecutedSynchronizationProcess();
     }
 
-    public boolean isSkipped() {
-        return delegate.isSkipped();
+    public boolean wasExecuted() {
+        return delegate.wasExecuted();
     }
 
     public void execute() {
+        if (!delegate.wasExecuted()) {
+            try {
+                SynchronizationConfiguration configuration = readSynchronizationConfigurationQuery.read();
+                if (configuration.isCloudServiceConfigured()) {
+                    delegate = new ActiveSynchronizationProcess(algorithmFactory, configuration);
+                } else {
+                    LOGGER.info("Synchronization skipped");
+                    delegate = new NotExecutedSynchronizationProcess();
+                }
+            } catch (Throwable exception) {
+                LOGGER.error("Failed to execute synchronization.", exception);
+                delegate = new FailedSynchronizationProcess(exception);
+            }
+        }
+
         delegate.execute();
     }
 
@@ -56,7 +61,7 @@ public class SynchronizationProcess {
     }
 
     private interface ProcessDelegate {
-        boolean isSkipped();
+        boolean wasExecuted();
         void execute();
         SynchronizationState getState();
         SynchronizationProgress getProgress();
@@ -77,8 +82,8 @@ public class SynchronizationProcess {
         }
 
         @Override
-        public boolean isSkipped() {
-            return false;
+        public boolean wasExecuted() {
+            return true;
         }
 
         @Override
@@ -132,18 +137,16 @@ public class SynchronizationProcess {
         }
     }
 
-    private static class SkippedSynchronizationProcess implements ProcessDelegate {
-        private static final String MESSAGE = "The synchronization was skipped.";
+    private static class NotExecutedSynchronizationProcess implements ProcessDelegate {
+        private static final String MESSAGE = "The synchronization was not executed.";
 
         @Override
-        public boolean isSkipped() {
-            return true;
+        public boolean wasExecuted() {
+            return false;
         }
 
         @Override
-        public void execute() {
-            throw new IllegalStateException(MESSAGE);
-        }
+        public void execute() {}
 
         @Nonnull
         @Override

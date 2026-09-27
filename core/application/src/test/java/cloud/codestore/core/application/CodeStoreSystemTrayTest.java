@@ -23,8 +23,9 @@ class CodeStoreSystemTrayTest {
         Locale.setDefault(Locale.ENGLISH);
     }
 
-    private static final int UPDATE_MENU_ITEM_INDEX = 0;
-    private static final int EXIT_MENU_ITEM_INDEX = 1;
+    private static final int CLOUD_SELECTION_MENU_ITEM_INDEX = 0;
+    private static final int UPDATE_MENU_ITEM_INDEX = 1;
+    private static final int EXIT_MENU_ITEM_INDEX = 2;
 
     @Mock
     private SystemTray systemTray;
@@ -38,7 +39,7 @@ class CodeStoreSystemTrayTest {
             return null;
         }).when(systemTray).add(any(TrayIcon.class));
 
-        codeStoreTray = new CodeStoreSystemTray(systemTray);
+        codeStoreTray = new CodeStoreSystemTray(systemTray, null);
     }
 
     @Test
@@ -101,6 +102,15 @@ class CodeStoreSystemTrayTest {
             assertThat(item.getName()).isEqualTo("update");
             assertThat(item.getLabel()).isEqualTo("Update");
             assertThat(item.isEnabled()).isFalse();
+        }
+
+        @Test
+        @DisplayName("cloud selection")
+        void cloudSelection() {
+            MenuItem item = menu.getItem(CLOUD_SELECTION_MENU_ITEM_INDEX);
+            assertThat(item.getName()).isEqualTo("cloudSelection");
+            assertThat(item.getLabel()).isEqualTo("Cloud Service");
+            assertThat(item.isEnabled()).isTrue();
         }
     }
 }

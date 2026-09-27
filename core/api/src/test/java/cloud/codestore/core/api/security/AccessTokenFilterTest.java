@@ -40,7 +40,7 @@ class AccessTokenFilterTest {
     @BeforeEach
     void setUp() {
         SynchronizationProcess synchronizationProcess = mock(SynchronizationProcess.class);
-        lenient().when(synchronizationProcess.isSkipped()).thenReturn(true);
+        lenient().when(synchronizationProcess.wasExecuted()).thenReturn(true);
         mockMvc = MockMvcBuilders.standaloneSetup(new RootController(synchronizationProcess))
                                  .addFilters(new AccessTokenFilter(ACCESS_TOKEN, objectMapper))
                                  .build();

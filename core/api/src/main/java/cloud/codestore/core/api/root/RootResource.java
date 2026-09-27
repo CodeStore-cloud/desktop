@@ -23,10 +23,10 @@ class RootResource extends ResourceObject {
         super("core", "1");
         setSelfLink(UriFactory.createUri(""));
 
-        if (synchronizationProcess.isSkipped()) {
-            synchronization = null;
-        } else {
+        if (synchronizationProcess.wasExecuted()) {
             synchronization = new Relationship(SynchronizationProcessResource.createLink());
+        } else {
+            synchronization = null;
         }
     }
 

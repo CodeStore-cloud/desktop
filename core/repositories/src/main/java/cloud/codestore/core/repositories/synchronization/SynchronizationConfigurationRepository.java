@@ -4,6 +4,7 @@ import cloud.codestore.core.repositories.File;
 import cloud.codestore.core.usecases.synchronizesnippets.CloudService;
 import cloud.codestore.core.usecases.synchronizesnippets.ReadSynchronizationConfigurationQuery;
 import cloud.codestore.core.usecases.synchronizesnippets.SynchronizationConfiguration;
+import cloud.codestore.core.usecases.synchronizesnippets.WriteSynchronizationConfigurationQuery;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +12,7 @@ import javax.annotation.Nonnull;
 import java.util.Properties;
 
 @Component
-class SynchronizationConfigurationRepository implements ReadSynchronizationConfigurationQuery {
+class SynchronizationConfigurationRepository implements ReadSynchronizationConfigurationQuery, WriteSynchronizationConfigurationQuery {
     private static final String SERVICE_NAME = "serviceName";
 
     private final File syncConfigFile;

@@ -24,7 +24,7 @@ class RootResourceTest extends AbstractControllerTest {
     @Test
     @DisplayName("returns the core resource")
     void getRootResource() throws Exception {
-        when(synchronizationProcess.isSkipped()).thenReturn(true);
+        when(synchronizationProcess.wasExecuted()).thenReturn(true);
         mockMvc.perform(get("/"))
                .andExpect(status().isOk())
                .andExpect(content().contentType(JsonApiDocument.MEDIA_TYPE))
@@ -72,7 +72,7 @@ class RootResourceTest extends AbstractControllerTest {
     @Test
     @DisplayName("contains a link to the initial synchronization if present")
     void linkInitialSynchronizationResource() throws Exception {
-        when(synchronizationProcess.isSkipped()).thenReturn(false);
+        when(synchronizationProcess.wasExecuted()).thenReturn(false);
 
         mockMvc.perform(get("/"))
                .andExpect(status().isOk())

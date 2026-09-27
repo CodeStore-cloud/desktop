@@ -29,14 +29,14 @@ class SynchronizationController {
 
     @GetMapping("/1")
     public JsonApiDocument getInitialSynchronization() throws SynchronizationNotExistsException {
-        if (synchronizationProcess.isSkipped()) {
+        if (synchronizationProcess.wasExecuted()) {
+            return new SynchronizationProcessResource(
+                    synchronizationProcess.getState(),
+                    synchronizationProcess.getProgress()
+            ).asDocument();
+        } else {
             throw new SynchronizationNotExistsException();
         }
-
-        return new SynchronizationProcessResource(
-                synchronizationProcess.getState(),
-                synchronizationProcess.getProgress()
-        ).asDocument();
     }
 
     @GetMapping("/{snippetId}")
