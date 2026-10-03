@@ -1,5 +1,6 @@
 package cloud.codestore.core.api.synchronization;
 
+import cloud.codestore.core.api.ErrorResponseBuilder;
 import cloud.codestore.core.usecases.synchronizesnippets.SnippetSynchronizationState;
 import cloud.codestore.jsonapi.error.ErrorObject;
 import cloud.codestore.jsonapi.resource.ResourceObject;
@@ -35,13 +36,8 @@ class SnippetSynchronizationResource extends ResourceObject {
 
     @JsonGetter("error")
     public ErrorObject getError() {
-        ErrorObject errorObject = null;
-        if (synchronization.getError() != null) {
-            errorObject = new ErrorObject();
-            //TODO fill error object
-        }
-
-        return errorObject;
+        Throwable error = synchronization.getError();
+        return error == null ? null : new ErrorResponseBuilder().createError("SYNCHRONIZATION_FAILED", "synchronization.error.title", error.getMessage());
     }
 
     private static String createLink(String snippetId) {

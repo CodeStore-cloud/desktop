@@ -6,6 +6,7 @@ import cloud.codestore.core.api.Operation;
 import cloud.codestore.core.api.ResourceMetaInfo;
 import cloud.codestore.core.api.UriFactory;
 import cloud.codestore.core.api.languages.LanguageResource;
+import cloud.codestore.core.api.synchronization.SynchronizationProcessResource;
 import cloud.codestore.core.api.tags.TagCollectionResource;
 import cloud.codestore.jsonapi.relationship.Relationship;
 import cloud.codestore.jsonapi.resource.ResourceObject;
@@ -31,6 +32,7 @@ public class SnippetResource extends ResourceObject {
     private OffsetDateTime modified;
     private Relationship language;
     private Relationship tags;
+    private Relationship synchronizationState;
 
     SnippetResource(@Nonnull Snippet snippet) {
         super(RESOURCE_TYPE, snippet.getId());
@@ -44,6 +46,10 @@ public class SnippetResource extends ResourceObject {
         this.modified = snippet.getModified();
         this.language = new Relationship(LanguageResource.createLink(snippet.getLanguage()));
         this.tags = new Relationship(TagCollectionResource.createLink(getId()));
+
+        if (snippet.getSynchronizationState().isPresent()) {
+            this.synchronizationState = new Relationship(SynchronizationProcessResource.createLink(getId()));
+        }
     }
 
     @JsonCreator
@@ -93,6 +99,11 @@ public class SnippetResource extends ResourceObject {
     @JsonGetter("tags")
     public Relationship getTags() {
         return tags;
+    }
+
+    @JsonGetter("synchronizationState")
+    public Relationship getSynchronizationState() {
+        return synchronizationState;
     }
 
     /**

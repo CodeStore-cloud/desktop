@@ -1,5 +1,7 @@
 package cloud.codestore.core;
 
+import cloud.codestore.core.usecases.synchronizesnippets.SnippetSynchronizationState;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
@@ -22,6 +24,7 @@ public class Snippet {
     private final Language language;
     private final OffsetDateTime created;
     private final OffsetDateTime modified;
+    private final SnippetSynchronizationState syncState;
 
     protected Snippet(
             @Nonnull String id,
@@ -31,7 +34,8 @@ public class Snippet {
             @Nonnull List<String> tags,
             @Nonnull Language language,
             @Nonnull OffsetDateTime created,
-            @Nullable OffsetDateTime modified
+            @Nullable OffsetDateTime modified,
+            @Nullable SnippetSynchronizationState syncState
     ) {
         this.id = id;
         this.title = title;
@@ -43,6 +47,7 @@ public class Snippet {
                               .withOffsetSameInstant(ZoneOffset.UTC);
         this.modified = modified == null ? null : modified.truncatedTo(ChronoUnit.SECONDS)
                                                           .withOffsetSameInstant(ZoneOffset.UTC);
+        this.syncState = syncState;
     }
 
     public static SnippetBuilder builder() {
@@ -101,6 +106,11 @@ public class Snippet {
     @Nonnull
     public Set<Permission> getPermissions() {
         return Set.of(Permission.UPDATE, Permission.DELETE);
+    }
+
+    @Nonnull
+    public Optional<SnippetSynchronizationState> getSynchronizationState() {
+        return Optional.ofNullable(syncState);
     }
 
     @Override

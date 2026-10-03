@@ -1,5 +1,6 @@
 package cloud.codestore.core.api.synchronization;
 
+import cloud.codestore.core.api.ErrorResponseBuilder;
 import cloud.codestore.core.api.UriFactory;
 import cloud.codestore.core.usecases.synchronizesnippets.SynchronizationProgress;
 import cloud.codestore.core.usecases.synchronizesnippets.SynchronizationState;
@@ -46,20 +47,15 @@ public class SynchronizationProcessResource extends ResourceObject {
 
     @JsonGetter("error")
     public ErrorObject getError() {
-        ErrorObject errorObject = null;
-        if (state.getError() != null) {
-            errorObject = new ErrorObject();
-            //TODO fill error object
-        }
-
-        return errorObject;
+        Throwable error = state.getError();
+        return error == null ? null : new ErrorResponseBuilder().createError("SYNCHRONIZATION_FAILED", "synchronization.error.title", error.getMessage());
     }
 
     public static String createLink() {
         return createLink(INITIAL_SYNC_ID);
     }
 
-    static String createLink(String id) {
+    public static String createLink(String id) {
         return UriFactory.createUri(PATH + "/" + id);
     }
 }

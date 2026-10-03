@@ -28,8 +28,8 @@ class SynchronizationProgressListener implements ProgressListener {
     @Override
     public void synchronizationStarted(String snippetId) {
         SnippetSynchronizationState state = new SnippetSynchronizationState(snippetId);
-        state.start();
         executedSynchronizations.add(state);
+        state.start();
     }
 
     @Override

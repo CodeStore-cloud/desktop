@@ -100,6 +100,7 @@ public class SynchronizationProcess {
             } catch (Throwable error) {
                 LOGGER.error("===== Snippet synchronization failed =====", error);
                 state.fail(error);
+                //TODO set all snippet syncStates to error
             }
         }
 
@@ -134,6 +135,7 @@ public class SynchronizationProcess {
         public void execute() {
             super.state.start();
             super.state.fail(error);
+            //TODO set all snippet syncStates to error
         }
     }
 

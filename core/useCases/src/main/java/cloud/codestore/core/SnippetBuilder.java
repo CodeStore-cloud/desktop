@@ -1,5 +1,7 @@
 package cloud.codestore.core;
 
+import cloud.codestore.core.usecases.synchronizesnippets.SnippetSynchronizationState;
+
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -17,6 +19,7 @@ public class SnippetBuilder {
     private List<String> tags;
     private OffsetDateTime created;
     private OffsetDateTime modified;
+    private SnippetSynchronizationState syncState;
 
     protected SnippetBuilder() {}
 
@@ -29,6 +32,7 @@ public class SnippetBuilder {
         tags(snippet.getTags());
         created(snippet.getCreated());
         modified(snippet.getModified());
+        synchronizationState(snippet.getSynchronizationState().orElse(null));
     }
 
     public SnippetBuilder id(String id) {
@@ -71,6 +75,11 @@ public class SnippetBuilder {
         return this;
     }
 
+    public SnippetBuilder synchronizationState(SnippetSynchronizationState syncState) {
+        this.syncState = syncState;
+        return this;
+    }
+
     public Snippet build() {
         return new Snippet(
                 id,
@@ -80,7 +89,8 @@ public class SnippetBuilder {
                 tags == null ? Collections.emptyList() : Collections.unmodifiableList(tags),
                 Objects.requireNonNullElseGet(language, Language::getDefault),
                 Objects.requireNonNullElseGet(created, OffsetDateTime::now),
-                modified
+                modified,
+                syncState
         );
     }
 }

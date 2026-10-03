@@ -5,6 +5,7 @@ import cloud.codestore.core.Snippet;
 import cloud.codestore.core.repositories.File;
 import cloud.codestore.core.repositories.RepositoryException;
 import cloud.codestore.core.repositories.synchronization.RemoteFile;
+import cloud.codestore.core.usecases.synchronizesnippets.SnippetSynchronizations;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,9 +18,11 @@ import java.util.Optional;
 @Component
 public class SnippetReader {
     private final ObjectMapper objectMapper;
+    private final SnippetSynchronizations syncStates;
 
-    SnippetReader(@Qualifier("snippetMapper") ObjectMapper objectMapper) {
+    SnippetReader(@Qualifier("snippetMapper") ObjectMapper objectMapper, SnippetSynchronizations syncStates) {
         this.objectMapper = objectMapper;
+        this.syncStates = syncStates;
     }
 
     public Snippet read(File file) {
@@ -51,6 +54,7 @@ public class SnippetReader {
                 .language(getLanguageById(dto.getLanguage()))
                 .created(parseDateTime(dto.getCreated()))
                 .modified(parseDateTime(dto.getModified()))
+                .synchronizationState(syncStates.getOptional(snippetId).orElse(null))
                 .build();
     }
 

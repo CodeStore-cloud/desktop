@@ -32,13 +32,13 @@ class SynchronizationProcessTest {
     private cloud.codestore.synchronization.Synchronization<Snippet> synchronizationAlgorithm;
     @Mock
     private Status status;
-    private SynchronizationProcess synchronization;
+    private SynchronizationProcess process;
 
     @BeforeEach
     void setUp() {
         when(readConfigQuery.read()).thenReturn(configuration);
         lenient().when(configuration.isCloudServiceConfigured()).thenReturn(true);
-        synchronization = new SynchronizationProcess(readConfigQuery, algorithmFactory);
+        process = new SynchronizationProcess(readConfigQuery, algorithmFactory);
         lenient().when(algorithmFactory.createSnippetSynchronizationAlgorithm(any(), any())).thenReturn(synchronizationAlgorithm);
         lenient().when(algorithmFactory.getStatus()).thenReturn(status);
     }
@@ -46,15 +46,15 @@ class SynchronizationProcessTest {
     @Test
     @DisplayName("provides access to the progress")
     void providesAccessToProgressAndReport() {
-        synchronization.execute();
-        assertThat(synchronization.getProgress()).isNotNull();
+        process.execute();
+        assertThat(process.getProgress()).isNotNull();
     }
 
     @Test
     @DisplayName("can only be started once")
     void avoidRestart() {
-        synchronization.execute();
-        assertThatThrownBy(synchronization::execute).isInstanceOf(IllegalStateException.class);
+        process.execute();
+        assertThatThrownBy(process::execute).isInstanceOf(IllegalStateException.class);
     }
 
     @Nested
@@ -64,17 +64,17 @@ class SynchronizationProcessTest {
         @DisplayName("updates the status")
         void setProgress() {
             when(algorithmFactory.createSnippetSynchronizationAlgorithm(any(), any())).thenAnswer(invocation -> {
-                assertThat(synchronization.getState().getStatus()).isEqualTo(SynchronizationStatus.IN_PROGRESS);
+                assertThat(process.getState().getStatus()).isEqualTo(SynchronizationStatus.IN_PROGRESS);
                 return synchronizationAlgorithm;
             });
-            synchronization.execute();
-            assertThat(synchronization.getState().getStatus()).isEqualTo(SynchronizationStatus.COMPLETED);
+            process.execute();
+            assertThat(process.getState().getStatus()).isEqualTo(SynchronizationStatus.COMPLETED);
         }
 
         @Test
         @DisplayName("executes the synchronization algorithm and saves the status afterwards")
         void executeSynchronizationAlgorithm() throws IOException {
-            synchronization.execute();
+            process.execute();
 
             InOrder inOrder = inOrder(synchronizationAlgorithm, status);
             inOrder.verify(synchronizationAlgorithm).synchronize();
@@ -95,9 +95,9 @@ class SynchronizationProcessTest {
         @Test
         @DisplayName("fails with the original exception")
         void failWithOriginalException() {
-            synchronization.execute();
+            process.execute();
 
-            SynchronizationState state = synchronization.getState();
+            SynchronizationState state = process.getState();
             assertThat(state.getStatus()).isEqualTo(SynchronizationStatus.FAILED);
             assertThat(state.getError()).isSameAs(ERROR);
         }
