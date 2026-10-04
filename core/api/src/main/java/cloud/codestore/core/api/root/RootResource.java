@@ -17,7 +17,7 @@ import javax.annotation.Nonnull;
  */
 class RootResource extends ResourceObject {
     private static final String API_VERSION = "1.0";
-    private final Relationship synchronization;
+    private Relationship synchronization;
 
     RootResource(@Nonnull SynchronizationProcess synchronizationProcess) {
         super("core", "1");
@@ -25,8 +25,6 @@ class RootResource extends ResourceObject {
 
         if (synchronizationProcess.wasExecuted()) {
             synchronization = new Relationship(SynchronizationProcessResource.createLink());
-        } else {
-            synchronization = null;
         }
     }
 

@@ -6,9 +6,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("The synchronization state")
 class SynchronizationStateTest {
@@ -58,8 +58,11 @@ class SynchronizationStateTest {
 
         @Test
         @DisplayName("cannot be started twice")
-        void cannotStartTwice() {
-            assertThatThrownBy(state::start).isInstanceOf(IllegalStateException.class);
+        void cannotStartTwice() throws InterruptedException {
+            var clone = state.clone();
+            Thread.sleep(Duration.ofSeconds(1));
+            state.start();
+            assertThat(state).isEqualTo(clone);
         }
     }
 
@@ -90,10 +93,18 @@ class SynchronizationStateTest {
 
         @Test
         @DisplayName("cannot be restarted or finished in any way")
-        void dontAllowFurtherActions() {
-            assertThatThrownBy(state::start).isInstanceOf(IllegalStateException.class);
-            assertThatThrownBy(state::complete).isInstanceOf(IllegalStateException.class);
-            assertThatThrownBy(() -> state.fail(new RuntimeException())).isInstanceOf(IllegalStateException.class);
+        void dontAllowFurtherActions() throws InterruptedException {
+            var clone = state.clone();
+            Thread.sleep(Duration.ofSeconds(1));
+
+            state.start();
+            assertThat(state).isEqualTo(clone);
+
+            state.complete();
+            assertThat(state).isEqualTo(clone);
+
+            state.fail(new RuntimeException());
+            assertThat(state).isEqualTo(clone);
         }
     }
 
@@ -132,9 +143,16 @@ class SynchronizationStateTest {
         @Test
         @DisplayName("cannot be restarted or finished in any way")
         void dontAllowFurtherActions() {
-            assertThatThrownBy(state::start).isInstanceOf(IllegalStateException.class);
-            assertThatThrownBy(state::complete).isInstanceOf(IllegalStateException.class);
-            assertThatThrownBy(() -> state.fail(new RuntimeException())).isInstanceOf(IllegalStateException.class);
+            var clone = state.clone();
+
+            state.start();
+            assertThat(state).isEqualTo(clone);
+
+            state.complete();
+            assertThat(state).isEqualTo(clone);
+
+            state.fail(new RuntimeException());
+            assertThat(state).isEqualTo(clone);
         }
     }
 }

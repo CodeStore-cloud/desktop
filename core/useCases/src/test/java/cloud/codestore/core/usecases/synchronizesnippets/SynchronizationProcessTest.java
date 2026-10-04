@@ -1,18 +1,18 @@
 package cloud.codestore.core.usecases.synchronizesnippets;
 
 import cloud.codestore.core.Snippet;
+import cloud.codestore.synchronization.ItemSet;
+import cloud.codestore.synchronization.MutableItemSynchronization;
 import cloud.codestore.synchronization.Status;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -21,85 +21,109 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("The synchronization process")
 class SynchronizationProcessTest {
+    private static final Set<String> SNIPPET_IDS = Set.of("1", "2", "3");
 
     @Mock
-    private ReadSynchronizationConfigurationQuery readConfigQuery;
-    @Mock
-    private SynchronizationConfiguration configuration;
-    @Mock
-    private SynchronizationAlgorithmFactory algorithmFactory;
-    @Mock
-    private cloud.codestore.synchronization.Synchronization<Snippet> synchronizationAlgorithm;
-    @Mock
     private Status status;
+    @Mock
+    private SnippetSetFactory snippetSetFactory;
+    @Mock
+    private ItemSet<Snippet> localSnippetSet;
+    private SnippetSynchronizations snippetSyncStates;
     private SynchronizationProcess process;
+    private SynchronizationConfiguration configuration;
 
     @BeforeEach
     void setUp() {
-        when(readConfigQuery.read()).thenReturn(configuration);
-        lenient().when(configuration.isCloudServiceConfigured()).thenReturn(true);
-        process = new SynchronizationProcess(readConfigQuery, algorithmFactory);
-        lenient().when(algorithmFactory.createSnippetSynchronizationAlgorithm(any(), any())).thenReturn(synchronizationAlgorithm);
-        lenient().when(algorithmFactory.getStatus()).thenReturn(status);
+        snippetSyncStates = new SnippetSynchronizations();
+        process = new SynchronizationProcess(status, snippetSetFactory, snippetSyncStates);
+
+        configuration = new SynchronizationConfiguration(CloudService.GOOGLE_DRIVE);
+        when(snippetSetFactory.createLocalSnippetSet()).thenReturn(localSnippetSet);
+        when(localSnippetSet.getItemIds()).thenReturn(SNIPPET_IDS);
     }
 
     @Test
-    @DisplayName("provides access to the progress")
-    void providesAccessToProgressAndReport() {
-        process.execute();
-        assertThat(process.getProgress()).isNotNull();
+    @DisplayName("can only be executed once")
+    void executedOnce() {
+        process.getState().start();
+        process.getState().complete();
+        assertThatThrownBy(() -> process.execute(configuration)).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
-    @DisplayName("can only be started once")
-    void avoidRestart() {
-        process.execute();
-        assertThatThrownBy(process::execute).isInstanceOf(IllegalStateException.class);
-    }
-
-    @Nested
-    @DisplayName("when executing")
-    class ExecutionTest {
-        @Test
-        @DisplayName("updates the status")
-        void setProgress() {
-            when(algorithmFactory.createSnippetSynchronizationAlgorithm(any(), any())).thenAnswer(invocation -> {
-                assertThat(process.getState().getStatus()).isEqualTo(SynchronizationStatus.IN_PROGRESS);
-                return synchronizationAlgorithm;
-            });
-            process.execute();
-            assertThat(process.getState().getStatus()).isEqualTo(SynchronizationStatus.COMPLETED);
+    @DisplayName("is skipped if no cloud service is configured")
+    void synchronizationSkipped() throws IOException {
+        configuration = SynchronizationConfiguration.empty();
+        try (var constructorMock = mockConstruction(MutableItemSynchronization.class)) {
+            var synchronization = constructorMock.constructed().getFirst();
+            process.execute(configuration);
+            verify(synchronization, never()).synchronize();
         }
 
-        @Test
-        @DisplayName("executes the synchronization algorithm and saves the status afterwards")
-        void executeSynchronizationAlgorithm() throws IOException {
-            process.execute();
+        assertThat(process.wasExecuted()).isFalse();
+        verify(status, never()).save();
 
-            InOrder inOrder = inOrder(synchronizationAlgorithm, status);
-            inOrder.verify(synchronizationAlgorithm).synchronize();
-            inOrder.verify(status).save();
+        for (String snippetId : SNIPPET_IDS) {
+            assertThat(snippetSyncStates.getOptional(snippetId)).isEmpty();
         }
     }
 
-    @Nested
-    @DisplayName("when the configuration could not be read")
-    class ConfigurationErrorTest {
-        private static final RuntimeException ERROR = new UncheckedIOException(new IOException("Loading config failed"));
-
-        @BeforeEach
-        void setUp() {
-            when(readConfigQuery.read()).thenThrow(ERROR);
+    @Test
+    @DisplayName("executes the synchronization successfully")
+    void synchronizationSuccessful() throws SynchronizationNotExistsException, IOException {
+        try (var constructorMock = mockConstruction(MutableItemSynchronization.class)) {
+            var synchronization = constructorMock.constructed().getFirst();
+            process.execute(configuration);
+            verify(synchronization).synchronize();
         }
 
-        @Test
-        @DisplayName("fails with the original exception")
-        void failWithOriginalException() {
-            process.execute();
+        assertThat(process.wasExecuted()).isTrue();
+        verify(status).save();
 
-            SynchronizationState state = process.getState();
-            assertThat(state.getStatus()).isEqualTo(SynchronizationStatus.FAILED);
-            assertThat(state.getError()).isSameAs(ERROR);
+        SynchronizationState globalSyncState = process.getState();
+        assertThat(globalSyncState).isNotNull();
+        assertThat(globalSyncState.getStatus()).isEqualTo(SynchronizationStatus.COMPLETED);
+        assertThat(globalSyncState.getError()).isNull();
+        assertThat(globalSyncState.getStartTime()).isNotNull();
+        assertThat(globalSyncState.getEndTime()).isNotNull().isAfter(globalSyncState.getStartTime());
+
+        for (String snippetId : SNIPPET_IDS) {
+            assertThat(snippetSyncStates.getOptional(snippetId)).isPresent();
+            SnippetSynchronizationState snippetSyncState = snippetSyncStates.get(snippetId);
+            assertThat(snippetSyncState.getStatus()).isEqualTo(SynchronizationStatus.COMPLETED);
+            assertThat(snippetSyncState.getError()).isNull();
+            assertThat(snippetSyncState.getStartTime()).isNotNull();
+            assertThat(snippetSyncState.getEndTime()).isNotNull().isAfter(snippetSyncState.getStartTime());
+        }
+    }
+
+    @Test
+    @DisplayName("marks all code snippets as failed if the overall synchronization fails")
+    void markSnippetsFailed() throws SynchronizationNotExistsException {
+        Throwable error = new RuntimeException();
+        try (var constructorMock = mockConstruction(MutableItemSynchronization.class)) {
+            var synchronization = constructorMock.constructed().getFirst();
+            doThrow(error).when(synchronization).synchronize();
+            process.execute(configuration);
+        }
+
+        assertThat(process.wasExecuted()).isTrue();
+
+        SynchronizationState globalSyncState = process.getState();
+        assertThat(globalSyncState).isNotNull();
+        assertThat(globalSyncState.getStatus()).isEqualTo(SynchronizationStatus.FAILED);
+        assertThat(globalSyncState.getError()).isSameAs(error);
+        assertThat(globalSyncState.getStartTime()).isNull();
+        assertThat(globalSyncState.getEndTime()).isNull();
+
+        for (String snippetId : SNIPPET_IDS) {
+            assertThat(snippetSyncStates.getOptional(snippetId)).isPresent();
+            SnippetSynchronizationState snippetSyncState = snippetSyncStates.get(snippetId);
+            assertThat(snippetSyncState.getStatus()).isEqualTo(SynchronizationStatus.FAILED);
+            assertThat(snippetSyncState.getError()).isSameAs(error);
+            assertThat(snippetSyncState.getStartTime()).isNull();
+            assertThat(snippetSyncState.getEndTime()).isNull();
         }
     }
 }

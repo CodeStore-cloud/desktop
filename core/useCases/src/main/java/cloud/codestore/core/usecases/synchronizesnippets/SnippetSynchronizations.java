@@ -15,16 +15,16 @@ import java.util.Optional;
 public class SnippetSynchronizations {
     private final Map<String, SnippetSynchronizationState> snippetSyncState = Collections.synchronizedMap(new HashMap<>());
 
-    void add(@Nonnull SnippetSynchronizationState synchronization) {
-        snippetSyncState.put(synchronization.getSnippetId(), synchronization);
+    void create(@Nonnull String snippetId) {
+        snippetSyncState.put(snippetId, new SnippetSynchronizationState(snippetId));
+    }
+
+    SnippetSynchronizationState getOrCreate(@Nonnull String snippetId) {
+        return snippetSyncState.computeIfAbsent(snippetId, SnippetSynchronizationState::new);
     }
 
     public SnippetSynchronizationState get(@Nonnull String snippetId) throws SynchronizationNotExistsException {
-        if (!snippetSyncState.containsKey(snippetId)) {
-            throw new SynchronizationNotExistsException();
-        }
-
-        return snippetSyncState.get(snippetId);
+        return getOptional(snippetId).orElseThrow(SynchronizationNotExistsException::new);
     }
 
     public Optional<SnippetSynchronizationState> getOptional(@Nonnull String snippetId) {

@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Objects;
 
 /**
  * Represents the state of the synchronization.
@@ -62,19 +63,11 @@ public class SynchronizationState {
     }
 
     private interface InternalState {
-        default void start() {
-            throw getIllegalStateException();
-        }
+        default void start() {}
 
-        default void complete() {
-            throw getIllegalStateException();
-        }
+        default void complete() {}
 
-        default void fail(Throwable error) {
-            throw getIllegalStateException();
-        }
-
-        IllegalStateException getIllegalStateException();
+        default void fail(Throwable throwable) {}
     }
 
     private class PendingState implements InternalState {
@@ -88,8 +81,9 @@ public class SynchronizationState {
         }
 
         @Override
-        public IllegalStateException getIllegalStateException() {
-            return new IllegalStateException("Synchronization not started.");
+        public void fail(Throwable throwable) {
+            error = throwable;
+            state = new FinishedState(SynchronizationStatus.FAILED);
         }
     }
 
@@ -109,11 +103,6 @@ public class SynchronizationState {
             error = throwable;
             state = new FinishedState(SynchronizationStatus.FAILED);
         }
-
-        @Override
-        public IllegalStateException getIllegalStateException() {
-            return new IllegalStateException("Synchronization already started.");
-        }
     }
 
     private class FinishedState implements InternalState {
@@ -121,10 +110,35 @@ public class SynchronizationState {
             status = finalStatus;
             endTime = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC);
         }
+    }
 
-        @Override
-        public IllegalStateException getIllegalStateException() {
-            return new IllegalStateException("Synchronization already finished.");
-        }
+    @Override
+    protected Object clone() {
+        var clone = new SynchronizationState();
+        clone.status = status;
+        clone.startTime = startTime;
+        clone.endTime = endTime;
+        clone.error = error;
+        return error;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        SynchronizationState that = (SynchronizationState) o;
+        return status == that.status &&
+               Objects.equals(startTime, that.startTime) &&
+               Objects.equals(endTime, that.endTime) &&
+               Objects.equals(error, that.error);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(status) +
+               Objects.hashCode(startTime) +
+               Objects.hashCode(endTime) +
+               Objects.hashCode(error);
     }
 }

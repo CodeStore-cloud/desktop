@@ -1,11 +1,18 @@
 package cloud.codestore.core.usecases.synchronizesnippets;
 
 import cloud.codestore.core.Injectable;
+import cloud.codestore.core.Snippet;
+import cloud.codestore.synchronization.ItemSet;
+import cloud.codestore.synchronization.MutableItemSynchronization;
+import cloud.codestore.synchronization.Status;
+import cloud.codestore.synchronization.Synchronization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Represents the process of synchronizing all code snippets.
@@ -14,152 +21,101 @@ import java.io.IOException;
 public class SynchronizationProcess {
     private static final Logger LOGGER = LoggerFactory.getLogger(SynchronizationProcess.class);
 
-    private final ReadSynchronizationConfigurationQuery readSynchronizationConfigurationQuery;
-    private final SynchronizationAlgorithmFactory algorithmFactory;
-    private ProcessDelegate delegate;
+    private final SynchronizationProgress progress = new SynchronizationProgress();
+    private final SynchronizationState state = new SynchronizationState();
+    private final Status status;
+    private final SnippetSetFactory snippetSetFactory;
+    private final SnippetSynchronizations snippetSyncStates;
 
     SynchronizationProcess(
-            ReadSynchronizationConfigurationQuery readSynchronizationConfigurationQuery,
-            SynchronizationAlgorithmFactory algorithmFactory
+            Status status,
+            SnippetSetFactory snippetSetFactory,
+            SnippetSynchronizations snippetSyncStates
     ) {
-        this.readSynchronizationConfigurationQuery = readSynchronizationConfigurationQuery;
-        this.algorithmFactory = algorithmFactory;
-        delegate = new NotExecutedSynchronizationProcess();
+        this.status = status;
+        this.snippetSetFactory = snippetSetFactory;
+        this.snippetSyncStates = snippetSyncStates;
     }
 
     public boolean wasExecuted() {
-        return delegate.wasExecuted();
+        return state.getStatus() != SynchronizationStatus.PENDING;
     }
 
-    public void execute() {
-        if (!delegate.wasExecuted()) {
-            try {
-                SynchronizationConfiguration configuration = readSynchronizationConfigurationQuery.read();
-                if (configuration.isCloudServiceConfigured()) {
-                    delegate = new ActiveSynchronizationProcess(algorithmFactory, configuration);
-                } else {
-                    LOGGER.info("Synchronization skipped");
-                    delegate = new NotExecutedSynchronizationProcess();
-                }
-            } catch (Throwable exception) {
-                LOGGER.error("Failed to execute synchronization.", exception);
-                delegate = new FailedSynchronizationProcess(exception);
-            }
+    public void execute(SynchronizationConfiguration configuration) {
+        if (wasExecuted()) {
+            throw new IllegalStateException("The synchronization has already been executed.");
         }
 
-        delegate.execute();
+        if (configuration.isCloudServiceConfigured()) {
+            try {
+                LOGGER.info("===== Snippet synchronization startet =====");
+                state.start();
+                execute(configuration.cloudService());
+                state.complete();
+                LOGGER.info("===== Snippet synchronization finished in {}ms =====", state.getDuration());
+            } catch (Throwable throwable) {
+                LOGGER.error("===== Snippet synchronization failed =====", throwable);
+                state.fail(throwable);
+            }
+        } else {
+            LOGGER.info("Synchronization skipped");
+        }
     }
 
     @Nonnull
     public SynchronizationState getState() {
-        return delegate.getState();
+        return state;
     }
 
     @Nonnull
     public SynchronizationProgress getProgress() {
-        return delegate.getProgress();
+        return progress;
     }
 
-    private interface ProcessDelegate {
-        boolean wasExecuted();
-        void execute();
-        SynchronizationState getState();
-        SynchronizationProgress getProgress();
-    }
+    private void execute(@Nonnull CloudService cloudService) {
+        Set<String> localSnippets = new HashSet<>();
+        try {
+            var localSnippetSet = snippetSetFactory.createLocalSnippetSet();
+            var remoteSnippetSet = snippetSetFactory.createRemoteSnippetSet(cloudService);
 
-    private static class ActiveSynchronizationProcess implements ProcessDelegate {
-        private final SynchronizationProgress progress = new SynchronizationProgress();
-        private final SynchronizationState state = new SynchronizationState();
-        private final SynchronizationAlgorithmFactory algorithmFactory;
-        private final SynchronizationConfiguration configuration;
+            localSnippets.addAll(localSnippetSet.getItemIds());
+            markSyncStatesAsPending(localSnippets);
 
-        private ActiveSynchronizationProcess(
-                SynchronizationAlgorithmFactory algorithmFactory,
-                SynchronizationConfiguration configuration
-        ) {
-            this.algorithmFactory = algorithmFactory;
-            this.configuration = configuration;
-        }
+            var synchronization = createSynchronization(localSnippetSet, remoteSnippetSet);
+            synchronization.synchronize();
 
-        @Override
-        public boolean wasExecuted() {
-            return true;
-        }
-
-        @Override
-        public void execute() {
-            state.start(); // throws Exception if already startet or finished
-
-            try {
-                LOGGER.info("===== Snippet synchronization startet =====");
-                algorithmFactory.createSnippetSynchronizationAlgorithm(progress, configuration.cloudService())
-                                .synchronize();
-                saveStatus();
-                state.complete();
-                LOGGER.info("===== Snippet synchronization finished in {}ms =====", state.getDuration());
-            } catch (Throwable error) {
-                LOGGER.error("===== Snippet synchronization failed =====", error);
-                state.fail(error);
-                //TODO set all snippet syncStates to error
-            }
-        }
-
-        @Nonnull
-        public SynchronizationState getState() {
-            return state;
-        }
-
-        @Nonnull
-        public SynchronizationProgress getProgress() {
-            return progress;
-        }
-
-        private void saveStatus() {
-            try {
-                algorithmFactory.getStatus().save();
-            } catch (IOException exception) {
-                LOGGER.error("Failed to save status.", exception);
-            }
+            saveStatus();
+        } catch (Throwable throwable) {
+            markAllSyncStatesAsFailed(localSnippets, throwable);
+            throw throwable;
         }
     }
 
-    private static class FailedSynchronizationProcess extends ActiveSynchronizationProcess {
-        private final Throwable error;
+    private Synchronization<Snippet> createSynchronization(
+            ItemSet<Snippet> localSnippetSet,
+            ItemSet<Snippet> remoteSnippetSet
+    ) {
+        var synchronization = new MutableItemSynchronization<>(localSnippetSet, remoteSnippetSet, status);
+        synchronization.setProgressListener(new SynchronizationProgressListener(snippetSyncStates, progress));
+        synchronization.setConflictResolver(new SnippetConflictResolver());
+        return synchronization;
+    }
 
-        private FailedSynchronizationProcess(@Nonnull Throwable error) {
-            super(null, null);
-            this.error = error;
-        }
+    private void markSyncStatesAsPending(Set<String> localSnippets) {
+        localSnippets.forEach(snippetSyncStates::create);
+    }
 
-        @Override
-        public void execute() {
-            super.state.start();
-            super.state.fail(error);
-            //TODO set all snippet syncStates to error
+    private void markAllSyncStatesAsFailed(Set<String> localSnippets, Throwable error) {
+        for (String snippetId : localSnippets) {
+            snippetSyncStates.getOrCreate(snippetId).fail(error);
         }
     }
 
-    private static class NotExecutedSynchronizationProcess implements ProcessDelegate {
-        private static final String MESSAGE = "The synchronization was not executed.";
-
-        @Override
-        public boolean wasExecuted() {
-            return false;
-        }
-
-        @Override
-        public void execute() {}
-
-        @Nonnull
-        @Override
-        public SynchronizationState getState() {
-            throw new IllegalStateException(MESSAGE);
-        }
-
-        @Nonnull
-        @Override
-        public SynchronizationProgress getProgress() {
-            throw new IllegalStateException(MESSAGE);
+    private void saveStatus() {
+        try {
+            status.save();
+        } catch (IOException exception) {
+            LOGGER.error("Failed to save status.", exception);
         }
     }
 }

@@ -7,15 +7,12 @@ import org.slf4j.LoggerFactory;
 class SynchronizationProgressListener implements ProgressListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(SynchronizationProgressListener.class);
 
-    private final SnippetSynchronizations executedSynchronizations;
+    private final SnippetSynchronizations snippetSyncStates;
     private final SynchronizationProgress progress;
     private int processedSnippets;
 
-    SynchronizationProgressListener(
-            SnippetSynchronizations executedSynchronizations,
-            SynchronizationProgress progress
-    ) {
-        this.executedSynchronizations = executedSynchronizations;
+    SynchronizationProgressListener(SnippetSynchronizations snippetSyncStates, SynchronizationProgress progress) {
+        this.snippetSyncStates = snippetSyncStates;
         this.progress = progress;
     }
 
@@ -27,35 +24,23 @@ class SynchronizationProgressListener implements ProgressListener {
 
     @Override
     public void synchronizationStarted(String snippetId) {
-        SnippetSynchronizationState state = new SnippetSynchronizationState(snippetId);
-        executedSynchronizations.add(state);
-        state.start();
+        snippetSyncStates.getOrCreate(snippetId).start();
     }
 
     @Override
     public void synchronizationFinished(String snippetId) {
         try {
-            executedSynchronizations.get(snippetId).complete();
+            snippetSyncStates.get(snippetId).complete();
+            progress.setProcessedSnippets(++processedSnippets);
         } catch (SynchronizationNotExistsException exception) {
             synchronizationFailed(snippetId, exception);
         }
-
-        progress.setProcessedSnippets(++processedSnippets);
     }
 
     @Override
     public void synchronizationFailed(String snippetId, Throwable exception) {
         LOGGER.error("Synchronization failed for snippet {}", snippetId, exception);
         progress.setProcessedSnippets(++processedSnippets);
-
-        SnippetSynchronizationState state;
-        try {
-            state = executedSynchronizations.get(snippetId);
-        } catch (SynchronizationNotExistsException notExistsException) {
-            exception = notExistsException;
-            state = new SnippetSynchronizationState(snippetId);
-            executedSynchronizations.add(state);
-        }
-        state.fail(exception);
+        snippetSyncStates.getOrCreate(snippetId).fail(exception);
     }
 }
