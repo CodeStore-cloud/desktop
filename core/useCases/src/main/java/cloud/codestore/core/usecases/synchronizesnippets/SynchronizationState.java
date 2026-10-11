@@ -83,7 +83,7 @@ public class SynchronizationState {
         @Override
         public void fail(Throwable throwable) {
             error = throwable;
-            state = new FinishedState(SynchronizationStatus.FAILED);
+            state = new FailedState();
         }
     }
 
@@ -95,20 +95,26 @@ public class SynchronizationState {
 
         @Override
         public void complete() {
-            state = new FinishedState(SynchronizationStatus.COMPLETED);
+            state = new CompletedState();
         }
 
         @Override
         public void fail(Throwable throwable) {
             error = throwable;
-            state = new FinishedState(SynchronizationStatus.FAILED);
+            state = new FailedState();
         }
     }
 
-    private class FinishedState implements InternalState {
-        FinishedState(SynchronizationStatus finalStatus) {
-            status = finalStatus;
+    private class CompletedState implements InternalState {
+        CompletedState() {
+            status = SynchronizationStatus.COMPLETED;
             endTime = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC);
+        }
+    }
+
+    private class FailedState implements InternalState {
+        FailedState() {
+            status = SynchronizationStatus.FAILED;
         }
     }
 
@@ -119,7 +125,7 @@ public class SynchronizationState {
         clone.startTime = startTime;
         clone.endTime = endTime;
         clone.error = error;
-        return error;
+        return clone;
     }
 
     @Override
@@ -140,5 +146,15 @@ public class SynchronizationState {
                Objects.hashCode(startTime) +
                Objects.hashCode(endTime) +
                Objects.hashCode(error);
+    }
+
+    @Override
+    public String toString() {
+        return "SynchronizationState {" +
+               "\nstatus=" + status +
+               "\nstartTime=" + startTime +
+               "\nendTime=" + endTime +
+               "\nerror=" + error +
+               "\n}";
     }
 }

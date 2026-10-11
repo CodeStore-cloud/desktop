@@ -26,7 +26,8 @@ class ExtendedSnippet extends Snippet {
                 snippet.getTags(),
                 snippet.getLanguage(),
                 snippet.getCreated(),
-                snippet.getModified()
+                snippet.getModified(),
+                snippet.getSynchronizationState().orElse(null)
         );
         this.additionalProperties = additionalProperties;
     }

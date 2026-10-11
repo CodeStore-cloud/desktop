@@ -3,7 +3,6 @@ package cloud.codestore.core.api.synchronization;
 import cloud.codestore.core.api.AbstractControllerTest;
 import cloud.codestore.core.usecases.synchronizesnippets.*;
 import cloud.codestore.jsonapi.document.JsonApiDocument;
-import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,14 +28,15 @@ class GetSynchronizationTest extends AbstractControllerTest {
     @MockitoBean
     private SnippetSynchronizations snippetSynchronizations;
     @MockitoBean
-    private SynchronizationProcess synchronization;
+    private SynchronizationProcess syncProcess;
     private SynchronizationProgress progress = mock(SynchronizationProgress.class);
     private SynchronizationState state = mock(SynchronizationState.class);
 
     @BeforeEach
     void setUp() {
-        when(synchronization.getProgress()).thenReturn(progress);
-        when(synchronization.getState()).thenReturn(state);
+        when(syncProcess.wasExecuted()).thenReturn(true);
+        when(syncProcess.getProgress()).thenReturn(progress);
+        when(syncProcess.getState()).thenReturn(state);
     }
 
     @Test
@@ -75,7 +75,7 @@ class GetSynchronizationTest extends AbstractControllerTest {
                .andExpect(jsonPath("$.data.id", is(SNIPPET_ID)))
                .andExpect(jsonPath("$.data.attributes.status", is(SynchronizationStatus.IN_PROGRESS.name())))
                .andExpect(jsonPath("$.data.attributes.startTime", is(startTime.toString())))
-               .andExpect(jsonPath("$.data.attributes.error", is(IsNull.nullValue())))
+               .andExpect(jsonPath("$.data.attributes.error").doesNotExist())
                .andExpect(jsonPath("$.data.links.self", is("http://localhost:8080/synchronizations/" + SNIPPET_ID)));
     }
 

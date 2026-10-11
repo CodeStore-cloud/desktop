@@ -85,7 +85,7 @@ class SynchronizationStateTest {
 
         @Test
         @DisplayName("sets the end time")
-        void setStartTime() {
+        void setEndTime() {
             assertThat(state.getStartTime()).isNotNull();
             assertThat(state.getEndTime()).isNotNull();
             assertThat(state.getDuration()).isGreaterThan(500);
@@ -127,11 +127,11 @@ class SynchronizationStateTest {
         }
 
         @Test
-        @DisplayName("sets the end time")
-        void setStartTime() {
+        @DisplayName("sets no end time")
+        void setEndTime() {
             assertThat(state.getStartTime()).isNotNull();
-            assertThat(state.getEndTime()).isNotNull();
-            assertThat(state.getDuration()).isGreaterThan(500);
+            assertThat(state.getEndTime()).isNull();
+            assertThat(state.getDuration()).isZero();
         }
 
         @Test

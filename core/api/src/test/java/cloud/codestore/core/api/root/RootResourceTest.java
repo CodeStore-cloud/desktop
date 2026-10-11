@@ -72,7 +72,7 @@ class RootResourceTest extends AbstractControllerTest {
     @Test
     @DisplayName("contains a link to the initial synchronization if present")
     void linkInitialSynchronizationResource() throws Exception {
-        when(synchronizationProcess.wasExecuted()).thenReturn(false);
+        when(synchronizationProcess.wasExecuted()).thenReturn(true);
 
         mockMvc.perform(get("/"))
                .andExpect(status().isOk())

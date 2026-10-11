@@ -40,10 +40,14 @@ public class ErrorResponseBuilder {
     }
 
     public String message(String messageKey, String... messageArguments) {
-        if (messageArguments.length == 0)
-            return resourceBundle.getString(messageKey);
+        if (resourceBundle.containsKey(messageKey)) {
+            if (messageArguments.length == 0)
+                return resourceBundle.getString(messageKey);
 
-        MessageFormat formatter = new MessageFormat(resourceBundle.getString(messageKey));
-        return formatter.format(messageArguments);
+            MessageFormat formatter = new MessageFormat(resourceBundle.getString(messageKey));
+            return formatter.format(messageArguments);
+        } else {
+            return messageKey;
+        }
     }
 }

@@ -39,8 +39,8 @@ class SynchronizationProcessTest {
         process = new SynchronizationProcess(status, snippetSetFactory, snippetSyncStates);
 
         configuration = new SynchronizationConfiguration(CloudService.GOOGLE_DRIVE);
-        when(snippetSetFactory.createLocalSnippetSet()).thenReturn(localSnippetSet);
-        when(localSnippetSet.getItemIds()).thenReturn(SNIPPET_IDS);
+        lenient().when(snippetSetFactory.createLocalSnippetSet()).thenReturn(localSnippetSet);
+        lenient().when(localSnippetSet.getItemIds()).thenReturn(SNIPPET_IDS);
     }
 
     @Test
@@ -55,11 +55,7 @@ class SynchronizationProcessTest {
     @DisplayName("is skipped if no cloud service is configured")
     void synchronizationSkipped() throws IOException {
         configuration = SynchronizationConfiguration.empty();
-        try (var constructorMock = mockConstruction(MutableItemSynchronization.class)) {
-            var synchronization = constructorMock.constructed().getFirst();
-            process.execute(configuration);
-            verify(synchronization, never()).synchronize();
-        }
+        process.execute(configuration);
 
         assertThat(process.wasExecuted()).isFalse();
         verify(status, never()).save();
@@ -72,9 +68,19 @@ class SynchronizationProcessTest {
     @Test
     @DisplayName("executes the synchronization successfully")
     void synchronizationSuccessful() throws SynchronizationNotExistsException, IOException {
-        try (var constructorMock = mockConstruction(MutableItemSynchronization.class)) {
-            var synchronization = constructorMock.constructed().getFirst();
+        try (var constructorMock = mockConstruction(MutableItemSynchronization.class, (mock, context) -> {
+            doAnswer(invocationOnMock -> {
+                for (String snippetId : SNIPPET_IDS) {
+                    SnippetSynchronizationState syncState = snippetSyncStates.get(snippetId);
+                    syncState.start();
+                    Thread.sleep(250);
+                    syncState.complete();
+                }
+                return null;
+            }).when(mock).synchronize();
+        })) {
             process.execute(configuration);
+            var synchronization = constructorMock.constructed().getFirst();
             verify(synchronization).synchronize();
         }
 
@@ -102,9 +108,7 @@ class SynchronizationProcessTest {
     @DisplayName("marks all code snippets as failed if the overall synchronization fails")
     void markSnippetsFailed() throws SynchronizationNotExistsException {
         Throwable error = new RuntimeException();
-        try (var constructorMock = mockConstruction(MutableItemSynchronization.class)) {
-            var synchronization = constructorMock.constructed().getFirst();
-            doThrow(error).when(synchronization).synchronize();
+        try (var constructorMock = mockConstruction(MutableItemSynchronization.class, (mock, context) -> doThrow(error).when(mock).synchronize())) {
             process.execute(configuration);
         }
 
@@ -114,7 +118,7 @@ class SynchronizationProcessTest {
         assertThat(globalSyncState).isNotNull();
         assertThat(globalSyncState.getStatus()).isEqualTo(SynchronizationStatus.FAILED);
         assertThat(globalSyncState.getError()).isSameAs(error);
-        assertThat(globalSyncState.getStartTime()).isNull();
+        assertThat(globalSyncState.getStartTime()).isNotNull();
         assertThat(globalSyncState.getEndTime()).isNull();
 
         for (String snippetId : SNIPPET_IDS) {
